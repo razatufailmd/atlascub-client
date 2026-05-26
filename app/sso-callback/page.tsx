@@ -1,0 +1,16 @@
+"use client";
+
+import { AuthenticateWithRedirectCallback } from "@clerk/nextjs";
+import { Loader2 } from "lucide-react";
+
+export default function SSOCallbackPage() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="absolute flex flex-col items-center justify-center text-center">
+        <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+        <p className="mt-4 text-sm text-muted-foreground">Completing sign in...</p>
+      </div>
+      <AuthenticateWithRedirectCallback signInUrl="/sign-in" signUpUrl="/sign-up" />
+    </div>
+  );
+}

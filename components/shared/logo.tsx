@@ -32,7 +32,7 @@ export function Logo({ className = "", width = 120, height = 40 }: LogoProps) {
         alt="Atlascub"
         width={width}
         height={height}
-        className="object-contain"
+        className="object-contain min-w-[50px]"
         priority
       />
     </Link>

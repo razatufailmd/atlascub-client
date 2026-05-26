@@ -1,8 +1,9 @@
 "use client";
 
-import { useUser, SignInButton, UserButton as ClerkUserButton } from "@clerk/nextjs";
+import { useUser, UserButton as ClerkUserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 export function UserButton() {
   const { isLoaded, isSignedIn } = useUser();
@@ -13,13 +14,19 @@ export function UserButton() {
 
   if (!isSignedIn) {
     return (
-      <SignInButton mode="modal">
-        <Button variant="ghost" size="sm">
-          Sign In
-        </Button>
-      </SignInButton>
+      <Button variant="ghost" size="sm" asChild>
+        <Link href="/sign-in">Sign In</Link>
+      </Button>
     );
   }
 
-  return <ClerkUserButton />;
+  return (
+    <ClerkUserButton
+      appearance={{
+        elements: {
+          userButtonAvatarBox: "h-9 w-9",
+        },
+      }}
+    />
+  );
 }
