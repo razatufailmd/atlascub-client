@@ -4,6 +4,8 @@ import "./globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
 import StoreProvider from "@/components/providers/store-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { Navbar } from "@/components/layout/navbar";
 
 const fontSans = Poppins({
   subsets: ["latin"],
@@ -35,21 +37,23 @@ export default function RootLayout({
 }>) {
   return (
     <StoreProvider>
-
-    <ClerkProvider>
-    <html
-      lang="en"
-      className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased`}
-    >
-      <body className=" min-h-screen bg-background font-body antialiased">
-          <div className="relative flex min-h-screen flex-col">
-            
-            <main className="flex-1">{children}</main>
-          
-          </div>
-        </body>
-    </html>
-    </ClerkProvider>
+      <ClerkProvider>
+        <html lang="en" className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased`} suppressHydrationWarning>
+          <body className="min-h-screen bg-background font-body antialiased">
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <div className="relative flex min-h-screen flex-col">
+                <Navbar />
+                <main className="flex-1 pt-16 md:pt-20">{children}</main>
+              </div>
+            </ThemeProvider>
+          </body>
+        </html>
+      </ClerkProvider>
     </StoreProvider>
   );
 }
