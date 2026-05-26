@@ -7,7 +7,7 @@ import { ChevronDown } from "lucide-react";
 import { categories } from "@/lib/constants/navigation";
 
 interface CategoryDropdownProps {
-  gender: "men" | "women" | "kids";
+  gender: "men" | "women" | "kids" | "collections";
   label: string;
 }
 
