@@ -3,6 +3,7 @@ import {  Libre_Baskerville, IBM_Plex_Mono,Poppins } from "next/font/google";
 import "./globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
+import StoreProvider from "@/components/providers/store-provider";
 
 const fontSans = Poppins({
   subsets: ["latin"],
@@ -33,12 +34,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    <StoreProvider>
+
     <ClerkProvider>
     <html
       lang="en"
       className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased`}
     >
-      <body className=" min-h-screen bg-background font-sans antialiased">
+      <body className=" min-h-screen bg-background font-body antialiased">
           <div className="relative flex min-h-screen flex-col">
             
             <main className="flex-1">{children}</main>
@@ -47,5 +50,6 @@ export default function RootLayout({
         </body>
     </html>
     </ClerkProvider>
+    </StoreProvider>
   );
 }
