@@ -11,6 +11,34 @@ export const genderLinks: NavigationItem[] = [
   { name: "Kids", slug: "kids", href: "/kids" },
 ];
 
+// Company dropdown links
+export const companyLinks = [
+  {
+    name: "About Us",
+    href: "/about",
+    description: "Our story, craftsmanship, and values",
+    icon: "✨",
+  },
+  {
+    name: "Support",
+    href: "/support",
+    description: "FAQs, shipping, returns & exchanges",
+    icon: "🎧",
+  },
+  {
+    name: "Contact",
+    href: "/contact",
+    description: "Get in touch with our team",
+    icon: "📧",
+  },
+  {
+    name: "Sustainability",
+    href: "/sustainability",
+    description: "Our commitment to ethical fashion",
+    icon: "🌱",
+  },
+];
+
 export const categories = {
   men: [
     {
@@ -114,8 +142,6 @@ export const categories = {
         "Comfy sweatshirts, lightweight rain jackets, and dynamic caps.",
     },
   ],
-
-  // Global Collections Category - Easily extensible dynamically for future promotional events or campaigns
   collections: [
     {
       name: "Modern Festive 2026",
@@ -124,9 +150,10 @@ export const categories = {
       description:
         "An elegant blend of traditional patterns and contemporary drapes.",
       type: "festival",
+      badge: "New",
     },
     {
-      name: "Pastel Dreams Campaign",
+      name: "Pastel Dreams",
       slug: "pastel-dreams",
       href: "/collections/pastel-dreams",
       description:
@@ -134,18 +161,20 @@ export const categories = {
       type: "campaign",
     },
     {
-      name: "Summer Solstice drapes",
+      name: "Summer Solstice",
       slug: "summer-26",
       href: "/collections/summer-26",
       description: "Breathable, airy resort-wear for warm-weather adventures.",
       type: "season",
+      badge: "Seasonal",
     },
     {
-      name: "Atlas Essentials Sale",
+      name: "Archive Sale",
       slug: "sale",
       href: "/collections/sale",
       description: "Curated collections with limited-time archival pricing.",
       type: "sale",
+      badge: "Up to 40%",
     },
   ],
 };
@@ -153,4 +182,5 @@ export const categories = {
 export const navigation = {
   genderLinks,
   categories,
+  companyLinks,
 };

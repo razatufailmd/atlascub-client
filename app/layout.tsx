@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import {  Libre_Baskerville, IBM_Plex_Mono,Poppins } from "next/font/google";
 import "./globals.css";
-
+import "../styles/theme-animation.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import StoreProvider from "@/components/providers/store-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
 
 const fontSans = Poppins({
   subsets: ["latin"],
@@ -49,6 +50,7 @@ export default function RootLayout({
               <div className="relative flex min-h-screen flex-col">
                 <Navbar />
                 <main className="flex-1 pt-16 md:pt-20">{children}</main>
+                <Footer/>
               </div>
             </ThemeProvider>
           </body>

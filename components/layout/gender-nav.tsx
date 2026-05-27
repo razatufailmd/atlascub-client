@@ -1,9 +1,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Link from "next/link";
+// import Link from "next/link";
 import { motion } from "framer-motion";
 import { CategoryDropdown } from "./category-dropdown";
+import { CollectionsDropdown } from "./collections-dropdown";
+import { CompanyDropdown } from "./company-dropdown";
 import { genderLinks } from "@/lib/constants/navigation";
 
 export function GenderNav() {
@@ -14,7 +16,7 @@ export function GenderNav() {
   };
 
   return (
-    <nav className="flex items-center gap-6">
+    <nav className="hidden md:flex items-center gap-6">
       {genderLinks.map((gender) => {
         const active = isActive(gender.href);
         const genderKey = gender.slug as "men" | "women" | "kids";
@@ -32,6 +34,12 @@ export function GenderNav() {
           </div>
         );
       })}
+      
+      {/* Collections Dropdown */}
+      <CollectionsDropdown />
+      
+      {/* Company Dropdown */}
+      <CompanyDropdown />
     </nav>
   );
 }

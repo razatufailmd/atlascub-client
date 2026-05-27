@@ -23,7 +23,7 @@ export default clerkMiddleware(async (auth, req) => {
 
   // Protect admin routes
   if (isAdminRoute(req)) {
-    const role = sessionClaims?.public_metadata?.role as string;
+    const role = (sessionClaims?.public_metadata as { role?: string })?.role;
     if (role !== "admin") {
       return NextResponse.redirect(new URL("/", req.url));
     }
