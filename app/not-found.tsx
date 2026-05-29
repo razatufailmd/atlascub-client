@@ -82,7 +82,7 @@ export default function NotFound() {
             </Button>
           </Link>
 
-          <Link href="/men">
+          <Link href="/collections/all">
             <Button variant="outline" className="gap-2 border-border hover:bg-muted">
               <Sparkles className="h-4 w-4" />
               Explore Collections
@@ -102,19 +102,19 @@ export default function NotFound() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
             <Link
-              href="/men"
+              href="/shop/men"
               className="text-sm text-muted-foreground transition-colors hover:text-primary"
             >
               Men
             </Link>
             <Link
-              href="/women"
+              href="/shop/women"
               className="text-sm text-muted-foreground transition-colors hover:text-primary"
             >
               Women
             </Link>
             <Link
-              href="/kids"
+              href="/shop/kids"
               className="text-sm text-muted-foreground transition-colors hover:text-primary"
             >
               Kids

@@ -5,10 +5,10 @@ export interface NavigationItem {
   description?: string;
 }
 
-export const genderLinks: NavigationItem[] = [
-  { name: "Men", slug: "men", href: "/men" },
-  { name: "Women", slug: "women", href: "/women" },
-  { name: "Kids", slug: "kids", href: "/kids" },
+export const genderLinks = [
+  { name: "Men", slug: "men", href: "/shop/men" }, // Updated: /shop/men
+  { name: "Women", slug: "women", href: "/shop/women" }, // Updated: /shop/women
+  { name: "Kids", slug: "kids", href: "/shop/kids" }, // Updated: /shop/kids
 ];
 
 // Company dropdown links
@@ -44,35 +44,35 @@ export const categories = {
     {
       name: "Ethnic & Festive",
       slug: "ethnic",
-      href: "/men/ethnic",
+      href: "/shop/men/ethnic",
       description:
         "Premium Kurtas, Nehru Jackets, Bandhgalas, and Sherwanis for festive milestones.",
     },
     {
       name: "Tops & Linens",
       slug: "tops",
-      href: "/men/tops",
+      href: "/shop/men/tops",
       description:
         "Oversized Tees, structural Shirts, drapes, and lightweight French linen wear.",
     },
     {
       name: "Outerwear & Shackets",
       slug: "outerwear",
-      href: "/men/outerwear",
+      href: "/shop/men/outerwear",
       description:
         "Modern jackets, tailored utility overshirts, and unstructured blazers.",
     },
     {
       name: "Bottoms & Trousers",
       slug: "bottoms",
-      href: "/men/bottoms",
+      href: "/shop/men/bottoms",
       description:
         "Pleated trousers, linen shorts, and relaxed-fit tapered trousers.",
     },
     {
       name: "Accessories",
       slug: "accessories",
-      href: "/men/accessories",
+      href: "/shop/men/accessories",
       description: "Minimalist caps, canvas bags, and premium leather belts.",
     },
   ],
@@ -80,35 +80,35 @@ export const categories = {
     {
       name: "Ethnic & Fusion Sets",
       slug: "ethnic",
-      href: "/women/ethnic",
+      href: "/shop/women/ethnic",
       description:
         "Designer Kurtas, effortless Anarkalis, contemporary Sarees, and Indigo drapes.",
     },
     {
       name: "Tops & Blouses",
       slug: "tops",
-      href: "/women/tops",
+      href: "/shop/women/tops",
       description:
         "Minimalist shirts, drapes, knitted vests, and tailored blouses.",
     },
     {
       name: "Outerwear & Capes",
       slug: "outerwear",
-      href: "/women/outerwear",
+      href: "/shop/women/outerwear",
       description:
         "Flowing outerwear, contemporary blazers, and lightweight layered capes.",
     },
     {
       name: "Bottoms & Palazzos",
       slug: "bottoms",
-      href: "/women/bottoms",
+      href: "/shop/women/bottoms",
       description:
         "Wide-leg trousers, flared palazzos, draped skirts, and structured shorts.",
     },
     {
       name: "Accessories",
       slug: "accessories",
-      href: "/women/accessories",
+      href: "/shop/women/accessories",
       description:
         "Aesthetic tote bags, handcrafted jewelry, and handspun scarves.",
     },
@@ -117,27 +117,27 @@ export const categories = {
     {
       name: "Festive & Ethnic Sets",
       slug: "ethnic",
-      href: "/kids/ethnic",
+      href: "/shop/kids/ethnic",
       description:
         "Comfortable organic cotton Kurta sets and miniature Lehengas.",
     },
     {
       name: "Tops & Shirts",
       slug: "tops",
-      href: "/kids/tops",
+      href: "/shop/kids/tops",
       description: "Playful graphic Tees and comfortable linen shirts.",
     },
     {
       name: "Bottoms",
       slug: "bottoms",
-      href: "/kids/bottoms",
+      href: "/shop/kids/bottoms",
       description:
         "Easy pull-on pants, elastic trousers, and breathable shorts.",
     },
     {
       name: "Outerwear & Accessories",
       slug: "accessories",
-      href: "/kids/accessories",
+      href: "/shop/kids/accessories",
       description:
         "Comfy sweatshirts, lightweight rain jackets, and dynamic caps.",
     },

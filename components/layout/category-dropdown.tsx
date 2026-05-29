@@ -23,7 +23,7 @@ export function CategoryDropdown({ gender, label }: CategoryDropdownProps) {
       onMouseLeave={() => setIsOpen(false)}
     >
        <Link
-        href={`/${gender}`}
+        href={`/shop/${gender}`}
         className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary"
       >
         {label}

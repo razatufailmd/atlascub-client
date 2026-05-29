@@ -35,7 +35,7 @@ export default function GenderPage() {
           {genderCategories.map((category) => (
             <Link
               key={category.slug}
-              href={`/${gender}/${category.slug}`}
+              href={`/shop/${gender}/${category.slug}`}
               className="group whitespace-nowrap rounded-full border border-border px-5 py-2 text-sm font-medium transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground"
             >
               {category.name}
@@ -52,7 +52,7 @@ export default function GenderPage() {
             <p className="text-sm text-muted-foreground">Fresh styles just landed</p>
           </div>
           <Link
-            href={`/${gender}?filter=new`}
+            href={`/shop/${gender}?filter=new`}
             className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary"
           >
             View all
@@ -74,7 +74,7 @@ export default function GenderPage() {
             <p className="text-sm text-muted-foreground">Customer favorites</p>
           </div>
           <Link
-            href={`/${gender}?filter=bestsellers`}
+            href={`/shop/${gender}?filter=bestsellers`}
             className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary"
           >
             View all

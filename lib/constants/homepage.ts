@@ -63,7 +63,7 @@ export const heroSlides: HeroSlide[] = [
     subtitle:
       "Celebrate in contemporary sarees and rich hand-embroidered silhouettes crafted for the modern Indian woman.",
     image: "/images/hero/hero-women.jpg",
-    ctaPrimary: { text: "Shop Womenswear", href: "/women" },
+    ctaPrimary: { text: "Shop Womenswear", href: "/shop/women" },
     ctaSecondary: {
       text: "Explore Festive",
       href: "/collections/modern-festive",
@@ -76,7 +76,7 @@ export const heroSlides: HeroSlide[] = [
     subtitle:
       "Breathable linens and bold handcrafted prints designed for effortless street style and tropical getaways.",
     image: "/images/hero/hero-men.jpg",
-    ctaPrimary: { text: "Shop Menswear", href: "/men" },
+    ctaPrimary: { text: "Shop Menswear", href: "/shop/men" },
     ctaSecondary: { text: "View Lookbook", href: "/collections/summer-26" },
   },
   {
@@ -86,8 +86,8 @@ export const heroSlides: HeroSlide[] = [
     subtitle:
       "Vibrant hues and cloud-soft ethnic wear to keep the little ones smiling and comfortable through every celebration.",
     image: "/images/hero/hero-kid.jpg",
-    ctaPrimary: { text: "Shop Kids", href: "/kids" },
-    ctaSecondary: { text: "Discover Sets", href: "/kids/ethnic" },
+    ctaPrimary: { text: "Shop Kids", href: "/shop/kids" },
+    ctaSecondary: { text: "Discover Sets", href: "/shop/kids/ethnic" },
   },
   {
     id: 4,
@@ -97,7 +97,7 @@ export const heroSlides: HeroSlide[] = [
       "A curated wardrobe of rusts, ochres, and pure cottons. Build your foundation with our seasonless Indian staples.",
     image: "/images/hero/collections.jpg",
     ctaPrimary: { text: "Shop All", href: "/shop" },
-    ctaSecondary: { text: "Explore Essentials", href: "/collections/sale" },
+    ctaSecondary: { text: "Explore Essentials", href: "/collections" },
   },
 ];
 
