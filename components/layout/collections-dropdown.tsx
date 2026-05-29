@@ -23,14 +23,20 @@ export function CollectionsDropdown() {
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
-      <button className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary">
+
+      
+
+      <Link
+        href="/collections/all"
+        className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary"
+      >
         Collections
         <ChevronDown
           className={`h-4 w-4 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
         />
-      </button>
+      </Link>
 
       <AnimatePresence>
         {isOpen && (

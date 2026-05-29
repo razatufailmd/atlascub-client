@@ -107,7 +107,7 @@ export function HeroSection() {
 
         "
       >
-        <div className="max-w-2xl border-2 p-2 border-accent-foreground bg-black/10 rounded-2xl">
+        <div className="max-w-2xl border-1 p-2 border-accent-foreground bg-black/10 rounded-2xl">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}

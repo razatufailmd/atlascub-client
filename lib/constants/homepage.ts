@@ -55,37 +55,49 @@ export interface BrandValue {
 }
 
 // --- CENTRAL EXPORTABLE DATA CONFIGURATION (DYNAMIC-READY) ---
-
 export const heroSlides: HeroSlide[] = [
   {
     id: 1,
-    overline: "Summer Solstice Campaign",
-    title: "Quiet Confidence",
+    overline: "The Festive Edit",
+    title: "Midnight Sequins & Silk",
     subtitle:
-      "Timeless, lightweight linen drapes and relaxed silhouettes tailored for the modern wardrobe.",
-    image: "/images/hero/hero-1.jpg",
-    ctaPrimary: { text: "Shop Menswear", href: "/men" },
-    ctaSecondary: { text: "Explore Campaign", href: "/collections/summer-26" },
+      "Celebrate in contemporary sarees and rich hand-embroidered silhouettes crafted for the modern Indian woman.",
+    image: "/images/hero/hero-women.jpg",
+    ctaPrimary: { text: "Shop Womenswear", href: "/women" },
+    ctaSecondary: {
+      text: "Explore Festive",
+      href: "/collections/modern-festive",
+    },
   },
   {
     id: 2,
-    overline: "New Season Campaign",
-    title: "Pastel Dreams",
+    overline: "Summer Resort Wear",
+    title: "The Artisan Print",
     subtitle:
-      "Understated lavender mists, soft sands, and lightweight organic cotton knits designed for daily ease.",
-    image: "/images/hero/hero-2.jpg",
-    ctaPrimary: { text: "Shop Womenswear", href: "/women" },
-    ctaSecondary: { text: "View Lookbook", href: "/collections/pastel-dreams" },
+      "Breathable linens and bold handcrafted prints designed for effortless street style and tropical getaways.",
+    image: "/images/hero/hero-men.jpg",
+    ctaPrimary: { text: "Shop Menswear", href: "/men" },
+    ctaSecondary: { text: "View Lookbook", href: "/collections/summer-26" },
   },
   {
     id: 3,
-    overline: "Festive Exclusive",
-    title: "Modern Festive 2026",
+    overline: "Little Atlas Collection",
+    title: "Joyful Traditions",
     subtitle:
-      "A thoughtful fusion of raw silk bandhgalas, textured kurtas, and structured drapes.",
-    image: "/images/campaigns/heritage.jpg",
-    ctaPrimary: { text: "Explore Festive", href: "/men/ethnic" },
-    ctaSecondary: { text: "Archival Sale", href: "/collections/sale" },
+      "Vibrant hues and cloud-soft ethnic wear to keep the little ones smiling and comfortable through every celebration.",
+    image: "/images/hero/hero-kid.jpg",
+    ctaPrimary: { text: "Shop Kids", href: "/kids" },
+    ctaSecondary: { text: "Discover Sets", href: "/kids/ethnic" },
+  },
+  {
+    id: 4,
+    overline: "Core Essentials",
+    title: "Warm Earth Tones",
+    subtitle:
+      "A curated wardrobe of rusts, ochres, and pure cottons. Build your foundation with our seasonless Indian staples.",
+    image: "/images/hero/collections.jpg",
+    ctaPrimary: { text: "Shop All", href: "/shop" },
+    ctaSecondary: { text: "Explore Essentials", href: "/collections/sale" },
   },
 ];
 

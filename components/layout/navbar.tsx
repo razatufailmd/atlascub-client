@@ -12,6 +12,7 @@ import { CartIcon } from "./cart-icon";
 import { ThemeToggle } from "./theme-toggle";
 import { MobileMenu } from "./mobile-menu";
 import { UserButton } from "../auth/user-button";
+import { WishlistIcon } from "./wishlist/wishlist-icon";
 
 export function Navbar() {
   const scrollDirection = useScrollDirection();
@@ -76,6 +77,7 @@ export function Navbar() {
             {!isSearchOpen && (
               <>
                 <ThemeToggle />
+                <WishlistIcon /> {/* Add Wishlist Icon here */}
                 <UserButton />
                 <CartIcon />
               </>

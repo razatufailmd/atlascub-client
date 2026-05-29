@@ -315,3 +315,15 @@
     @apply mx-auto px-4 max-w-7xl;
   }
 }
+
+
+/* filters*/
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

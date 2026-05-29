@@ -24,14 +24,19 @@ export function CompanyDropdown() {
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
-      <button className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary">
+     
+
+      <Link
+        href="/about"
+        className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary"
+      >
         Company
         <ChevronDown
           className={`h-4 w-4 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
         />
-      </button>
+      </Link>
 
       <AnimatePresence>
         {isOpen && (
