@@ -42,17 +42,6 @@ export default function ShopIndexPage() {
     },
   };
 
-  const cardHoverVariants:Variants = {
-    rest: { scale: 1 },
-    hover: {
-      scale: 1.02,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut",
-      },
-    },
-  };
-
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -107,10 +96,7 @@ export default function ShopIndexPage() {
                   key={gender}
                   variants={itemVariants}
                   custom={index}
-                  whileHover="hover"
-                  initial="rest"
-                  animate="rest"
-                  variants={cardHoverVariants}
+                  whileHover={{ scale: 1.02, transition: { duration: 0.3, ease: "easeOut" } }}
                   className="group"
                 >
                   <Link href={`/shop/${gender}`} className="block">

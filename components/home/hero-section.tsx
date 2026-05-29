@@ -6,6 +6,7 @@ import Image from "next/image";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
 import { heroSlides } from "@/lib/constants/homepage";
+import { TextReveal } from "../shadcn-space/animated-text/animated-text-06";
 
 export function HeroSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -103,93 +104,96 @@ export function HeroSection() {
       {/* Text Content */}
       <motion.div
         style={{ y: yText, opacity: opacityText }}
-        className="relative z-10 h-full container mx-auto px-4 md:px-6 flex items-center
-
-        "
+        className="relative z-10 h-full container mx-auto px-4 md:px-6 flex items-center"
       >
-        <div className="max-w-2xl border-1 p-2 border-accent-foreground bg-black/10 rounded-2xl">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentIndex}
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              className="space-y-5 md:space-y-6"
+        {/* Removed the glass box wrapper to let the background image shine completely */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            className="space-y-5 md:space-y-6 "
+          >
+            {/* Overline - Secondary Font with light shadow */}
+            <motion.span
+              variants={{
+                hidden: { opacity: 0, y: 15 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+                },
+              }}
+              className="block text-sm md:text-base tracking-[0.2em] uppercase font-secondary text-white/90 drop-shadow-md"
             >
-              {/* Overline - Secondary Font */}
-              <motion.span
-                variants={{
-                  hidden: { opacity: 0, y: 15 },
-                  visible: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
-                  }
-                }}
-                className="block text-sm md:text-base tracking-[0.2em] uppercase font-secondary text-primary-foreground/90"
-              >
-                {activeSlide.overline}
-              </motion.span>
+              {activeSlide.overline}
+            </motion.span>
 
-              {/* Title - Primary Font (Serif) */}
-              <motion.h1
-                variants={{
-                  hidden: { opacity: 0, y: 30 },
-                  visible: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }
-                  }
-                }}
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-primary font-bold tracking-tight text-primary-foreground leading-[1.1] md:leading-[1.15]"
-              >
-                {activeSlide.title}
-              </motion.h1>
-
-              {/* Subtitle - Body Font */}
-              <motion.p
-                variants={{
-                  hidden: { opacity: 0, y: 25 },
-                  visible: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }
-                  }
-                }}
-                className="text-base sm:text-lg font-body text-primary-foreground/80 max-w-lg leading-relaxed"
-              >
-                {activeSlide.subtitle}
-              </motion.p>
-
-              {/* Buttons */}
-              <motion.div
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }
-                  }
-                }}
-                className="flex flex-wrap gap-4 pt-4"
-              >
-                <Link
-                  href={activeSlide.ctaPrimary.href}
-                  className="group inline-flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 px-6 md:px-8 py-3 md:py-4 font-medium rounded-md shadow-lg text-sm md:text-base"
-                >
-                  <span>{activeSlide.ctaPrimary.text}</span>
-                  <ArrowUpRight className="h-4 w-4 ml-2 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                </Link>
-                <Link
-                  href={activeSlide.ctaSecondary.href}
-                  className="group inline-flex items-center justify-center bg-background/10 text-primary-foreground border border-primary-foreground/30 backdrop-blur-sm hover:bg-background/20 transition-all duration-300 px-6 md:px-8 py-3 md:py-4 font-medium rounded-md text-sm md:text-base"
-                >
-                  {activeSlide.ctaSecondary.text}
-                </Link>
-              </motion.div>
+            {/* Title - Animated Text Reveal with heavy diffused text-shadow */}
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 30 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] },
+                },
+              }}
+            >
+              <TextReveal
+                text={activeSlide.title}
+                as="h1"
+                className="text-5xl sm:text-6xl  max-w-5xl text-wrap font-primary font-bold tracking-tight text-[#fef3c7] leading-[1.1] md:leading-[1.15] [text-shadow:_0_4px_30px_rgb(0_0_0_/_60%)]"
+              />
             </motion.div>
-          </AnimatePresence>
-        </div>
+
+            {/* Subtitle - Animated Text Reveal with medium text-shadow */}
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 25 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] },
+                },
+              }}
+            >
+              <TextReveal
+                text={activeSlide.subtitle}
+                as="p"
+                className="text-lg sm:text-xl font-body text-white/95 max-w-lg leading-relaxed [text-shadow:_0_2px_15px_rgb(0_0_0_/_50%)]"
+              />
+            </motion.div>
+
+            {/* Buttons (Solid colors to anchor the floating text) */}
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] },
+                },
+              }}
+              className="flex flex-wrap gap-4 pt-4"
+            >
+              <Link
+                href={activeSlide.ctaPrimary.href}
+                className="group inline-flex items-center justify-center bg-accent transition-all duration-300 px-6 md:px-8 py-3 md:py-4 font-medium rounded-md shadow-xl text-sm md:text-base"
+              >
+                <span>{activeSlide.ctaPrimary.text}</span>
+                <ArrowUpRight className="h-4 w-4 ml-2 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </Link>
+              <Link
+                href={activeSlide.ctaSecondary.href}
+                className="group inline-flex items-center justify-center bg-black/40 backdrop-blur-md text-white border border-white/20 hover:bg-black/60 transition-all duration-300 px-6 md:px-8 py-3 md:py-4 font-medium rounded-md shadow-xl text-sm md:text-base"
+              >
+                {activeSlide.ctaSecondary.text}
+              </Link>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
       </motion.div>
 
       {/* Navigation Arrows */}
