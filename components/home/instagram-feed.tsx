@@ -7,7 +7,7 @@ import { Heart, Sparkles } from "lucide-react";
 import { instagramFeed } from "@/lib/constants/homepage";
 export function InstagramFeed() {
 return (
-  <section className="py-24 md:py-32 bg-white">
+  <section className="py-24 md:py-32 bg-background">
       <div className="container">
         
 

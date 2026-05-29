@@ -6,10 +6,12 @@ import { CategoryShowcase } from "@/components/home/category-showcase";
 import { BrandValues } from "@/components/home/brand-values";
 import { EditorialStory } from "@/components/home/editorial-story";
 import { NewsletterSignup } from "@/components/home/newsletter-signup";
+import { FloatingBlobs } from "@/components/home/floating-blob";
 
 export default function HomePage() {
   return (
     <main>
+      <FloatingBlobs />
        {/* 1. Hero Section with Scroll Parallax */}
        <HeroSection />
         {/* 2. Brand Sourcing Values */}
