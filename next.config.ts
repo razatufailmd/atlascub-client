@@ -1,7 +1,20 @@
 import type { NextConfig } from "next";
+import withPWAInit from "@ducanh2912/next-pwa";
+
+const withPWA = withPWAInit({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development", // Disable PWA in dev mode for faster compilation
+  register: true,
+  scope: "/app",
+  sw: "service-worker.js",
+  workboxOptions: {
+    disableDevLogs: true,
+  },
+});
 
 const nextConfig: NextConfig = {
   /* config options here */
+  turbopack: {},
   images: {
     remotePatterns: [
       {
@@ -16,4 +29,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);

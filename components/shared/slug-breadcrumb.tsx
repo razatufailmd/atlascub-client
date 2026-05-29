@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ChevronRight, Home } from "lucide-react";
 import { genderMetadata, getCategoryTitle } from "@/lib/constants/categories";
+import { categories } from "@/lib/constants/navigation";
 
 interface BreadcrumbItem {
   label: string;
@@ -12,29 +13,84 @@ interface BreadcrumbItem {
 
 export function SlugBreadcrumb() {
   const pathname = usePathname();
-  const params = useParams();
-  const gender = params.gender as string;
-  const category = params.category as string;
-
+  
   const buildBreadcrumbs = (): BreadcrumbItem[] => {
     const breadcrumbs: BreadcrumbItem[] = [{ label: "Home", href: "/" }];
-
-    if (gender && genderMetadata[gender as keyof typeof genderMetadata]) {
-      const genderTitle = genderMetadata[gender as keyof typeof genderMetadata].title;
+    
+    const segments = pathname.split("/").filter(Boolean);
+    
+    // Handle /shop/* routes
+    if (segments[0] === "shop") {
+      breadcrumbs.push({ label: "Shop", href: "/shop" });
+      
+      if (segments[1]) {
+        const gender = segments[1];
+        const genderTitle = genderMetadata[gender as keyof typeof genderMetadata]?.title || 
+          gender.charAt(0).toUpperCase() + gender.slice(1);
+        breadcrumbs.push({
+          label: genderTitle,
+          href: `/shop/${gender}`,
+        });
+      }
+      
+      if (segments[2]) {
+        const category = segments[2];
+        const categoryTitle = getCategoryTitle(category);
+        breadcrumbs.push({
+          label: categoryTitle,
+          href: `/shop/${segments[1]}/${category}`,
+        });
+      }
+    }
+    
+    // Handle /collections/* routes
+    else if (segments[0] === "collections") {
+      breadcrumbs.push({ label: "Collections", href: "/collections/all" });
+      
+      if (segments[1] && segments[1] !== "all") {
+        // Find collection by slug to get display name
+        const collections = categories.collections || [];
+        const collection = collections.find((c) => c.slug === segments[1]);
+        const collectionName = collection?.name || 
+          segments[1].split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+        
+        breadcrumbs.push({
+          label: collectionName,
+          href: `/collections/${segments[1]}`,
+        });
+      }
+    }
+    
+    // Handle /product/* routes (for future product detail pages)
+    else if (segments[0] === "product" && segments[1]) {
+      breadcrumbs.push({ label: "Shop", href: "/shop" });
       breadcrumbs.push({
-        label: genderTitle,
-        href: `/${gender}`,
+        label: "Product",
+        href: pathname,
       });
     }
-
-    if (category) {
-      const categoryTitle = getCategoryTitle(category);
-      breadcrumbs.push({
-        label: categoryTitle,
-        href: `/${gender}/${category}`,
+    
+    // Handle /wishlist route
+    else if (segments[0] === "wishlist") {
+      breadcrumbs.push({ 
+        label: "Wishlist", 
+        href: "/wishlist" 
       });
     }
-
+    
+    // Handle /account routes
+    else if (segments[0] === "account") {
+      breadcrumbs.push({ label: "Account", href: "/account" });
+      
+      if (segments[1]) {
+        const pageName = segments[1].charAt(0).toUpperCase() + segments[1].slice(1);
+        breadcrumbs.push({
+          label: pageName,
+          href: `/account/${segments[1]}`,
+        });
+      }
+    }
+    
     return breadcrumbs;
   };
 
