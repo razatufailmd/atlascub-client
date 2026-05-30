@@ -1,49 +1,124 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { ShoppingBag } from 'lucide-react';
-import { EmptyState } from '@/components/shared/empty-state';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/lib/store/store';
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowLeft, ArrowRight, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { CartItem } from "@/components/cart/cart-item";
+import { EmptyState } from "@/components/shared/empty-state";
+import { SlugBreadcrumb } from "@/components/shared/slug-breadcrumb";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { clearCart, removeFromCart, updateQuantity } from "@/lib/store/features/cartSlice";
 
 export default function CartPage() {
-  // Pull persistent local client state directly from Redux Toolkit Cart Slice
-  const cartItems = useSelector((state: RootState) => state.cart.items);
+  const dispatch = useAppDispatch();
+  const { items } = useAppSelector((state) => state.cart);
 
-  return (
-    <div className="container mx-auto px-4 py-16 md:py-24 max-w-5xl">
-      <div className="mb-10 text-center md:text-left">
-        <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground md:text-5xl">
-          Shopping Cart
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Review your chosen apparel design options before final purchase settlement.
-        </p>
-      </div>
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
-      {cartItems.length === 0 ? (
-        <EmptyState 
-          title="Your Cart is Empty"
-          description="Looks like you haven't added any premium Atlascub custom garments to your shopping bag yet."
-          icon={ShoppingBag}
+  if (items.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <SlugBreadcrumb />
+        <EmptyState
+          title="Your cart is empty"
+          description="Add items to get started"
           action={{
-            label: "Explore Collections",
-            href: "/"
+            label: "Continue Shopping",
+            href: "/shop",
           }}
         />
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Cart item layout and checkout summation blocks will be implemented in Module 3 */}
-          <div className="lg:col-span-8 bg-card border border-border p-6 rounded-xl">
-            {cartItems.map((item) => (
-              <div key={item.id} className="flex justify-between py-4 border-b last:border-0 border-border">
-                <span>{item.name} ({item.size} / {item.color})</span>
-                <span>Qty: {item.quantity} - ₹{item.price * item.quantity}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8 md:py-12">
+      <SlugBreadcrumb />
+
+      <h1 className="heading-lg font-primary mt-4 mb-8">Shopping Cart ({itemCount})</h1>
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        {/* Cart Items */}
+        <div className="lg:col-span-2">
+          <div className="rounded-lg border border-border bg-card">
+            <div className="hidden border-b border-border p-4 text-sm font-medium text-muted-foreground md:grid md:grid-cols-12">
+              <div className="col-span-6">Product</div>
+              <div className="col-span-2 text-center">Quantity</div>
+              <div className="col-span-2 text-center">Price</div>
+              <div className="col-span-2 text-right">Total</div>
+            </div>
+
+            <div className="divide-y divide-border">
+              {items.map((item) => (
+                <CartItem
+                  key={item.id}
+                  item={item}
+                  onUpdateQuantity={(id, quantity) =>
+                    dispatch(updateQuantity({ id, quantity }))
+                  }
+                  onRemove={(id) => dispatch(removeFromCart(id))}
+                />
+              ))}
+            </div>
+
+            <div className="border-t border-border p-4">
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  asChild
+                  className="gap-2"
+                >
+                  <Link href="/shop">
+                    <ArrowLeft className="h-4 w-4" />
+                    Continue Shopping
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => dispatch(clearCart())}
+                  className="gap-2 text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Clear Cart
+                </Button>
               </div>
-            ))}
+            </div>
           </div>
         </div>
-      )}
+
+        {/* Order Summary */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-24 rounded-lg border border-border bg-card p-6">
+            <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
+            
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span>₹{subtotal.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Shipping</span>
+                <span>Calculated at checkout</span>
+              </div>
+              <Separator />
+              <div className="flex justify-between text-base font-semibold">
+                <span>Total</span>
+                <span>₹{subtotal.toLocaleString()}</span>
+              </div>
+            </div>
+
+            <Button asChild className="mt-6 w-full gap-2" size="lg">
+              <Link href="/checkout">
+                Proceed to Checkout
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

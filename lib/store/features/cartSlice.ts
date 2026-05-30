@@ -1,80 +1,74 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface CartItem {
-  id: string; // Unique Cart Item ID (incorporating variation states)
+  id: string;
   productId: string;
   name: string;
   price: number;
-  image: string;
-  size: string; // Selected Size variant (e.g. "M")
-  color: string; // Selected Color variant (e.g. "Olive")
+  compareAtPrice?: number;
   quantity: number;
+  size: string;
+  color: string;
+  image: string;
+  slug: string;
+  inStock: boolean;
 }
 
 interface CartState {
   items: CartItem[];
-  isOpen: boolean; // Sidebar slide-out state management
+  isOpen: boolean;
 }
 
-const getStoredCart = (): CartItem[] => {
-  if (typeof window === "undefined") return [];
-  try {
-    const data = localStorage.getItem("atlascub_cart");
-    return data ? JSON.parse(data) : [];
-  } catch {
-    return [];
-  }
-};
-
-const initialCartState: CartState = {
-  items: getStoredCart(),
+const initialState: CartState = {
+  items: [],
   isOpen: false,
 };
 
 const cartSlice = createSlice({
   name: "cart",
-  initialState: initialCartState,
+  initialState,
   reducers: {
-    addToCart(state, action: PayloadAction<Omit<CartItem, "id">>) {
-      const { productId, size, color, quantity } = action.payload;
-      const compositeId = `${productId}-${size}-${color}`;
-
-      const existingItemIndex = state.items.findIndex(
-        (item) => item.id === compositeId
+    addToCart: (state, action: PayloadAction<CartItem>) => {
+      const existing = state.items.find(
+        (item) =>
+          item.productId === action.payload.productId &&
+          item.size === action.payload.size &&
+          item.color === action.payload.color
       );
 
-      if (existingItemIndex > -1) {
-        state.items[existingItemIndex].quantity += quantity;
+      if (existing) {
+        existing.quantity += action.payload.quantity;
       } else {
-        state.items.push({ ...action.payload, id: compositeId });
+        state.items.push(action.payload);
       }
-
-      localStorage.setItem("atlascub_cart", JSON.stringify(state.items));
-      state.isOpen = true; // Slide open cart drawer automatically on selection
     },
-    removeFromCart(state, action: PayloadAction<string>) {
+    removeFromCart: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter((item) => item.id !== action.payload);
-      localStorage.setItem("atlascub_cart", JSON.stringify(state.items));
     },
-    updateQuantity(
+    updateQuantity: (
       state,
       action: PayloadAction<{ id: string; quantity: number }>
-    ) {
-      const item = state.items.find((i) => i.id === action.payload.id);
-      if (item && action.payload.quantity > 0) {
+    ) => {
+      const item = state.items.find((item) => item.id === action.payload.id);
+      if (
+        item &&
+        action.payload.quantity > 0 &&
+        action.payload.quantity <= 10
+      ) {
         item.quantity = action.payload.quantity;
-        localStorage.setItem("atlascub_cart", JSON.stringify(state.items));
       }
     },
-    clearCart(state) {
+    clearCart: (state) => {
       state.items = [];
-      localStorage.removeItem("atlascub_cart");
     },
-    toggleCart(state) {
+    toggleCart: (state) => {
       state.isOpen = !state.isOpen;
     },
-    setCartOpen(state, action: PayloadAction<boolean>) {
-      state.isOpen = action.payload;
+    openCart: (state) => {
+      state.isOpen = true;
+    },
+    closeCart: (state) => {
+      state.isOpen = false;
     },
   },
 });
@@ -85,7 +79,7 @@ export const {
   updateQuantity,
   clearCart,
   toggleCart,
-  setCartOpen,
+  openCart,
+  closeCart,
 } = cartSlice.actions;
-
 export default cartSlice.reducer;

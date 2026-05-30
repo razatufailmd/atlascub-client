@@ -14,10 +14,12 @@ export interface WishlistItem {
 
 interface WishlistState {
   items: WishlistItem[];
+  isOpen: boolean;
 }
 
 const initialState: WishlistState = {
-  items: [], // Can be hydrated from localStorage
+  items: [],
+  isOpen: false,
 };
 
 const wishlistSlice = createSlice({
@@ -52,8 +54,14 @@ const wishlistSlice = createSlice({
     clearWishlist: (state) => {
       state.items = [];
     },
-    hydrateWishlist: (state, action: PayloadAction<WishlistItem[]>) => {
-      state.items = action.payload;
+    toggleWishlistDrawer: (state) => {
+      state.isOpen = !state.isOpen;
+    },
+    openWishlistDrawer: (state) => {
+      state.isOpen = true;
+    },
+    closeWishlistDrawer: (state) => {
+      state.isOpen = false;
     },
   },
 });
@@ -63,6 +71,8 @@ export const {
   removeFromWishlist,
   toggleWishlist,
   clearWishlist,
-  hydrateWishlist,
+  toggleWishlistDrawer,
+  openWishlistDrawer,
+  closeWishlistDrawer,
 } = wishlistSlice.actions;
 export default wishlistSlice.reducer;
