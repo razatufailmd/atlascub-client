@@ -1,0 +1,91 @@
+import { Order } from "@/types/product";
+
+export const mockOrders: Order[] = [
+  {
+    id: "ord-001",
+    orderNumber: "ATL-2024-001",
+    status: "DELIVERED",
+    items: [
+      {
+        productId: "prod-001",
+        name: "Premium Linen Oversized Shirt",
+        price: 3499,
+        quantity: 1,
+        size: "M",
+        color: "Natural",
+        image: "/images/products/men/linen-shirt-1.jpg",
+      },
+    ],
+    shippingAddress: {
+      firstName: "John",
+      lastName: "Doe",
+      email: "john@example.com",
+      phone: "+91 9876543210",
+      address: "123 Main Street",
+      city: "Mumbai",
+      state: "Maharashtra",
+      pincode: "400001",
+      country: "India",
+    },
+    totalAmount: 3499,
+    subtotal: 3499,
+    shippingCost: 0,
+    tax: 0,
+    discount: 0,
+    paymentMethod: "razorpay",
+    paymentId: "pay_123456",
+    trackingNumber: "SHIP123456",
+    createdAt: "2024-02-15T10:30:00Z",
+    updatedAt: "2024-02-20T10:30:00Z",
+  },
+  {
+    id: "ord-002",
+    orderNumber: "ATL-2024-002",
+    status: "SHIPPED",
+    items: [
+      {
+        productId: "prod-002",
+        name: "Heavyweight Cotton Oversized Tee",
+        price: 1899,
+        quantity: 2,
+        size: "L",
+        color: "Black",
+        image: "/images/products/men/oversized-tee-1.jpg",
+      },
+      {
+        productId: "prod-009",
+        name: "Minimalist Leather Belt",
+        price: 1899,
+        quantity: 1,
+        size: "M",
+        color: "Tan",
+        image: "/images/products/accessories/leather-belt-1.jpg",
+      },
+    ],
+    shippingAddress: {
+      firstName: "Jane",
+      lastName: "Smith",
+      email: "jane@example.com",
+      phone: "+91 9876543211",
+      address: "456 Park Avenue",
+      city: "Delhi",
+      state: "Delhi",
+      pincode: "110001",
+      country: "India",
+    },
+    totalAmount: 5697,
+    subtotal: 5697,
+    shippingCost: 0,
+    tax: 0,
+    discount: 0,
+    paymentMethod: "razorpay",
+    paymentId: "pay_123457",
+    trackingNumber: "SHIP123457",
+    createdAt: "2024-03-01T14:00:00Z",
+    updatedAt: "2024-03-05T10:00:00Z",
+  },
+];
+
+export const getOrderById = (id: string) => mockOrders.find((o) => o.id === id);
+export const getOrdersByStatus = (status: Order["status"]) =>
+  mockOrders.filter((o) => o.status === status);
