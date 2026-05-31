@@ -44,10 +44,11 @@ export const viewport: Viewport = {
   
   // --- GLOBAL SEO METADATA ---
   export const metadata: Metadata = {
-  metadataBase: new URL("https://www.atlascub.in"), // Base URL for relative image paths
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"), // Fixed to support local testing!
+  manifest: "/manifest.webmanifest", // Explicitly link the dynamic manifest
   title: {
-  default: "Atlascub | Premium Modern Clothing & Drapes",
-  template: "%s | Atlascub", // E.g., "Men's Outerwear | Atlascub"
+    default: "Atlascub | Premium Modern Clothing & Drapes",
+    template: "%s | Atlascub",
   },
   description: "Discover curated apparel at Atlascub. Premium quality, timeless design, and modern Indian tailoring.",
   keywords: ["premium clothing", "Indian fashion", "linen shirts", "oversized tees", "Atlascub", "festive wear"],
