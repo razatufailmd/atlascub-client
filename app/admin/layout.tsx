@@ -20,7 +20,7 @@ export default function AdminLayout({
     <AdminGuard>
       <div className="min-h-screen bg-muted/30">
         <AdminSidebar />
-        <div className="pl-64">
+        <div className="md:pl-64">
           {/* <AdminHeader /> */}
           <main className="p-6">{children}</main>
         </div>

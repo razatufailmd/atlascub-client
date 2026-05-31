@@ -4,25 +4,26 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
-import { ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { heroSlides } from "@/lib/constants/homepage";
 import { TextReveal } from "../shadcn-space/animated-text/animated-text-06";
+
 
 export function HeroSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const containerRef = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
+  // Parallax effects tied to the inner card
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end start"]
+    offset: ["start start", "end start"],
   });
 
-  const yBg = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
-  const yText = useTransform(scrollYProgress, [0, 1], ["0px", "-80px"]);
-  const opacityText = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-  const scaleBg = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
+  const yBg = useTransform(scrollYProgress, [0, 1], ["0%", "15%"]);
+  const yText = useTransform(scrollYProgress, [0, 1], ["0px", "-50px"]);
+  const scaleBg = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
 
   const handleNext = () => {
     setDirection(1);
@@ -59,305 +60,182 @@ export function HeroSection() {
   const activeSlide = heroSlides[currentIndex];
 
   return (
-    <section
-      ref={containerRef}
-      className="relative h-screen min-h-[650px] w-full overflow-hidden bg-background"
-    >
-      {/* Background Image with Parallax */}
-      <motion.div
-        style={{ y: yBg, scale: scaleBg }}
-        className="absolute inset-0 z-0 origin-top"
+    // Outer container provides the background color and padding (The Fintech Frame)
+    <section className="relative h-screen min-h-[700px] w-full bg-background px-4 pb-4 pt-4 md:px-6 md:pb-6 md:pt-4 flex flex-col">
+      
+      {/* Inner Rounded Card containing the actual carousel */}
+      <div 
+        ref={containerRef}
+        className="relative flex-1 w-full rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl bg-black"
       >
-        <AnimatePresence initial={false} mode="wait" custom={direction}>
-          <motion.div
-            key={currentIndex}
-            custom={direction}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
-            className="absolute inset-0"
-          >
+        {/* Parallax Background Wrapper */}
+        <motion.div
+          style={{ y: yBg, scale: scaleBg }}
+          className="absolute inset-0 z-0 origin-top"
+        >
+          <AnimatePresence initial={false} mode="wait" custom={direction}>
             <motion.div
-              initial={{ scale: 1.02 }}
-              animate={{ scale: 1.1 }}
-              transition={{ duration: 8, ease: "linear" }}
-              className="relative h-full w-full"
+              key={currentIndex}
+              custom={direction}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
+              className="absolute inset-0"
             >
-              <Image
-                src={activeSlide.image}
-                alt={activeSlide.title}
-                fill
-                priority
-                className="object-cover object-center"
-                sizes="100vw"
-              />
-            </motion.div>
-
-            {/* Gradient overlays using theme variables
-            <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-foreground/10 to-foreground/20" />
-            <div className="absolute inset-0 bg-gradient-to-r from-background/20 to-transparent" /> */}
-          </motion.div>
-        </AnimatePresence>
-      </motion.div>
-
-      {/* Text Content */}
-      <motion.div
-        style={{ y: yText, opacity: opacityText }}
-        className="relative z-10 h-full container mx-auto px-4 md:px-6 flex items-center"
-      >
-        {/* Removed the glass box wrapper to let the background image shine completely */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentIndex}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            className="space-y-5 md:space-y-6 "
-          >
-            {/* Overline - Secondary Font with light shadow */}
-            <motion.span
-              variants={{
-                hidden: { opacity: 0, y: 15 },
-                visible: {
-                  opacity: 1,
-                  y: 0,
-                  transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
-                },
-              }}
-              className="block text-sm md:text-base tracking-[0.2em] uppercase font-secondary text-white/90 drop-shadow-md"
-            >
-              {activeSlide.overline}
-            </motion.span>
-
-            {/* Title - Animated Text Reveal with heavy diffused text-shadow */}
-            <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 30 },
-                visible: {
-                  opacity: 1,
-                  y: 0,
-                  transition: { duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] },
-                },
-              }}
-            >
-              <TextReveal
-                text={activeSlide.title}
-                as="h1"
-                className="text-5xl sm:text-6xl  max-w-5xl text-wrap font-primary font-bold tracking-tight text-[#fef3c7] leading-[1.1] md:leading-[1.15] [text-shadow:_0_4px_30px_rgb(0_0_0_/_60%)]"
-              />
-            </motion.div>
-
-            {/* Subtitle - Animated Text Reveal with medium text-shadow */}
-            <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 25 },
-                visible: {
-                  opacity: 1,
-                  y: 0,
-                  transition: { duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] },
-                },
-              }}
-            >
-              <TextReveal
-                text={activeSlide.subtitle}
-                as="p"
-                className="text-lg sm:text-xl font-body text-white/95 max-w-lg leading-relaxed [text-shadow:_0_2px_15px_rgb(0_0_0_/_50%)]"
-              />
-            </motion.div>
-
-            {/* Buttons (Solid colors to anchor the floating text) */}
-            <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: {
-                  opacity: 1,
-                  y: 0,
-                  transition: { duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] },
-                },
-              }}
-              className="flex flex-wrap gap-4 pt-4"
-            >
-              <Link
-                href={activeSlide.ctaPrimary.href}
-                className="group inline-flex items-center justify-center bg-accent transition-all duration-300 px-6 md:px-8 py-3 md:py-4 font-medium rounded-md shadow-xl text-sm md:text-base"
+              <motion.div
+                initial={{ scale: 1.02 }}
+                animate={{ scale: 1.1 }}
+                transition={{ duration: 8, ease: "linear" }}
+                className="relative h-full w-full"
               >
-                <span>{activeSlide.ctaPrimary.text}</span>
-                <ArrowUpRight className="h-4 w-4 ml-2 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </Link>
-              <Link
-                href={activeSlide.ctaSecondary.href}
-                className="group inline-flex items-center justify-center bg-black/40 backdrop-blur-md text-white border border-white/20 hover:bg-black/60 transition-all duration-300 px-6 md:px-8 py-3 md:py-4 font-medium rounded-md shadow-xl text-sm md:text-base"
-              >
-                {activeSlide.ctaSecondary.text}
-              </Link>
+                <Image
+                  src={activeSlide.image}
+                  alt={activeSlide.title}
+                  fill
+                  priority
+                  className="object-cover object-center"
+                  sizes="100vw"
+                />
+              </motion.div>
+
+              {/* Elegant Gradient Overlay to ensure text legibility */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
             </motion.div>
-          </motion.div>
-        </AnimatePresence>
-      </motion.div>
+          </AnimatePresence>
+        </motion.div>
 
-      {/* Navigation Arrows */}
-      <div className="absolute right-4 md:right-8 bottom-8 md:bottom-12 z-20 hidden sm:flex items-center gap-3">
-        <button
-          onClick={handlePrev}
-          className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full border border-primary-foreground/20 bg-background/5 text-primary-foreground backdrop-blur-md transition-all hover:bg-background/20 hover:border-primary-foreground/40"
-          aria-label="Previous slide"
+        {/* Text Content Overlay */}
+        <motion.div
+          style={{ y: yText }}
+          className="absolute inset-0 z-10 flex flex-col items-start justify-center p-8 md:p-16 lg:p-24"
         >
-          <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
-        </button>
-        <button
-          onClick={handleNext}
-          className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full border border-primary-foreground/20 bg-background/5 text-primary-foreground backdrop-blur-md transition-all hover:bg-background/20 hover:border-primary-foreground/40"
-          aria-label="Next slide"
-        >
-          <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
-        </button>
-      </div>
-
-      {/* Progress Indicators */}
-      <div className="absolute bottom-6 md:bottom-8 left-4 md:left-8 z-20 flex gap-3 md:gap-4">
-        {heroSlides.map((slide, index) => {
-          const isActive = index === currentIndex;
-          return (
-            <button
-              key={slide.id}
-              onClick={() => handleDotClick(index)}
-              className="group flex flex-col items-start focus:outline-none"
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentIndex}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              className="max-w-2xl space-y-4 md:space-y-6"
             >
-              <div className="flex items-center gap-2 mb-1 text-[10px] font-mono uppercase tracking-wider text-primary-foreground/50 group-hover:text-primary-foreground transition-colors">
-                <span>0{index + 1}</span>
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  —
-                </span>
-              </div>
-              <div className="h-[2px] w-12 md:w-16 bg-primary-foreground/20 relative rounded-full overflow-hidden">
-                {isActive && (
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: "100%" }}
-                    transition={{ duration: 6.5, ease: "linear" }}
-                    className="absolute inset-y-0 left-0 bg-primary-foreground"
-                  />
-                )}
-              </div>
-            </button>
-          );
-        })}
-      </div>
+              {/* Overline */}
+              <motion.span
+                variants={{
+                  hidden: { opacity: 0, y: 15 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
+                }}
+                className="block text-xs md:text-sm tracking-[0.25em] uppercase font-secondary text-white/80"
+              >
+                {activeSlide.overline}
+              </motion.span>
 
-      {/* Scroll Hint */}
-      <div className="absolute bottom-6 right-4 md:right-8 z-20 hidden lg:flex items-center gap-2 text-primary-foreground/30 text-[9px] uppercase tracking-widest font-mono">
-        <span>Scroll</span>
-        <motion.span
-          animate={{ y: [0, 4, 0] }}
-          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-        >
-          ↓
-        </motion.span>
+              {/* Title */}
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 30 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] } },
+                }}
+              >
+                <TextReveal
+                  text={activeSlide.title}
+                  as="h1"
+                  className="text-5xl sm:text-6xl md:text-7xl font-primary font-bold tracking-tight text-white leading-[1.05]"
+                />
+              </motion.div>
+
+              {/* Subtitle */}
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 25 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] } },
+                }}
+              >
+                <TextReveal
+                  text={activeSlide.subtitle}
+                  as="p"
+                  className="text-base sm:text-lg md:text-xl font-body text-white/80 max-w-md leading-relaxed"
+                />
+              </motion.div>
+
+              {/* Fintech-Style Pill Buttons */}
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] } },
+                }}
+                className="flex flex-wrap items-center gap-4 pt-6"
+              >
+                {/* Primary Pill Button with Icon Circle */}
+                <Link
+                  href={activeSlide.ctaPrimary.href}
+                  className="group flex items-center bg-white text-black hover:bg-white/90 transition-all duration-300 rounded-full pl-6 pr-2 py-2 font-medium shadow-xl text-sm md:text-base"
+                >
+                  <span className="mr-4">{activeSlide.ctaPrimary.text}</span>
+                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-black text-white group-hover:bg-primary transition-colors duration-300">
+                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                  </div>
+                </Link>
+
+                {/* Secondary Ghost Pill */}
+                <Link
+                  href={activeSlide.ctaSecondary.href}
+                  className="group inline-flex items-center justify-center bg-white/10 backdrop-blur-md text-white border border-white/20 hover:bg-white/20 transition-all duration-300 px-6 py-3 font-medium rounded-full text-sm md:text-base"
+                >
+                  {activeSlide.ctaSecondary.text}
+                </Link>
+              </motion.div>
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Navigation Arrows (Inside the card, vertically centered) */}
+        <div className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 z-20 hidden md:flex flex-col gap-4">
+          <button
+            onClick={handlePrev}
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all hover:bg-white hover:text-black"
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            onClick={handleNext}
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all hover:bg-white hover:text-black"
+            aria-label="Next slide"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Progress Indicators (Inside the card, bottom left) */}
+        <div className="absolute bottom-8 left-8 md:left-16 z-20 flex gap-4">
+          {heroSlides.map((slide, index) => {
+            const isActive = index === currentIndex;
+            return (
+              <button
+                key={slide.id}
+                onClick={() => handleDotClick(index)}
+                className="group flex flex-col items-start focus:outline-none"
+              >
+                <div className="flex items-center gap-2 mb-2 text-[10px] font-mono uppercase tracking-wider text-white/50 group-hover:text-white transition-colors">
+                  <span>0{index + 1}</span>
+                </div>
+                <div className="h-[2px] w-12 md:w-16 bg-white/20 relative rounded-full overflow-hidden">
+                  {isActive && (
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 6.5, ease: "linear" }}
+                      className="absolute inset-y-0 left-0 bg-white"
+                    />
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
       </div>
     </section>
   );
 }
-
-
-
-
-//   <motion.div
-//   style={{ y: yText, opacity: opacityText }}
-//   className="relative z-10 h-full container mx-auto px-4 md:px-6 flex items-center"
-// >
-//   {/* Premium Glassmorphism Wrapper for perfect legibility */}
-//   <div className="max-w-2xl p-6 md:p-10 rounded-2xl bg-black/30 backdrop-blur-md border border-white/10 shadow-2xl overflow-hidden">
-//     <AnimatePresence mode="wait">
-//       <motion.div
-//         key={currentIndex}
-//         initial="hidden"
-//         animate="visible"
-//         exit="hidden"
-//         className="space-y-5 md:space-y-6"
-//       >
-//         {/* Overline - Secondary Font */}
-//         <motion.span
-//           variants={{
-//             hidden: { opacity: 0, y: 15 },
-//             visible: {
-//               opacity: 1,
-//               y: 0,
-//               transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
-//             }
-//           }}
-//           className="block text-sm md:text-base tracking-[0.2em] uppercase font-secondary text-primary-foreground/90"
-//         >
-//           {activeSlide.overline}
-//         </motion.span>
-
-//         {/* Title - Animated Text Reveal */}
-//         <motion.div
-//           variants={{
-//             hidden: { opacity: 0, y: 30 },
-//             visible: {
-//               opacity: 1,
-//               y: 0,
-//               transition: { duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }
-//             }
-//           }}
-//         >
-//           <TextReveal
-//             text={activeSlide.title}
-//             as="h1"
-//             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-primary font-bold tracking-tight text-primary-foreground leading-[1.1] md:leading-[1.15]"
-//           />
-//         </motion.div>
-
-//         {/* Subtitle - Animated Text Reveal */}
-//         <motion.div
-//           variants={{
-//             hidden: { opacity: 0, y: 25 },
-//             visible: {
-//               opacity: 1,
-//               y: 0,
-//               transition: { duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }
-//             }
-//           }}
-//         >
-//           <TextReveal
-//             text={activeSlide.subtitle}
-//             as="p"
-//             className="text-base sm:text-lg font-body text-primary-foreground/80 max-w-lg leading-relaxed"
-//           />
-//         </motion.div>
-
-//         {/* Buttons */}
-//         <motion.div
-//           variants={{
-//             hidden: { opacity: 0, y: 20 },
-//             visible: {
-//               opacity: 1,
-//               y: 0,
-//               transition: { duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }
-//             }
-//           }}
-//           className="flex flex-wrap gap-4 pt-4"
-//         >
-//           <Link
-//             href={activeSlide.ctaPrimary.href}
-//             className="group inline-flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 px-6 md:px-8 py-3 md:py-4 font-medium rounded-md shadow-lg text-sm md:text-base"
-//           >
-//             <span>{activeSlide.ctaPrimary.text}</span>
-//             <ArrowUpRight className="h-4 w-4 ml-2 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-//           </Link>
-//           <Link
-//             href={activeSlide.ctaSecondary.href}
-//             className="group inline-flex items-center justify-center bg-background/10 text-primary-foreground border border-primary-foreground/30 backdrop-blur-sm hover:bg-background/20 transition-all duration-300 px-6 md:px-8 py-3 md:py-4 font-medium rounded-md text-sm md:text-base"
-//           >
-//             {activeSlide.ctaSecondary.text}
-//           </Link>
-//         </motion.div>
-//       </motion.div>
-//     </AnimatePresence>
-//   </div>
-// </motion.div>
-
-
-
-
