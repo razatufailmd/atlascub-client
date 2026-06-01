@@ -3,12 +3,15 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 import wishlistReducer from "./features/wishlistSlice";
 import cartReducer from "./features/cartSlice";
+import announceUI from "./features/announcementSlice";
 
 // 2. CONFIGURE CENTRAL APP STORE
 export const store = configureStore({
   reducer: {
     cart: cartReducer,
     wishlist: wishlistReducer,
+    // announcement bar
+    ui: announceUI,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

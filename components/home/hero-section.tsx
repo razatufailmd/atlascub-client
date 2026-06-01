@@ -61,7 +61,7 @@ export function HeroSection() {
 
   return (
     // Outer container provides the background color and padding (The Fintech Frame)
-    <section className="relative h-screen min-h-[700px] w-full bg-background/30 px-4 pb-4 pt-4 md:px-6 md:pb-6 md:pt-4 flex flex-col">
+    <section className="relative h-screen min-h-[700px] w-full bg-background/30 px-4 pb-4md:px-6 md:pb-6  pt-8  md:pt-4 flex flex-col">
       
       {/* Inner Rounded Card containing the actual carousel */}
       <div 

@@ -13,12 +13,26 @@ import { ThemeToggle } from "./theme-toggle";
 import { MobileMenu } from "./mobile-menu";
 import { WishlistIcon } from "./wishlist/wishlist-icon";
 import { UserMenu } from "../auth/user-menu";
+import { useAppSelector } from "@/lib/store/store";
 
 export function Navbar() {
   const scrollDirection = useScrollDirection();
   const scrolled = useScrollPosition(20);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+
+  // 1. Pull the visibility state instantly and cleanly from Redux!
+  const isBannerVisible = useAppSelector((state) => state.ui.isAnnouncementVisible);
+
+  // Track search state from SearchBar via event listener
+  useEffect(() => {
+    const handleSearchState = (e: CustomEvent) => {
+      setIsSearchOpen(e.detail.isOpen);
+    };
+    window.addEventListener("searchStateChange", handleSearchState as EventListener);
+    return () => window.removeEventListener("searchStateChange", handleSearchState as EventListener);
+  }, []);
 
   // Track search state from SearchBar via event listener
   useEffect(() => {
@@ -40,10 +54,8 @@ export function Navbar() {
     },
   };
 
-  // Don't hide navbar when search is open on mobile
   const shouldHide = scrollDirection === "down" && scrolled && !(isMobile && isSearchOpen);
 
-  // Set CSS variable for navbar height
   useEffect(() => {
     const navbar = document.querySelector("header");
     if (navbar) {
@@ -61,23 +73,26 @@ export function Navbar() {
         scrolled || isSearchOpen
           ? "bg-background/80 shadow-sm backdrop-blur-lg"
           : "bg-transparent"
+      } ${
+        /* Apply dynamic margin ONLY if we haven't scrolled AND the banner is active */
+        !scrolled && isBannerVisible 
+          ? " mt-[36px] md:mt-[20px]" // Added your requested 5px/8px margins + base top offset
+          : "top-0 mt-0"
       }`}
     >
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between gap-2 md:h-20 md:gap-4">
-          {/* Left Section - Logo + Desktop Navigation */}
           <div className="flex items-center gap-4 md:gap-8">
             <Logo />
             {!isMobile && !isSearchOpen && <GenderNav />}
           </div>
 
-          {/* Right Section - Actions */}
           <div className="flex items-center gap-1 md:gap-2">
             <SearchBar />
             {!isSearchOpen && (
               <>
                 <ThemeToggle />
-                <WishlistIcon /> {/* Add Wishlist Icon here */}
+                <WishlistIcon />
                 <UserMenu/>
                 <CartIcon />
               </>
