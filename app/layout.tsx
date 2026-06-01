@@ -11,6 +11,7 @@ import { SmoothCursor } from "@/components/ui/smooth-cursor";
 import { CartSidebar } from "@/components/cart/cart-sidebar";
 import { WishlistSidebar } from "@/components/wishlist/wishlist-sidebar";
 import { AnnouncementBar } from "@/components/shared/announcement-bar";
+import { WhatsappWidget } from "@/components/home/whats-app-widget";
 
 const fontSans = Poppins({
   subsets: ["latin"],
@@ -122,6 +123,7 @@ export default function RootLayout({
 
                 <CartSidebar />
                 <WishlistSidebar />
+                <WhatsappWidget/>
               </div>
             </ThemeProvider>
           </body>

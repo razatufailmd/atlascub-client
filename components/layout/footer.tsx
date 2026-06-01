@@ -2,226 +2,199 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion ,Variants} from "framer-motion";
-import {
-ArrowUpRight,
-Mail,
-MapPin,
-Phone,
-
+import { motion, Variants } from "framer-motion";
+import { 
+  ArrowUpRight 
 } from "lucide-react";
-import { FaInstagram, FaTwitter } from 'react-icons/fa';
-import { Logo } from "../shared/logo";
+import { Logo } from "@/components/shared/logo"; 
+import { FaInstagram,FaTwitter } from "react-icons/fa";
+
 export function Footer() {
-const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-useEffect(() => {
-setMounted(true);
-}, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-// Framer Motion Animation Variants
-const footerContainerVariants:Variants = {
-hidden: { opacity: 0, y: 30 },
-visible: {
-opacity: 1,
-y: 0,
-transition: {
-duration: 0.8,
-ease: [0.16, 1, 0.3, 1],
-staggerChildren: 0.08,
-delayChildren: 0.1,
-},
-},
-};
+  // Framer Motion Stagger Animation Variants
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.1,
+      },
+    },
+  };
 
-const itemVariants:Variants = {
-hidden: { opacity: 0, y: 15 },
-visible: {
-opacity: 1,
-y: 0,
-transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
-},
-};
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+    },
+  };
 
-const borderVariants:Variants = {
-hidden: { scaleX: 0 },
-visible: {
-scaleX: 1,
-transition: { duration: 1.5, ease: [0.16, 1, 0.3, 1] },
-},
-};
+  if (!mounted) return null;
 
-if (!mounted) return null;
-
-return (
-<motion.footer
-variants={footerContainerVariants}
-initial="hidden"
-whileInView="visible"
-viewport={{ once: true, margin: "-50px" }}
-className="relative bg-background text-foreground border-t border-border mt-auto overflow-hidden font-sans"
->
-{/* Subtle Animated Glowing Highlight */}
-<div
-className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[1px] origin-center bg-gradient-to-r from-transparent via-primary/40 to-transparent pointer-events-none"
-style={{ transform: "scaleX(1)" }}
-/>
-
-  {/* Subtle Border-Top Growing Animation */}
-  <motion.div 
-    variants={borderVariants}
-    className="absolute top-0 left-0 right-0 h-[2px] bg-primary origin-left pointer-events-none"
-  />
-
-  <div className="container mx-auto px-6 py-16 md:py-24 max-w-7xl relative z-10">
-    
-    {/* Main 5-Column Grid */}
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 pb-16 border-b border-border">
+  return (
+    <footer className="relative bg-background text-foreground border-t border-border mt-auto overflow-hidden">
       
-      {/* Column 1: Brand & Logo Panel */}
-      <motion.div variants={itemVariants} className="lg:col-span-1 space-y-6">
-        <div className="flex items-center gap-3">
-          <Logo withGlow={true} width={130} height={42} animated={true} />
-        </div>
+      <div className="container mx-auto px-6 pt-20 md:pt-32 pb-8 max-w-7xl">
         
-        <p className="text-xs leading-relaxed text-muted-foreground font-light max-w-sm">
-          Translating classic Indian handloom textures and premium combed cottons into timeless, modern silhouettes. Made for generation-spanning daily wear.
-        </p>
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-8 mb-20 md:mb-28"
+        >
+          {/* Column 1: Brand & Socials */}
+          <motion.div variants={itemVariants} className="col-span-2 md:col-span-1 space-y-8">
+            <div className="space-y-4">
+              <p className="font-serif text-lg font-bold">
+                Atlascub Studio
+              </p>
+              <p className="text-sm leading-relaxed text-muted-foreground font-body max-w-xs md:max-w-none">
+                Translating classic Indian handloom textures and premium combed cottons into timeless, modern silhouettes. Made for generation-spanning daily wear.
+              </p>
+            </div>
 
-        <div className="flex gap-4">
-          <Link 
-            href="https://instagram.com/atlascub" 
-            target="_blank" 
-            className="p-2.5 rounded-full bg-secondary/50 text-secondary-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-300"
-            aria-label="Follow Atlascub on Instagram"
-          >
-            <FaInstagram className="h-4 w-4" />
-          </Link>
-          <Link 
-            href="https://twitter.com/atlascub" 
-            target="_blank" 
-            className="p-2.5 rounded-full bg-secondary/50 text-secondary-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-300"
-            aria-label="Follow Atlascub on Twitter"
-          >
-            <FaTwitter className="h-4 w-4" />
-          </Link>
+            <div className="flex gap-4">
+              <Link 
+                href="https://instagram.com/atlascub" 
+                target="_blank" 
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300"
+                aria-label="Follow Atlascub on Instagram"
+              >
+                <FaInstagram className="h-4 w-4" />
+              </Link>
+              <Link 
+                href="https://twitter.com/atlascub" 
+                target="_blank" 
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300"
+                aria-label="Follow Atlascub on Twitter"
+              >
+                <FaTwitter className="h-4 w-4" />
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* Column 2: Shop */}
+          <motion.div variants={itemVariants} className="space-y-6">
+            <h4 className="font-secondary text-xs uppercase tracking-[0.2em] text-foreground font-bold">
+              Shop
+            </h4>
+            <ul className="space-y-4 text-sm font-body">
+              {["Men", "Women", "Kids", "Collections"].map((item, idx) => {
+                const hrefs = ["/shop/men", "/shop/women", "/shop/kids", "/collections"];
+                return (
+                  <li key={idx}>
+                    <Link 
+                      href={hrefs[idx]} 
+                      className="text-muted-foreground hover:text-primary hover:pl-2 transition-all duration-300 block"
+                    >
+                      {item}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </motion.div>
+
+          {/* Column 3: The Brand */}
+          <motion.div variants={itemVariants} className="space-y-6">
+            <h4 className="font-secondary text-xs uppercase tracking-[0.2em] text-foreground font-bold">
+              Company
+            </h4>
+            <ul className="space-y-4 text-sm font-body">
+              {[
+                { name: "About Us", href: "/about" },
+                { name: "Our Weavers", href: "/weavers" },
+                { name: "Sourcing Map", href: "/sourcing-map" },
+              ].map((item, idx) => (
+                <li key={idx}>
+                  <Link 
+                    href={item.href} 
+                    className="text-muted-foreground hover:text-primary hover:pl-2 transition-all duration-300 block"
+                  >
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {/* Column 4: Customer Services */}
+          <motion.div variants={itemVariants} className="space-y-6">
+            <h4 className="font-secondary text-xs uppercase tracking-[0.2em] text-foreground font-bold">
+              Customer Services
+            </h4>
+            <ul className="space-y-4 text-sm font-body">
+              {[
+                { name: "Track Order", href: "/account/orders" },
+                { name: "Shipping & Delivery", href: "/shipping" },
+                { name: "Cancellation and Refund", href: "/cancellation" },
+                { name: "Exchange & Return", href: "/returns" },
+                { name: "Contact Support", href: "/contact" },
+              ].map((link, idx) => (
+                <li key={idx}>
+                  <Link 
+                    href={link.href} 
+                    className="text-muted-foreground hover:text-primary hover:pl-2 transition-all duration-300 block"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+        </motion.div>
+
+        {/* Central Logo Brand Anchor */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full border-t border-border pt-12 pb-8 flex justify-center items-center "
+        >
+          {/* Scaled up the logo width and height to act as a prominent footer anchor */}
+          <div className="opacity-100 hover:opacity-100 transition-opacity">
+            <Logo 
+              width={800} 
+              height={400} 
+              animated={true} 
+              withGlow={true} 
+              variant="default"
+            />
+          </div>
+        </motion.div>
+
+        {/* Bottom Legal Panel */}
+        <div className="pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] font-secondary uppercase tracking-widest text-muted-foreground border-t border-border/50 ">
+          <div className="flex flex-col md:flex-row items-center gap-2 text-center md:text-left">
+            <span>© 2026 Atlascub Premium Apparel.</span>
+            <span className="hidden md:inline">•</span>
+            <span>Developer: Md Danish Raza</span>
+          </div>
+          
+          <div className="flex flex-wrap justify-center gap-6">
+            <Link href="/privacy" className="hover:text-primary transition-colors flex items-center gap-1 group">
+              <span>Privacy Policy</span>
+              <ArrowUpRight className="h-3 w-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+            </Link>
+            <Link href="/terms" className="hover:text-primary transition-colors flex items-center gap-1 group">
+              <span>Terms of Service</span>
+              <ArrowUpRight className="h-3 w-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+            </Link>
+          </div>
         </div>
-      </motion.div>
 
-      {/* Column 2: Shop Department Links */}
-      <motion.div variants={itemVariants} className="space-y-4">
-        <h4 className="font-mono text-[10px] uppercase tracking-widest text-primary font-bold">
-          Shop Collections
-        </h4>
-        <ul className="space-y-3 text-xs">
-          {["Men's Wardrobe", "Women's Wardrobe", "Kids Playwear", "Ethnic & Festive"].map((item, idx) => {
-            const hrefs = ["/shop?gender=men", "/shop?gender=women", "/shop?gender=kids", "/shop?category=ethnic"];
-            return (
-              <li key={idx}>
-                <Link 
-                  href={hrefs[idx]} 
-                  className="text-muted-foreground hover:text-primary hover:pl-1 transition-all duration-200 block font-light"
-                >
-                  {item}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </motion.div>
-
-      {/* Column 3: Sourcing & Philosophy */}
-      <motion.div variants={itemVariants} className="space-y-4">
-        <h4 className="font-mono text-[10px] uppercase tracking-widest text-primary font-bold">
-          The Brand
-        </h4>
-        <ul className="space-y-3 text-xs">
-          {["Our Weavers", "Sourcing Map", "Slow Fashion Ethics", "Archival Campaign"].map((item, idx) => (
-            <li key={idx}>
-              <Link 
-                href="#" 
-                className="text-muted-foreground hover:text-primary hover:pl-1 transition-all duration-200 block font-light"
-              >
-                {item}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </motion.div>
-
-      {/* Column 4: Customer Support */}
-      <motion.div variants={itemVariants} className="space-y-4">
-        <h4 className="font-mono text-[10px] uppercase tracking-widest text-primary font-bold">
-          Customer Desk
-        </h4>
-        <ul className="space-y-3 text-xs">
-          {["Fulfillment Desk", "Shipping & Courier Desk", "Returns Policy", "Secure Checkout"].map((item, idx) => (
-            <li key={idx}>
-              <Link 
-                href="#" 
-                className="text-muted-foreground hover:text-primary hover:pl-1 transition-all duration-200 block font-light"
-              >
-                {item}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </motion.div>
-
-      {/* Column 5: Sourcing Registry Location */}
-      <motion.div variants={itemVariants} className="space-y-4">
-        <h4 className="font-mono text-[10px] uppercase tracking-widest text-primary font-bold">
-          HQ Registry
-        </h4>
-        <ul className="space-y-3 text-xs text-muted-foreground font-light">
-          <li className="flex items-start gap-2.5">
-            <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-            <span>Faridabad, Haryana</span>
-          </li>
-          <li className="flex items-center gap-2.5">
-            <Phone className="h-4 w-4 text-primary shrink-0" />
-            <span>+91-987654321</span>
-          </li>
-          <li className="flex items-center gap-2.5">
-            <Mail className="h-4 w-4 text-primary shrink-0" />
-            <a href="mailto:care@atlascub.in" className="hover:text-primary transition-colors">
-              contact@atlascub.in
-            </a>
-          </li>
-        </ul>
-      </motion.div>
-
-    </div>
-
-    {/* Bottom Metadata & Copyright Panel */}
-    <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-      <motion.div 
-        variants={itemVariants} 
-        className="flex items-center gap-2"
-      >
-        <span>© 2026 Atlascub Premium Apparel. All rights reserved.</span>
-        <span>Developer:Md Danish Raza</span>
-      </motion.div>
-     
-      
-      <motion.div 
-        variants={itemVariants} 
-        className="flex gap-6"
-      >
-        <Link href="/privacy" className="hover:text-primary transition-colors flex items-center gap-0.5 group">
-          <span>Privacy Policy</span>
-          <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-        </Link>
-        <Link href="/terms" className="hover:text-primary transition-colors flex items-center gap-0.5 group">
-          <span>Terms of Service</span>
-          <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-        </Link>
-      </motion.div>
-    </div>
-
-  </div>
-</motion.footer>
-
-
-);
+      </div>
+    </footer>
+  );
 }

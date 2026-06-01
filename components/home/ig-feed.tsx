@@ -87,7 +87,7 @@ return (
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
-            className="group relative aspect-square overflow-hidden rounded-lg bg-stone-100 border border-[#f5e8d2] shadow-2xs hover:shadow-xs transition-shadow"
+            className="group relative aspect-square overflow-hidden rounded-lg bg-stone-100  shadow-2xs hover:shadow-xs transition-shadow"
           >
             <Link href={post.permalink} target="_blank" rel="noopener noreferrer">
               

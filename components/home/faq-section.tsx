@@ -111,7 +111,7 @@ export function FaqsSection() {
   );
 
   return (
-    <section className="relative w-full py-20 md:py-32 bg-background/30 border-t border-border">
+    <section className="relative w-full py-20 md:py-32 bg-background/30 ">
       <div className="mx-auto w-full max-w-6xl px-4 md:px-6">
         
         {/* Section Header */}
@@ -204,8 +204,8 @@ export function FaqsSection() {
             {/* Read More Link */}
             <div className="pt-6">
               <Button asChild variant="outline" className="border-border hover:bg-muted text-muted-foreground">
-                <Link href="/faq">
-                  Read all FAQs
+                <Link href="/contact">
+                  Reach Our Support
                 </Link>
               </Button>
             </div>

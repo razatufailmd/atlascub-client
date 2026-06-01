@@ -76,7 +76,7 @@ export function Navbar() {
       } ${
         /* Apply dynamic margin ONLY if we haven't scrolled AND the banner is active */
         !scrolled && isBannerVisible 
-          ? " mt-[36px] md:mt-[20px]" // Added your requested 5px/8px margins + base top offset
+          ? " mt-[36px] md:mt-[30px]" // Added your requested 5px/8px margins + base top offset
           : "top-0 mt-0"
       }`}
     >
