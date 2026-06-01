@@ -9,7 +9,7 @@ import { curatedCampaigns } from "@/lib/constants/homepage";
 
 export function FeaturedCollection() {
   return (
-    <section className="py-20 md:py-28 bg-background overflow-hidden">
+    <section className="py-20 md:py-28 bg-background/30 overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div

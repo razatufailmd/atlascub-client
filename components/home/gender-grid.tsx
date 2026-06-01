@@ -9,7 +9,7 @@ import { genderGrid } from "@/lib/constants/homepage";
 
 export function GenderGrid() {
   return (
-    <section className="py-24 md:py-32 bg-background">
+    <section className="py-24 md:py-32 bg-background/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div

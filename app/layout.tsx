@@ -10,6 +10,7 @@ import { Footer } from "@/components/layout/footer";
 import { SmoothCursor } from "@/components/ui/smooth-cursor";
 import { CartSidebar } from "@/components/cart/cart-sidebar";
 import { WishlistSidebar } from "@/components/wishlist/wishlist-sidebar";
+import { AnnouncementBar } from "@/components/shared/announcement-bar";
 
 const fontSans = Poppins({
   subsets: ["latin"],
@@ -113,6 +114,7 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <SmoothCursor/>
+                <AnnouncementBar/>
               <div className="relative flex min-h-screen flex-col">
                 <Navbar />
                 <main className="flex-1 pt-16 md:pt-20">{children}</main>
