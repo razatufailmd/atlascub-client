@@ -155,7 +155,7 @@ export function FaqsSection() {
         >
           {/* Left Sidebar: Categories */}
           <div className="md:col-span-4 lg:col-span-3">
-            <div className="flex w-max flex-wrap items-start justify-start gap-2 md:flex-col md:w-full md:sticky md:top-24">
+            <div className="flex w-full flex-wrap items-start justify-start gap-2 md:flex-col md:w-full md:sticky md:top-24">
               {categories.map((cat) => (
                 <Button
                   key={cat.id}

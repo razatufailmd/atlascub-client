@@ -11,6 +11,7 @@ import { TestimonialsSection } from "@/components/home/testimonials";
 import { FeatureSection } from "@/components/home/feature-section";
 import { FaqsSection } from "@/components/home/faq-section";
 import { InstagramFeedLive } from "@/components/home/ig-feed";
+import { CinematicShowcase } from "@/components/home/cinematic-showcase-images";
 
 
 export default function HomePage() {
@@ -25,6 +26,8 @@ export default function HomePage() {
         <FeaturedCollection/>
         {/* 4. Gender/Department Split Grid */}
         <GenderGrid />
+        {/* best work */}
+        <CinematicShowcase/>
         {/* 5. Editorial Storytelling */}
         <EditorialStory />
         {/* 6. Category Silhouette Showcase */}
