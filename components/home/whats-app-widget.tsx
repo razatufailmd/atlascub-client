@@ -11,7 +11,7 @@ export function WhatsappWidget() {
   const isHomepage = pathname === "/";
 
   // WhatsApp Configuration
-  const phoneNumber = "919876543210"; 
+  const phoneNumber = "8287627289"; 
   const initialMessage = "Hi Atlascub! I'm interested in exploring your premium collections and need some assistance.";
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(initialMessage)}`;
 

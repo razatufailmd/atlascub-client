@@ -133,13 +133,13 @@ export function Footer() {
               Customer Services
             </h4>
             <ul className="space-y-4 text-sm font-body">
-              {[
-                { name: "Track Order", href: "/account/orders" },
-                { name: "Shipping & Delivery", href: "/shipping" },
-                { name: "Cancellation and Refund", href: "/cancellation" },
-                { name: "Exchange & Return", href: "/returns" },
-                { name: "Contact Support", href: "/contact" },
-              ].map((link, idx) => (
+              { [
+    { name: "Help Center", href: "/support" },
+    { name: "Shipping Info", href: "/support#shipping" },
+    { name: "Returns & Exchanges", href: "/support#returns" },
+    { name: "Size Guide", href: "/size-guide" },
+    { name: "Contact Us", href: "/contact" },
+  ].map((link, idx) => (
                 <li key={idx}>
                   <Link 
                     href={link.href} 

@@ -16,6 +16,8 @@ const isPublicRoute = createRouteMatcher([
   "/product(.*)",
   "/cart",
   "/wishlist",
+  "/privacy",
+  "/terms",
 ]);
 
 // Define admin routes (requires admin role)

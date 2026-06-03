@@ -72,7 +72,7 @@ export default function CategoryPage() {
       </div>
 
       {/* Desktop Layout: Sidebar + Grid */}
-      <div className="flex gap-8">
+      <div className="flex  gap-8">
         {/* Desktop Sidebar */}
         <aside className="hidden w-64 shrink-0 lg:block">
           <div className="sticky top-24">
