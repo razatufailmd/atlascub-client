@@ -163,36 +163,110 @@ export const curatedCampaigns: CuratedCampaign[] = [
   },
 ];
 
-export const categoryHighlights: CategoryHighlight[] = [
-  {
-    id: "outerwear",
-    title: "Outerwear",
-    description: "Unstructured Blazers & Overshirts",
-    image: "/images/categories/outerwear.jpg",
-    href: "/men/outerwear",
-  },
-  {
-    id: "tops",
-    title: "Tops & Linens",
-    description: "Combed Cotton Tees & Resort Shirts",
-    image: "/images/categories/tops.jpg",
-    href: "/men/tops",
-  },
-  {
-    id: "bottoms",
-    title: "Bottoms & Trousers",
-    description: "Pleated Chinos & Relaxed Drape Pants",
-    image: "/images/categories/bottoms.jpg",
-    href: "/men/bottoms",
-  },
-  {
-    id: "accessories",
-    title: "Accessories",
-    description: "Minimalist Caps & Fine Leather Belts",
-    image: "/images/categories/accessories.jpg",
-    href: "/men/accessories",
-  },
-];
+export const silhouetteHighlights = {
+  men: [
+    {
+      id: "m-ethnic",
+      title: "Ethnic & Festive",
+      description: "Premium Kurtas & Bandhgalas",
+      image:
+        "https://images.unsplash.com/photo-1760080839523-37570311861e?q=80&w=600&auto=format&fit=crop",
+      href: "/shop/men/ethnic",
+    },
+    {
+      id: "m-tops",
+      title: "Tops & Linens",
+      description: "Oversized Tees & Resort Shirts",
+      image:
+        "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=600&auto=format&fit=crop",
+      href: "/shop/men/tops",
+    },
+    {
+      id: "m-outerwear",
+      title: "Outerwear & Shackets",
+      description: "Tailored Utility & Blazers",
+      image:
+        "https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?q=80&w=600&auto=format&fit=crop",
+      href: "/shop/men/outerwear",
+    },
+    {
+      id: "m-bottoms",
+      title: "Bottoms & Trousers",
+      description: "Pleated Chinos & Drapes",
+      image:
+        "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=600&auto=format&fit=crop",
+      href: "/shop/men/bottoms",
+    },
+  ],
+  women: [
+    {
+      id: "w-ethnic",
+      title: "Ethnic & Fusion",
+      description: "Contemporary Sarees & Anarkalis",
+      image:
+        "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=600&auto=format&fit=crop",
+      href: "/shop/women/ethnic",
+    },
+    {
+      id: "w-tops",
+      title: "Tops & Blouses",
+      description: "Minimalist Shirts & Knits",
+      image:
+        "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?q=80&w=600&auto=format&fit=crop",
+      href: "/shop/women/tops",
+    },
+    {
+      id: "w-outerwear",
+      title: "Outerwear & Capes",
+      description: "Flowing Capes & Blazers",
+      image:
+        "https://images.unsplash.com/photo-1637875891040-90677c6b3d37?q=80&w=600&auto=format&fit=crop",
+      href: "/shop/women/outerwear",
+    },
+    {
+      id: "w-bottoms",
+      title: "Palazzos & Bottoms",
+      description: "Wide-leg Trousers & Skirts",
+      image:
+        "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop",
+      href: "/shop/women/bottoms",
+    },
+  ],
+  kids: [
+    {
+      id: "k-ethnic",
+      title: "Festive & Ethnic",
+      description: "Comfortable Kurta Sets",
+      image:
+        "https://images.unsplash.com/photo-1519457431-44ccd64a579b?q=80&w=600&auto=format&fit=crop",
+      href: "/shop/kids/ethnic",
+    },
+    {
+      id: "k-tops",
+      title: "Tops & Shirts",
+      description: "Playful Tees & Linens",
+      image:
+        "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?q=80&w=600&auto=format&fit=crop",
+      href: "/shop/kids/tops",
+    },
+    {
+      id: "k-bottoms",
+      title: "Bottoms",
+      description: "Easy Pull-on Pants",
+      image:
+        "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?q=80&w=600&auto=format&fit=crop",
+      href: "/shop/kids/bottoms",
+    },
+    {
+      id: "k-outerwear",
+      title: "Outerwear",
+      description: "Lightweight Jackets",
+      image:
+        "https://images.unsplash.com/photo-1519689680058-324335c77eba?q=80&w=600&auto=format&fit=crop",
+      href: "/shop/kids/accessories",
+    },
+  ],
+};
 
 export const instagramFeed: InstagramPost[] = [
   {
