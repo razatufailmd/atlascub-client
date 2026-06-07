@@ -12,6 +12,8 @@ import { CartSidebar } from "@/components/cart/cart-sidebar";
 import { WishlistSidebar } from "@/components/wishlist/wishlist-sidebar";
 import { AnnouncementBar } from "@/components/shared/announcement-bar";
 import { WhatsappWidget } from "@/components/home/whats-app-widget";
+import { Toaster } from "sonner";
+import { TokenDebug } from "@/components/debug/token-debug";
 
 const fontSans = Poppins({
   subsets: ["latin"],
@@ -124,7 +126,13 @@ export default function RootLayout({
                 <CartSidebar />
                 <WishlistSidebar />
                 <WhatsappWidget/>
+
+
+                {/* temp */}
+                <TokenDebug />
               </div>
+
+              <Toaster position="bottom-right" richColors />
             </ThemeProvider>
           </body>
         </html>

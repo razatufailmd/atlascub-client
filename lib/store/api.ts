@@ -1,32 +1,35 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import axios from "axios";
-import type { AxiosRequestConfig, AxiosError } from "axios";
+import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 
-// Error type definition
+import type { AxiosRequestConfig, AxiosError } from "axios";
+import apiClient from "./apis/axios-client";
+
 interface ApiError {
   status?: number;
   data?: unknown;
   message?: string;
 }
 
-// Axios base query configuration
-export const axiosBaseQuery =
-  ({ baseUrl }: { baseUrl: string } = { baseUrl: "" }) =>
-  async ({
-    url,
-    method = "GET",
-    data,
-    params,
-    headers,
-  }: AxiosRequestConfig) => {
+// Custom base query using our token-aware axios client
+export const axiosBaseQuery = (): BaseQueryFn<
+  {
+    url: string;
+    method?: AxiosRequestConfig["method"];
+    data?: AxiosRequestConfig["data"];
+    params?: AxiosRequestConfig["params"];
+    headers?: AxiosRequestConfig["headers"];
+  },
+  unknown,
+  ApiError
+> => {
+  return async ({ url, method = "GET", data, params, headers }) => {
     try {
-      const result = await axios({
-        url: baseUrl + url,
+      const result = await apiClient({
+        url,
         method,
         data,
         params,
         headers,
-        withCredentials: true, // Important for cookies/sessions
       });
       return { data: result.data };
     } catch (axiosError) {
@@ -36,10 +39,11 @@ export const axiosBaseQuery =
           status: err.response?.status,
           data: err.response?.data,
           message: err.message,
-        } as ApiError,
+        },
       };
     }
   };
+};
 
 // API Tags for cache invalidation
 export const API_TAGS = {
@@ -59,23 +63,14 @@ export type APITagType = (typeof API_TAGS)[keyof typeof API_TAGS];
 // Initialize API service with base configuration
 export const api = createApi({
   reducerPath: "api",
-  baseQuery: axiosBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/",
-  }),
+  baseQuery: axiosBaseQuery(),
   tagTypes: Object.values(API_TAGS) as APITagType[],
   endpoints: () => ({}),
-  // Keep unused data for 60 seconds before garbage collection
   keepUnusedDataFor: 60,
-  // Refetch when window regains focus
   refetchOnFocus: false,
-  // Refetch when network reconnects
   refetchOnReconnect: true,
-  // Refetch when mount
   refetchOnMountOrArgChange: false,
 });
 
-// Export hooks for use in components (will be populated by injected endpoints)
-export const {
-  // These will be populated when endpoints are injected
-  usePrefetch,
-} = api;
+// Export hooks
+export const { usePrefetch } = api;

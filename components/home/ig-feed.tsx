@@ -21,28 +21,28 @@ const [posts, setPosts] = useState<InstagramPost[]>([]);
 const [handle, setHandle] = useState("atlascub.in");
 const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-async function fetchFeed() {
-try {
-const response = await fetch("/api/instagram");
-const json = await response.json();
+// useEffect(() => {
+// async function fetchFeed() {
+// try {
+// const response = await fetch("/api/instagram");
+// const json = await response.json();
 
-    if (json.data) {
-      setPosts(json.data.slice(0, 8)); // Display exactly 8 latest posts
-    }
-    if (json.handle) {
-      setHandle(json.handle);
-    }
-  } catch (err) {
-    console.error("Failed to load Instagram feed api:", err);
-  } finally {
-    setLoading(false);
-  }
-}
-fetchFeed();
+//     if (json.data) {
+//       setPosts(json.data.slice(0, 8)); // Display exactly 8 latest posts
+//     }
+//     if (json.handle) {
+//       setHandle(json.handle);
+//     }
+//   } catch (err) {
+//     console.error("Failed to load Instagram feed api:", err);
+//   } finally {
+//     setLoading(false);
+//   }
+// }
+// fetchFeed();
 
 
-}, []);
+// }, []);
 
 return (
   <section className="py-24 md:py-32 bg-background/30">
