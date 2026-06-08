@@ -13,7 +13,7 @@ import { WishlistSidebar } from "@/components/wishlist/wishlist-sidebar";
 import { AnnouncementBar } from "@/components/shared/announcement-bar";
 import { WhatsappWidget } from "@/components/home/whats-app-widget";
 import { Toaster } from "sonner";
-import { TokenDebug } from "@/components/debug/token-debug";
+import { AuthStatus } from "@/components/debug/token-debug";
 
 const fontSans = Poppins({
   subsets: ["latin"],
@@ -129,7 +129,7 @@ export default function RootLayout({
 
 
                 {/* temp */}
-                <TokenDebug />
+                <AuthStatus />
               </div>
 
               <Toaster position="bottom-right" richColors />

@@ -1,6 +1,5 @@
 import axios from "axios";
 
-// Create axios instance with default config
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/",
   withCredentials: true,
@@ -9,33 +8,44 @@ export const apiClient = axios.create({
   },
 });
 
-// Request interceptor to add Clerk token from cookies
+// Request interceptor to add Clerk token
 apiClient.interceptors.request.use(
   async (config) => {
     try {
-      // Get token from Clerk's session cookie
-      // The token is automatically available in the cookie
-      // We need to read it from the request or use Clerk's helper
-
-      // For client-side, we can use Clerk's getToken
+      // Axios interceptors run outside of React render cycles, so we fetch tokens
+      // via window.__clerk_client if available, or dynamically import the template handler.
       const { getToken } = await import("@clerk/nextjs");
-      const token = await getToken();
+
+      // PASS YOUR TEMPLATE NAME HERE to get a verified asymmetric signature
+      const token = await getToken({ template: "nestjs" });
+
+      // console.log(
+      //   "🔑 Token retrieved:",
+      //   token ? `${token.substring(0, 50)}...` : "NO TOKEN"
+      // );
 
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        console.log("✅ Token added to headers");
+      } else {
+        console.warn("⚠️ No token available - user may not be signed in");
       }
     } catch (error) {
-      console.warn("Failed to get Clerk token:", error);
+      console.error("❌ Failed to get Clerk token:", error);
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error(
+      "❌ API Error:",
+      error.response?.status,
+      error.response?.data
+    );
     if (error.response?.status === 401) {
       console.error("Unauthorized - please sign in again");
     }

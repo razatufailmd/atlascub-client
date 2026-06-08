@@ -1,39 +1,46 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useAuth, useUser } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
 
-export function TokenDebug() {
-  const { getToken, userId, isSignedIn } = useAuth();
+export function AuthStatus() {
+  const { isLoaded, isSignedIn, userId, getToken } = useAuth();
+  const { user } = useUser();
   const [token, setToken] = useState<string>("");
+  const [tokenError, setTokenError] = useState<string>("");
 
-  const copyToken = async () => {
-    const t = await getToken();
-    setToken(t || "");
-    await navigator.clipboard.writeText(t || "");
-    alert("Token copied to clipboard!");
-  };
+  useEffect(() => {
+    async function getTokenValue() {
+      if (isLoaded && isSignedIn) {
+        try {
+          const t = await getToken();
+          setToken(t || "No token received");
+        } catch (err) {
+          setTokenError(String(err));
+        }
+      }
+    }
+    getTokenValue();
+  }, [isLoaded, isSignedIn, getToken]);
 
-  if (process.env.NODE_ENV !== "development") return null;
+  if (!isLoaded) return null;
   if (!isSignedIn) return null;
 
+  // console.log(token)
+
+  const isAdmin = user?.publicMetadata?.role === "admin";
+
   return (
-    <div className="fixed bottom-4 right-4 z-50 rounded-lg bg-black/80 p-3 text-xs text-white">
-      <div>User ID: {userId?.slice(0, 20)}...</div>
-      <Button
-        size="sm"
-        variant="secondary"
-        className="mt-2 h-7 text-xs"
-        onClick={copyToken}
-      >
-        Copy Token
-      </Button>
-      {token && (
-        <div className="mt-2 max-w-[300px] break-all text-[10px] text-gray-300">
-          Token: {token.slice(0, 50)}...
-        </div>
-      )}
+    <div className="fixed bottom-4 left-4 z-50 max-w-md rounded-lg bg-black/90 p-3 text-xs text-white">
+      <div className="font-bold mb-2">🔐 Auth Debug</div>
+      <div>✅ Signed In: {String(isSignedIn)}</div>
+      <div>👤 User ID: {userId?.substring(0, 20)}...</div>
+      <div>👑 Admin Role: {String(isAdmin)}</div>
+      <div>🔑 Token: {token ? `${token.substring(0, 40)}...` : "No token"}</div>
+      {tokenError && <div className="text-red-400">❌ Error: {tokenError}</div>}
+      <div className="text-xs text-gray-400 mt-1 break-all">
+        Raw role: {JSON.stringify(user?.publicMetadata)}
+      </div>
     </div>
   );
 }
