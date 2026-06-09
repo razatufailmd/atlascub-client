@@ -20,6 +20,9 @@ const isPublicRoute = createRouteMatcher([
   "/terms",
 ]);
 
+// Define authentication pages specifically
+const isAuthRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
+
 // Define admin routes (requires admin role)
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
@@ -50,6 +53,13 @@ const proxy = clerkMiddleware(async (auth, req) => {
       });
     }
     return NextResponse.next();
+  }
+
+  // 🛡️ REDIRECT LOGGED-IN USERS AWAY FROM SIGN-IN / SIGN-UP
+  if (userId && isAuthRoute(req)) {
+    // If they are admin, send them directly to the admin suite, otherwise home
+    const destination = isAdmin ? "/admin" : "/";
+    return NextResponse.redirect(new URL(destination, req.url));
   }
 
   // Redirect to sign-in if accessing protected route without authentication

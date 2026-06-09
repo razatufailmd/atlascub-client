@@ -1,7 +1,17 @@
 import { ReactNode } from "react";
 import { Logo } from "@/components/shared/logo";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
-export default function AuthLayout({ children }: { children: ReactNode }) {
+export default async function AuthLayout({ children }: { children: ReactNode }) {
+  // 🛡️ LAYOUT FALLBACK SECURE GUARD
+  const { userId, sessionClaims } = await auth();
+  
+  if (userId) {
+    const role = sessionClaims?.public_metadata?.role as string;
+    const redirectPath = role === "admin" ? "/admin" : "/";
+    redirect(redirectPath);
+  }
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-background to-secondary/20">
       {/* Background decorative elements */}

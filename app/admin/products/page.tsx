@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search, Edit, Trash2, MoreHorizontal, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { 
+  Plus, Search, Edit, Trash2, MoreHorizontal, 
+  Loader2, Eye, EyeOff 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,45 +21,68 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
+import { toast } from "sonner";
 import {
   useGetProductsQuery,
   useDeleteProductMutation,
+  useHardDeleteProductMutation,
 } from "@/lib/store/apis/product-api";
-import { toast } from "sonner";
-import Link from "next/link";
 
 export default function AdminProductsPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [productToAction, setProductToAction] = useState<{ id: string; name: string; action: 'soft' | 'hard' } | null>(null);
   const limit = 10;
 
-  // Fetch products with RTK Query
   const { data, isLoading, isError, refetch } = useGetProductsQuery({
     search: search || undefined,
     page,
     limit,
   });
 
-  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
+  const [softDelete, { isLoading: isSoftDeleting }] = useDeleteProductMutation();
+  const [hardDelete, { isLoading: isHardDeleting }] = useHardDeleteProductMutation();
 
   const products = data?.data || [];
   const totalPages = data?.totalPages || 0;
+  const isDeleting = isSoftDeleting || isHardDeleting;
 
-  const handleDelete = async (id: string, name: string) => {
-    if (confirm(`Are you sure you want to delete "${name}"?`)) {
-      try {
-        await deleteProduct(id).unwrap();
-        toast.success("Product deleted successfully");
-        refetch();
-      } catch (error) {
-        toast.error("Failed to delete product");
-      }
+  const handleSoftDelete = async (id: string, name: string) => {
+    try {
+      await softDelete(id).unwrap();
+      toast.success(`"${name}" has been hidden from storefront`);
+      refetch();
+    } catch (error) {
+      toast.error("Failed to hide product");
     }
+    setProductToAction(null);
+  };
+
+  const handleHardDelete = async (id: string, name: string) => {
+    try {
+      await hardDelete(id).unwrap();
+      toast.success(`"${name}" has been permanently deleted`);
+      refetch();
+    } catch (error) {
+      toast.error("Failed to delete product permanently");
+    }
+    setProductToAction(null);
   };
 
   // Loading skeleton
@@ -86,7 +113,6 @@ export default function AdminProductsPage() {
     );
   }
 
-  // Error state
   if (isError) {
     return (
       <div className="space-y-6">
@@ -104,10 +130,7 @@ export default function AdminProductsPage() {
             <EmptyState
               title="Failed to load products"
               description="There was an error loading your products. Please try again."
-              action={{
-                label: "Retry",
-                onClick: () => refetch(),
-              }}
+              action={{ label: "Retry", onClick: () => refetch() }}
             />
           </CardContent>
         </Card>
@@ -123,16 +146,15 @@ export default function AdminProductsPage() {
           <h1 className="heading-md font-primary">Products</h1>
           <p className="text-muted-foreground">Manage your product catalog</p>
         </div>
-        <Link   href={"/admin/products/new"}>
-        <Button className="gap-2 " >
-          <Plus className="h-4 w-4" />
-          Add Product
-
+        <Button asChild className="gap-2">
+          <Link href="/admin/products/new">
+            <Plus className="h-4 w-4" />
+            Add Product
+          </Link>
         </Button>
-        </Link>
       </div>
 
-      {/* Search Bar */}
+      {/* Search */}
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -158,11 +180,7 @@ export default function AdminProductsPage() {
           {products.length === 0 ? (
             <EmptyState
               title="No products found"
-              description={
-                search
-                  ? `No products matching "${search}"`
-                  : "Start adding products to your catalog"
-              }
+              description={search ? `No products matching "${search}"` : "Start adding products to your catalog"}
               action={{
                 label: search ? "Clear Search" : "Add Your First Product",
                 onClick: search ? () => setSearch("") : undefined,
@@ -191,23 +209,20 @@ export default function AdminProductsPage() {
                           <div className="flex items-center gap-3">
                             <div className="h-10 w-10 overflow-hidden rounded-md bg-muted">
                               {product.images[0] ? (
-                                // eslint-disable-next-line @next/next/no-img-element
                                 <img
                                   src={product.images[0]}
                                   alt={product.name}
                                   className="h-full w-full object-cover"
                                 />
                               ) : (
-                                <div className="flex h-full w-full items-center justify-center bg-muted text-xs text-muted-foreground">
+                                <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
                                   No img
                                 </div>
                               )}
                             </div>
                             <div>
                               <p className="line-clamp-1 font-medium">{product.name}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {product.slug}
-                              </p>
+                              <p className="text-xs text-muted-foreground">{product.slug}</p>
                             </div>
                           </div>
                         </TableCell>
@@ -215,42 +230,23 @@ export default function AdminProductsPage() {
                         <TableCell className="capitalize">{product.gender}</TableCell>
                         <TableCell>₹{product.price.toLocaleString()}</TableCell>
                         <TableCell>
-                          <span
-                            className={
-                              product.inventory <= 5
-                                ? "text-orange-600"
-                                : "text-green-600"
-                            }
-                          >
+                          <span className={product.inventory <= 5 ? "text-orange-600" : "text-green-600"}>
                             {product.inventory} units
                           </span>
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
-                            {product.inStock ? (
-                              <Badge
-                                variant="outline"
-                                className="border-green-500 text-green-600"
-                              >
-                                In Stock
-                              </Badge>
-                            ) : (
-                              <Badge
-                                variant="outline"
-                                className="border-red-500 text-red-600"
-                              >
-                                Out of Stock
-                              </Badge>
-                            )}
+                            <Badge variant="outline" className={product.inStock ? "border-green-500 text-green-600" : "border-red-500 text-red-600"}>
+                              {product.inStock ? "In Stock" : "Out of Stock"}
+                            </Badge>
                             {product.isNew && (
-                              <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                                New
-                              </Badge>
+                              <Badge variant="secondary" className="bg-blue-100 text-blue-700">New</Badge>
                             )}
                             {product.isBestSeller && (
-                              <Badge variant="secondary" className="bg-amber-100 text-amber-700">
-                                Bestseller
-                              </Badge>
+                              <Badge variant="secondary" className="bg-amber-100 text-amber-700">Bestseller</Badge>
+                            )}
+                            {product.deletedAt && (
+                              <Badge variant="outline" className="border-gray-500 text-gray-500">Hidden</Badge>
                             )}
                           </div>
                         </TableCell>
@@ -261,25 +257,58 @@ export default function AdminProductsPage() {
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            {/* // Update the DropdownMenuContent section: */}
                             <DropdownMenuContent align="end">
+                              {/* Edit */}
                               <DropdownMenuItem asChild className="gap-2">
                                 <Link href={`/admin/products/${product.id}/edit`}>
                                   <Edit className="h-4 w-4" />
                                   Edit
                                 </Link>
                               </DropdownMenuItem>
-                              <DropdownMenuItem
+
+                              {/* View on Storefront */}
+                              <DropdownMenuItem asChild className="gap-2">
+                                <Link href={`/product/${product.slug}`} target="_blank">
+                                  <Eye className="h-4 w-4" />
+                                  View on Store
+                                </Link>
+                              </DropdownMenuItem>
+
+                              <DropdownMenuSeparator />
+
+                              {/* Hide/Unhide (Soft Delete/Restore) */}
+                              {product.deletedAt ? (
+                                <DropdownMenuItem 
+                                  className="gap-2 text-green-600"
+                                  onClick={() => handleSoftDelete(product.id, product.name)}
+                                  disabled={isDeleting}
+                                >
+                                  {isSoftDeleting ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Eye className="h-4 w-4" />
+                                  )}
+                                  Restore to Store
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem 
+                                  className="gap-2 text-amber-600"
+                                  onClick={() => setProductToAction({ id: product.id, name: product.name, action: 'soft' })}
+                                  disabled={isDeleting}
+                                >
+                                  <EyeOff className="h-4 w-4" />
+                                  Hide from Store
+                                </DropdownMenuItem>
+                              )}
+
+                              {/* Permanent Delete */}
+                              <DropdownMenuItem 
                                 className="gap-2 text-destructive"
-                                onClick={() => handleDelete(product.id, product.name)}
+                                onClick={() => setProductToAction({ id: product.id, name: product.name, action: 'hard' })}
                                 disabled={isDeleting}
                               >
-                                {isDeleting ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Trash2 className="h-4 w-4" />
-                                )}
-                                Delete
+                                <Trash2 className="h-4 w-4" />
+                                Delete Permanently
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -293,24 +322,12 @@ export default function AdminProductsPage() {
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="mt-4 flex items-center justify-between gap-4">
-                  <p className="text-sm text-muted-foreground">
-                    Page {page} of {totalPages}
-                  </p>
+                  <p className="text-sm text-muted-foreground">Page {page} of {totalPages}</p>
                   <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
                       Previous
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={page === totalPages}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
                       Next
                     </Button>
                   </div>
@@ -320,6 +337,40 @@ export default function AdminProductsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={!!productToAction} onOpenChange={() => setProductToAction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {productToAction?.action === 'soft' ? 'Hide Product' : 'Permanently Delete Product'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {productToAction?.action === 'soft' 
+                ? `"${productToAction?.name}" will be hidden from the storefront. You can restore it later.`
+                : `Are you sure you want to permanently delete "${productToAction?.name}"? This action cannot be undone and will also delete all product images from Cloudinary.`
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (productToAction) {  // Add null check
+                  if (productToAction.action === 'soft') {
+                    handleSoftDelete(productToAction.id, productToAction.name);
+                  } else if (productToAction.action === 'hard') {
+                    handleHardDelete(productToAction.id, productToAction.name);
+                  }
+                }
+              }}
+              className={productToAction?.action === 'soft' ? 'bg-amber-600 hover:bg-amber-700' : 'bg-destructive hover:bg-destructive/90'}
+            >
+              {productToAction?.action === 'soft' ? 'Hide Product' : 'Permanently Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

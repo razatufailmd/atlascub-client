@@ -46,10 +46,11 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
   const [images, setImages] = useState<string[]>(initialData?.images || []);
   const [sizes, setSizes] = useState<string[]>(initialData?.sizes || []);
   const [colors, setColors] = useState(initialData?.colors || []);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [createProduct] = useCreateProductMutation();
-  const [updateProduct] = useUpdateProductMutation();
+  const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
+  const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
+
+  const isSubmitting = isCreating || isUpdating;
 
   const {
     register,
@@ -68,7 +69,6 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
     },
   });
 
-  // Watch values for conditional rendering
   const watchInStock = watch("inStock");
   const watchIsNew = watch("isNew");
   const watchIsBestSeller = watch("isBestSeller");
@@ -86,23 +86,20 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
   }, [colors, setValue]);
 
   const onSubmit = async (data: ProductFormData) => {
-    setIsSubmitting(true);
-    
     try {
       if (isEditing && initialData) {
         await updateProduct({ id: initialData.id, data }).unwrap();
         toast.success("Product updated successfully!");
+        router.push("/admin/products");
       } else {
         await createProduct(data).unwrap();
         toast.success("Product created successfully!");
+        router.push("/admin/products");
       }
-      router.push("/admin/products");
       router.refresh();
     } catch (error: any) {
       console.error("Failed to save product:", error);
       toast.error(error?.data?.message || "Failed to save product");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -122,6 +119,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                   id="name"
                   {...register("name")}
                   placeholder="Premium Linen Shirt"
+                  disabled={isSubmitting}
                 />
                 {errors.name && (
                   <p className="text-xs text-destructive mt-1">{errors.name.message}</p>
@@ -135,6 +133,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                   {...register("description")}
                   rows={4}
                   placeholder="Detailed product description..."
+                  disabled={isSubmitting}
                 />
                 {errors.description && (
                   <p className="text-xs text-destructive mt-1">{errors.description.message}</p>
@@ -150,6 +149,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                     step="1"
                     {...register("price", { valueAsNumber: true })}
                     placeholder="2999"
+                    disabled={isSubmitting}
                   />
                   {errors.price && (
                     <p className="text-xs text-destructive mt-1">{errors.price.message}</p>
@@ -163,6 +163,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                     step="1"
                     {...register("compareAtPrice", { valueAsNumber: true })}
                     placeholder="4999"
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
@@ -216,6 +217,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                     setSelectedGender(value);
                     setValue("gender", value);
                   }}
+                  disabled={isSubmitting}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select gender" />
@@ -238,6 +240,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                 <Select
                   onValueChange={(value) => setValue("category", value)}
                   defaultValue={initialData?.category}
+                  disabled={isSubmitting}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
@@ -261,6 +264,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                   id="inventory"
                   type="number"
                   {...register("inventory", { valueAsNumber: true })}
+                  disabled={isSubmitting}
                 />
                 {errors.inventory && (
                   <p className="text-xs text-destructive mt-1">{errors.inventory.message}</p>
@@ -273,6 +277,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                   id="inStock"
                   checked={watchInStock}
                   onCheckedChange={(checked) => setValue("inStock", checked)}
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -282,6 +287,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                   id="isNew"
                   checked={watchIsNew}
                   onCheckedChange={(checked) => setValue("isNew", checked)}
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -291,6 +297,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                   id="isBestSeller"
                   checked={watchIsBestSeller}
                   onCheckedChange={(checked) => setValue("isBestSeller", checked)}
+                  disabled={isSubmitting}
                 />
               </div>
             </CardContent>
@@ -308,6 +315,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                   {...register("details")}
                   rows={3}
                   placeholder="Fabric composition, care instructions, features..."
+                  disabled={isSubmitting}
                 />
               </div>
               <div>
@@ -317,6 +325,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                   {...register("sizing")}
                   rows={3}
                   placeholder="Fit guide, model measurements..."
+                  disabled={isSubmitting}
                 />
               </div>
               <div>
@@ -326,6 +335,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                   {...register("shipping")}
                   rows={3}
                   placeholder="Delivery time, return policy..."
+                  disabled={isSubmitting}
                 />
               </div>
             </CardContent>
@@ -338,6 +348,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
           type="button"
           variant="outline"
           onClick={() => router.push("/admin/products")}
+          disabled={isSubmitting}
         >
           Cancel
         </Button>
