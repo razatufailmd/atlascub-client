@@ -129,7 +129,8 @@ export default function RootLayout({
 
 
                 {/* temp */}
-                <AuthStatus />
+                {process.env.NODE_ENV === "development" && <AuthStatus />}
+                
               </div>
 
               <Toaster position="bottom-right" richColors />

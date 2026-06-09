@@ -224,6 +224,17 @@ export const productApi = api.injectEndpoints({
         { type: API_TAGS.PRODUCTS, id: "LIST" },
       ],
     }),
+    // hard delete
+    hardDeleteProduct: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/products/${id}/permanent`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: API_TAGS.PRODUCT, id },
+        { type: API_TAGS.PRODUCTS, id: "LIST" },
+      ],
+    }),
   }),
   overrideExisting: false,
 });
@@ -242,6 +253,7 @@ export const {
   useUpdateProductMutation,
   useDeleteProductMutation,
   useRestoreProductMutation,
+  useHardDeleteProductMutation,
   // Prefetch
   usePrefetch: usePrefetchProducts,
 } = productApi;

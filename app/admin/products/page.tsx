@@ -123,10 +123,13 @@ export default function AdminProductsPage() {
           <h1 className="heading-md font-primary">Products</h1>
           <p className="text-muted-foreground">Manage your product catalog</p>
         </div>
-        <Button className="gap-2">
+        <Link   href={"/admin/products/new"}>
+        <Button className="gap-2 " >
           <Plus className="h-4 w-4" />
           Add Product
+
         </Button>
+        </Link>
       </div>
 
       {/* Search Bar */}
@@ -258,7 +261,7 @@ export default function AdminProductsPage() {
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            // Update the DropdownMenuContent section:
+                            {/* // Update the DropdownMenuContent section: */}
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem asChild className="gap-2">
                                 <Link href={`/admin/products/${product.id}/edit`}>

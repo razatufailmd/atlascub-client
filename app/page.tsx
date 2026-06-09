@@ -1,7 +1,7 @@
 import { HeroSection } from "@/components/home/hero-section";
 import { GenderGrid } from "@/components/home/gender-grid";
 import { FeaturedCollection } from "@/components/home/featured-section";
-import { InstagramFeed } from "@/components/home/instagram-feed";
+
 import { CategoryShowcase } from "@/components/home/category-showcase";
 import { BrandValues } from "@/components/home/brand-values";
 import { EditorialStory } from "@/components/home/editorial-story";
