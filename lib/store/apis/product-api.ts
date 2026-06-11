@@ -74,6 +74,7 @@ export interface ProductFilters {
   page?: number;
   limit?: number;
   inStock?: boolean;
+  includeDeleted?: boolean; // Add this
 }
 
 export interface ProductsResponse {

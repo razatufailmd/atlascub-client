@@ -1,29 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { 
-  Plus, Search, Edit, Trash2, MoreHorizontal, 
-  Loader2, Eye, EyeOff, X
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,34 +13,29 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import { toast } from "sonner";
+
 import {
   useGetProductsQuery,
   useDeleteProductMutation,
   useHardDeleteProductMutation,
+  useRestoreProductMutation,  // Add this import
 } from "@/lib/store/apis/product-api";
-import { useGetCategoriesQuery } from "@/lib/store/apis/category-api";
+import { ProductsHeader } from "@/components/admin/products-header";
+import { ProductsFilters } from "@/components/admin/products-filter";
+import { CollectionsManager } from "@/components/admin/collections-manager";
+import { ProductsTable } from "@/components/admin/products-table";
 
 export default function AdminProductsPage() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedGender, setSelectedGender] = useState<string>("all");
+  const [showHidden, setShowHidden] = useState(true); // Default true for admin to see hidden products
   const [page, setPage] = useState(1);
-  const [productToAction, setProductToAction] = useState<{ id: string; name: string; action: 'soft' | 'hard' } | null>(null);
+  const [productToAction, setProductToAction] = useState<{ id: string; name: string; action: 'soft' | 'hard' | 'restore' } | null>(null);
   const limit = 10;
-
-  // Fetch categories for filter dropdown
-  const { data: allCategories } = useGetCategoriesQuery();
 
   const { data, isLoading, isError, refetch } = useGetProductsQuery({
     search: search || undefined,
@@ -69,14 +43,22 @@ export default function AdminProductsPage() {
     gender: selectedGender !== "all" ? selectedGender : undefined,
     page,
     limit,
+    includeDeleted: showHidden, // Show hidden products when toggle is on
   });
 
+  console.log(data)
+  console.log("Query params:", { 
+    search, selectedCategory, selectedGender, page, showHidden 
+  });
+  
+
   const [softDelete, { isLoading: isSoftDeleting }] = useDeleteProductMutation();
-  const [hardDelete, { isLoading: isHardDeleting }] = useDeleteProductMutation();
+  const [hardDelete, { isLoading: isHardDeleting }] = useHardDeleteProductMutation();
+  const [restoreProduct, { isLoading: isRestoring }] = useRestoreProductMutation();
 
   const products = data?.data || [];
   const totalPages = data?.totalPages || 0;
-  const isDeleting = isSoftDeleting || isHardDeleting;
+  const isDeleting = isSoftDeleting || isHardDeleting || isRestoring;
 
   const handleSoftDelete = async (id: string, name: string) => {
     try {
@@ -85,6 +67,17 @@ export default function AdminProductsPage() {
       refetch();
     } catch (error) {
       toast.error("Failed to hide product");
+    }
+    setProductToAction(null);
+  };
+
+  const handleRestore = async (id: string, name: string) => {
+    try {
+      await restoreProduct(id).unwrap();
+      toast.success(`"${name}" has been restored to storefront`);
+      refetch();
+    } catch (error) {
+      toast.error("Failed to restore product");
     }
     setProductToAction(null);
   };
@@ -107,22 +100,16 @@ export default function AdminProductsPage() {
     setPage(1);
   };
 
-  const hasActiveFilters = search || selectedCategory !== "all" || selectedGender !== "all";
+  const hasActiveFilters = search !== "" || selectedCategory !== "all" || selectedGender !== "all";
 
-  // Loading skeleton
+  // Loading state
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <Skeleton className="h-8 w-32" />
-            <Skeleton className="mt-1 h-4 w-48" />
-          </div>
-          <Skeleton className="h-10 w-32" />
-        </div>
+        <ProductsHeader />
         <div className="flex gap-3">
           <Skeleton className="h-10 w-64" />
-          <Skeleton className="h-10 w-40" />
+          <Skeleton className="h-10 w-32" />
           <Skeleton className="h-10 w-40" />
         </div>
         <Card>
@@ -137,22 +124,16 @@ export default function AdminProductsPage() {
             </div>
           </CardContent>
         </Card>
+        <CollectionsManager />
       </div>
     );
   }
 
+  // Error state
   if (isError) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="heading-md font-primary">Products</h1>
-            <p className="text-muted-foreground">Manage your product catalog</p>
-          </div>
-          <Button className="gap-2" onClick={() => refetch()}>
-            Try Again
-          </Button>
-        </div>
+        <ProductsHeader />
         <Card>
           <CardContent className="py-12">
             <EmptyState
@@ -166,81 +147,23 @@ export default function AdminProductsPage() {
     );
   }
 
-  // Filter categories by gender for the dropdown
-  const filteredCategories = allCategories?.filter(
-    (cat) => selectedGender === "all" || cat.gender === selectedGender
-  );
-
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="heading-md font-primary">Products</h1>
-          <p className="text-muted-foreground">Manage your product catalog</p>
-        </div>
-        <Button asChild className="gap-2">
-          <Link href="/admin/products/new">
-            <Plus className="h-4 w-4" />
-            Add Product
-          </Link>
-        </Button>
-      </div>
+      <ProductsHeader />
 
-      {/* Filters Row */}
-      <div className="flex flex-wrap gap-3">
-        {/* Search */}
-        <div className="relative w-64">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search products..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            className="pl-9"
-          />
-        </div>
+      <ProductsFilters
+        search={search}
+        onSearchChange={(val) => { setSearch(val); setPage(1); }}
+        selectedGender={selectedGender}
+        onGenderChange={(val) => { setSelectedGender(val); setPage(1); }}
+        selectedCategory={selectedCategory}
+        onCategoryChange={(val) => { setSelectedCategory(val); setPage(1); }}
+        onClearFilters={clearFilters}
+        hasActiveFilters={hasActiveFilters}
+        showHidden={showHidden}
+        onShowHiddenChange={setShowHidden}
+      />
 
-        {/* Gender Filter */}
-        <Select value={selectedGender} onValueChange={(val) => { setSelectedGender(val); setPage(1); }}>
-          <SelectTrigger className="w-32">
-            <SelectValue placeholder="All Genders" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Genders</SelectItem>
-            <SelectItem value="men">Men</SelectItem>
-            <SelectItem value="women">Women</SelectItem>
-            <SelectItem value="kids">Kids</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Category Filter */}
-        <Select value={selectedCategory} onValueChange={(val) => { setSelectedCategory(val); setPage(1); }}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="All Categories" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {filteredCategories?.map((cat) => (
-              <SelectItem key={cat.id} value={cat.slug}>
-                {cat.name} ({cat.gender})
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Clear Filters Button */}
-        {hasActiveFilters && (
-          <Button variant="ghost" onClick={clearFilters} className="gap-2">
-            <X className="h-4 w-4" />
-            Clear Filters
-          </Button>
-        )}
-      </div>
-
-      {/* Products Table */}
       <Card>
         <CardHeader>
           <CardTitle>All Products</CardTitle>
@@ -261,127 +184,13 @@ export default function AdminProductsPage() {
             />
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[300px]">Product</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Gender</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Inventory</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="w-20">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {products.map((product) => (
-                      <TableRow key={product.id}>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 overflow-hidden rounded-md bg-muted">
-                              {product.images[0] ? (
-                                <img
-                                  src={product.images[0]}
-                                  alt={product.name}
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : (
-                                <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-                                  No img
-                                </div>
-                              )}
-                            </div>
-                            <div>
-                              <p className="line-clamp-1 font-medium">{product.name}</p>
-                              <p className="text-xs text-muted-foreground">{product.slug}</p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {product.category?.name || 'Other'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="capitalize">{product.gender}</TableCell>
-                        <TableCell>₹{product.price.toLocaleString()}</TableCell>
-                        <TableCell>
-                          <span className={product.inventory <= 5 ? "text-orange-600" : "text-green-600"}>
-                            {product.inventory} units
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            <Badge variant="outline" className={product.inStock ? "border-green-500 text-green-600" : "border-red-500 text-red-600"}>
-                              {product.inStock ? "In Stock" : "Out of Stock"}
-                            </Badge>
-                            {product.isNew && (
-                              <Badge variant="secondary" className="bg-blue-100 text-blue-700">New</Badge>
-                            )}
-                            {product.isBestSeller && (
-                              <Badge variant="secondary" className="bg-amber-100 text-amber-700">Bestseller</Badge>
-                            )}
-                            {product.deletedAt && (
-                              <Badge variant="outline" className="border-gray-500 text-gray-500">Hidden</Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem asChild className="gap-2">
-                                <Link href={`/admin/products/${product.id}/edit`}>
-                                  <Edit className="h-4 w-4" />
-                                  Edit
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild className="gap-2">
-                                <Link href={`/product/${product.slug}`} target="_blank">
-                                  <Eye className="h-4 w-4" />
-                                  View on Store
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              {product.deletedAt ? (
-                                <DropdownMenuItem 
-                                  className="gap-2 text-green-600"
-                                  onClick={() => handleSoftDelete(product.id, product.name)}
-                                  disabled={isDeleting}
-                                >
-                                  {isSoftDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
-                                  Restore to Store
-                                </DropdownMenuItem>
-                              ) : (
-                                <DropdownMenuItem 
-                                  className="gap-2 text-amber-600"
-                                  onClick={() => setProductToAction({ id: product.id, name: product.name, action: 'soft' })}
-                                  disabled={isDeleting}
-                                >
-                                  <EyeOff className="h-4 w-4" />
-                                  Hide from Store
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem 
-                                className="gap-2 text-destructive"
-                                onClick={() => setProductToAction({ id: product.id, name: product.name, action: 'hard' })}
-                                disabled={isDeleting}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                                Delete Permanently
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <ProductsTable
+                products={products}
+                onHide={(id, name) => setProductToAction({ id, name, action: 'soft' })}
+                onRestore={(id, name) => handleRestore(id, name)}  // Direct restore without dialog
+                onDelete={(id, name) => setProductToAction({ id, name, action: 'hard' })}
+                isDeleting={isDeleting}
+              />
 
               {/* Pagination */}
               {totalPages > 1 && (
@@ -402,7 +211,10 @@ export default function AdminProductsPage() {
         </CardContent>
       </Card>
 
-      {/* Confirmation Dialog */}
+      {/* Collections Manager Section */}
+      <CollectionsManager />
+
+      {/* Confirmation Dialog - Only for destructive actions */}
       <AlertDialog open={!!productToAction} onOpenChange={() => setProductToAction(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
