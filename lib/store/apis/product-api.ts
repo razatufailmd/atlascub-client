@@ -41,7 +41,7 @@ export interface CreateProductDto {
   images: string[];
   sizes: string[];
   colors: ColorOption[];
-  category: string;
+  category: string; // This is the category slug
   gender: string;
   tags?: string[];
   isNew?: boolean;

@@ -10,13 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { productSchema, ProductFormData } from "@/lib/validations/product-schema";
@@ -27,13 +21,9 @@ import {
   useCreateProductMutation,
   useUpdateProductMutation,
 } from "@/lib/store/apis/product-api";
+import { CategorySelector } from "./category-selector";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
-const genderOptions = ["men", "women", "kids"];
-const categoryOptions = {
-  men: ["ethnic", "tops", "outerwear", "bottoms", "accessories"],
-  women: ["ethnic", "tops", "outerwear", "bottoms", "accessories"],
-  kids: ["ethnic", "tops", "bottoms", "accessories"],
-};
 
 interface ProductFormProps {
   initialData?: any;
@@ -216,6 +206,8 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                   onValueChange={(value) => {
                     setSelectedGender(value);
                     setValue("gender", value);
+                    // Reset category when gender changes
+                    setValue("category", "");
                   }}
                   disabled={isSubmitting}
                 >
@@ -223,39 +215,24 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                   <SelectContent>
-                    {genderOptions.map((g) => (
-                      <SelectItem key={g} value={g}>
-                        {g.charAt(0).toUpperCase() + g.slice(1)}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="men">Men</SelectItem>
+                    <SelectItem value="women">Women</SelectItem>
+                    <SelectItem value="kids">Kids</SelectItem>
                   </SelectContent>
                 </Select>
                 {errors.gender && (
                   <p className="text-xs text-destructive mt-1">{errors.gender.message}</p>
                 )}
               </div>
-
               <div>
                 <Label htmlFor="category">Category *</Label>
-                <Select
-                  onValueChange={(value) => setValue("category", value)}
-                  defaultValue={initialData?.category}
+                <CategorySelector
+                  gender={selectedGender}
+                  value={watch("category") || ""}
+                  onChange={(value) => setValue("category", value)}
                   disabled={isSubmitting}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categoryOptions[selectedGender as keyof typeof categoryOptions]?.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.category && (
-                  <p className="text-xs text-destructive mt-1">{errors.category.message}</p>
-                )}
+                  error={errors.category?.message}
+                />
               </div>
 
               <div>
