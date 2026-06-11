@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { 
   Plus, Search, Edit, Trash2, MoreHorizontal, 
-  Loader2, Eye, EyeOff 
+  Loader2, Eye, EyeOff, X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -43,21 +50,29 @@ import {
   useDeleteProductMutation,
   useHardDeleteProductMutation,
 } from "@/lib/store/apis/product-api";
+import { useGetCategoriesQuery } from "@/lib/store/apis/category-api";
 
 export default function AdminProductsPage() {
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedGender, setSelectedGender] = useState<string>("all");
   const [page, setPage] = useState(1);
   const [productToAction, setProductToAction] = useState<{ id: string; name: string; action: 'soft' | 'hard' } | null>(null);
   const limit = 10;
 
+  // Fetch categories for filter dropdown
+  const { data: allCategories } = useGetCategoriesQuery();
+
   const { data, isLoading, isError, refetch } = useGetProductsQuery({
     search: search || undefined,
+    category: selectedCategory !== "all" ? selectedCategory : undefined,
+    gender: selectedGender !== "all" ? selectedGender : undefined,
     page,
     limit,
   });
 
   const [softDelete, { isLoading: isSoftDeleting }] = useDeleteProductMutation();
-  const [hardDelete, { isLoading: isHardDeleting }] = useHardDeleteProductMutation();
+  const [hardDelete, { isLoading: isHardDeleting }] = useDeleteProductMutation();
 
   const products = data?.data || [];
   const totalPages = data?.totalPages || 0;
@@ -85,6 +100,15 @@ export default function AdminProductsPage() {
     setProductToAction(null);
   };
 
+  const clearFilters = () => {
+    setSearch("");
+    setSelectedCategory("all");
+    setSelectedGender("all");
+    setPage(1);
+  };
+
+  const hasActiveFilters = search || selectedCategory !== "all" || selectedGender !== "all";
+
   // Loading skeleton
   if (isLoading) {
     return (
@@ -96,7 +120,11 @@ export default function AdminProductsPage() {
           </div>
           <Skeleton className="h-10 w-32" />
         </div>
-        <Skeleton className="h-10 w-full max-w-sm" />
+        <div className="flex gap-3">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-10 w-40" />
+          <Skeleton className="h-10 w-40" />
+        </div>
         <Card>
           <CardHeader>
             <Skeleton className="h-6 w-40" />
@@ -138,6 +166,11 @@ export default function AdminProductsPage() {
     );
   }
 
+  // Filter categories by gender for the dropdown
+  const filteredCategories = allCategories?.filter(
+    (cat) => selectedGender === "all" || cat.gender === selectedGender
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -154,18 +187,57 @@ export default function AdminProductsPage() {
         </Button>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search products..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          className="pl-9"
-        />
+      {/* Filters Row */}
+      <div className="flex flex-wrap gap-3">
+        {/* Search */}
+        <div className="relative w-64">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search products..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="pl-9"
+          />
+        </div>
+
+        {/* Gender Filter */}
+        <Select value={selectedGender} onValueChange={(val) => { setSelectedGender(val); setPage(1); }}>
+          <SelectTrigger className="w-32">
+            <SelectValue placeholder="All Genders" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Genders</SelectItem>
+            <SelectItem value="men">Men</SelectItem>
+            <SelectItem value="women">Women</SelectItem>
+            <SelectItem value="kids">Kids</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* Category Filter */}
+        <Select value={selectedCategory} onValueChange={(val) => { setSelectedCategory(val); setPage(1); }}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {filteredCategories?.map((cat) => (
+              <SelectItem key={cat.id} value={cat.slug}>
+                {cat.name} ({cat.gender})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Clear Filters Button */}
+        {hasActiveFilters && (
+          <Button variant="ghost" onClick={clearFilters} className="gap-2">
+            <X className="h-4 w-4" />
+            Clear Filters
+          </Button>
+        )}
       </div>
 
       {/* Products Table */}
@@ -180,11 +252,11 @@ export default function AdminProductsPage() {
           {products.length === 0 ? (
             <EmptyState
               title="No products found"
-              description={search ? `No products matching "${search}"` : "Start adding products to your catalog"}
+              description={hasActiveFilters ? "Try adjusting your filters" : "Start adding products to your catalog"}
               action={{
-                label: search ? "Clear Search" : "Add Your First Product",
-                onClick: search ? () => setSearch("") : undefined,
-                href: !search ? "/admin/products/new" : undefined,
+                label: hasActiveFilters ? "Clear Filters" : "Add Your First Product",
+                onClick: hasActiveFilters ? clearFilters : undefined,
+                href: !hasActiveFilters ? "/admin/products/new" : undefined,
               }}
             />
           ) : (
@@ -226,7 +298,11 @@ export default function AdminProductsPage() {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="capitalize">{product.category}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {product.category?.name || 'Other'}
+                          </Badge>
+                        </TableCell>
                         <TableCell className="capitalize">{product.gender}</TableCell>
                         <TableCell>₹{product.price.toLocaleString()}</TableCell>
                         <TableCell>
@@ -258,36 +334,26 @@ export default function AdminProductsPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              {/* Edit */}
                               <DropdownMenuItem asChild className="gap-2">
                                 <Link href={`/admin/products/${product.id}/edit`}>
                                   <Edit className="h-4 w-4" />
                                   Edit
                                 </Link>
                               </DropdownMenuItem>
-
-                              {/* View on Storefront */}
                               <DropdownMenuItem asChild className="gap-2">
                                 <Link href={`/product/${product.slug}`} target="_blank">
                                   <Eye className="h-4 w-4" />
                                   View on Store
                                 </Link>
                               </DropdownMenuItem>
-
                               <DropdownMenuSeparator />
-
-                              {/* Hide/Unhide (Soft Delete/Restore) */}
                               {product.deletedAt ? (
                                 <DropdownMenuItem 
                                   className="gap-2 text-green-600"
                                   onClick={() => handleSoftDelete(product.id, product.name)}
                                   disabled={isDeleting}
                                 >
-                                  {isSoftDeleting ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <Eye className="h-4 w-4" />
-                                  )}
+                                  {isSoftDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
                                   Restore to Store
                                 </DropdownMenuItem>
                               ) : (
@@ -300,8 +366,6 @@ export default function AdminProductsPage() {
                                   Hide from Store
                                 </DropdownMenuItem>
                               )}
-
-                              {/* Permanent Delete */}
                               <DropdownMenuItem 
                                 className="gap-2 text-destructive"
                                 onClick={() => setProductToAction({ id: product.id, name: product.name, action: 'hard' })}
@@ -356,10 +420,10 @@ export default function AdminProductsPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                if (productToAction) {  // Add null check
+                if (productToAction) {
                   if (productToAction.action === 'soft') {
                     handleSoftDelete(productToAction.id, productToAction.name);
-                  } else if (productToAction.action === 'hard') {
+                  } else {
                     handleHardDelete(productToAction.id, productToAction.name);
                   }
                 }

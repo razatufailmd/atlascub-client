@@ -6,6 +6,13 @@ export interface ColorOption {
   value: string;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  gender: string;
+  description?: string;
+}
 export interface Product {
   id: string;
   slug: string;
@@ -16,7 +23,7 @@ export interface Product {
   images: string[];
   sizes: string[];
   colors: ColorOption[];
-  category: string;
+  category: Category; // Now it's an object, not string
   gender: string;
   tags: string[];
   rating: number;

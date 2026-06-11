@@ -10,20 +10,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { productSchema, ProductFormData } from "@/lib/validations/product-schema";
 import { ImageUploader } from "./image-uploader";
 import { SizePicker } from "./size-picker";
 import { ColorPicker } from "./color-picker";
+import { CategorySelector } from "./category-selector";
 import {
   useCreateProductMutation,
   useUpdateProductMutation,
 } from "@/lib/store/apis/product-api";
-import { CategorySelector } from "./category-selector";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
+const genderOptions = ["men", "women", "kids"];
 
 interface ProductFormProps {
   initialData?: any;
@@ -42,6 +48,9 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
 
   const isSubmitting = isCreating || isUpdating;
 
+  // Get initial category slug from the category object
+  const initialCategorySlug = initialData?.category?.slug || initialData?.category || "";
+
   const {
     register,
     handleSubmit,
@@ -56,12 +65,19 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
       isBestSeller: false,
       inventory: 0,
       ...initialData,
+      // Override category with the slug from the category object
+      category: initialCategorySlug,
     },
   });
 
   const watchInStock = watch("inStock");
   const watchIsNew = watch("isNew");
   const watchIsBestSeller = watch("isBestSeller");
+  const watchCategory = watch("category");
+
+  // Log for debugging
+  console.log("Initial category slug:", initialCategorySlug);
+  console.log("Watched category:", watchCategory);
 
   useEffect(() => {
     setValue("images", images);
@@ -96,7 +112,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="grid gap-8 lg:grid-cols-2">
-        {/* Left Column */}
+        {/* Left Column - Same as before */}
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -199,6 +215,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
               <CardTitle>Category & Inventory</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Gender Selection */}
               <div>
                 <Label htmlFor="gender">Gender *</Label>
                 <Select
@@ -215,26 +232,34 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="men">Men</SelectItem>
-                    <SelectItem value="women">Women</SelectItem>
-                    <SelectItem value="kids">Kids</SelectItem>
+                    {genderOptions.map((g) => (
+                      <SelectItem key={g} value={g}>
+                        {g.charAt(0).toUpperCase() + g.slice(1)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 {errors.gender && (
                   <p className="text-xs text-destructive mt-1">{errors.gender.message}</p>
                 )}
               </div>
+
+              {/* Category Selection */}
               <div>
                 <Label htmlFor="category">Category *</Label>
                 <CategorySelector
                   gender={selectedGender}
-                  value={watch("category") || ""}
+                  value={watchCategory || ""}
                   onChange={(value) => setValue("category", value)}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !selectedGender}
                   error={errors.category?.message}
                 />
+                {!selectedGender && (
+                  <p className="text-xs text-muted-foreground mt-1">Please select a gender first</p>
+                )}
               </div>
 
+              {/* Inventory */}
               <div>
                 <Label htmlFor="inventory">Inventory Count *</Label>
                 <Input

@@ -18,6 +18,13 @@ export interface CreateCategoryDto {
   description?: string;
 }
 
+export interface UpdateCategoryDto {
+  name?: string;
+  slug?: string;
+  description?: string;
+  isActive?: boolean;
+}
+
 export const categoryApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getCategories: builder.query<Category[], string | void>({
@@ -49,6 +56,25 @@ export const categoryApi = api.injectEndpoints({
       }),
       invalidatesTags: [API_TAGS.CATEGORY],
     }),
+    updateCategory: builder.mutation<
+      Category,
+      { id: string; data: UpdateCategoryDto }
+    >({
+      query: ({ id, data }) => ({
+        url: `/categories/${id}`,
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: [API_TAGS.CATEGORY],
+    }),
+
+    deleteCategory: builder.mutation<{ message: string }, string>({
+      query: (id) => ({
+        url: `/categories/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [API_TAGS.CATEGORY],
+    }),
 
     seedCategories: builder.mutation<void, void>({
       query: () => ({
@@ -65,5 +91,7 @@ export const {
   useGetCategoriesQuery,
   useGetCategoryBySlugQuery,
   useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
   useSeedCategoriesMutation,
 } = categoryApi;
