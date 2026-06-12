@@ -65,7 +65,7 @@ export interface UpdateProductDto extends Partial<CreateProductDto> {}
 export interface ProductFilters {
   search?: string;
   gender?: string;
-  category?: string;
+  category?: string; // This is category slug
   sizes?: string[];
   colors?: string[];
   minPrice?: number;
@@ -73,8 +73,8 @@ export interface ProductFilters {
   sortBy?: "newest" | "price_asc" | "price_desc" | "popularity";
   page?: number;
   limit?: number;
-  inStock?: boolean;
-  includeDeleted?: boolean; // Add this
+  inStock?: boolean | string;
+  includeDeleted?: boolean;
 }
 
 export interface ProductsResponse {

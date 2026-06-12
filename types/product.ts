@@ -1,7 +1,14 @@
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  gender: string;
+  description?: string;
+}
+
 export interface ColorOption {
   name: string;
-  value: string; // Hex code
-  image?: string;
+  value: string;
 }
 
 export interface Product {
@@ -14,9 +21,8 @@ export interface Product {
   images: string[];
   sizes: string[];
   colors: ColorOption[];
-  category: string;
-  categorySlug: string;
-  gender: "men" | "women" | "kids";
+  category: Category; // This is an object, not string
+  gender: string;
   tags: string[];
   rating: number;
   reviewCount: number;
@@ -27,7 +33,9 @@ export interface Product {
   details?: string;
   sizing?: string;
   shipping?: string;
-  createdAt: Date;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
 }
 
 export interface CartItem {

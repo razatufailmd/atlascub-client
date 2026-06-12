@@ -6,9 +6,8 @@ import { motion } from "framer-motion";
 import { Star, ShoppingBag, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Product } from "@/types/globals";
+import { Product } from "@/lib/store/apis/product-api";
 import { WishlistButton } from "../layout/wishlist/wishlist-button";
-
 
 interface ProductCardProps {
   product: Product;
@@ -30,7 +29,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         {/* Image Container */}
         <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-muted">
           <Image
-            src={product.images[0]}
+            src={product.images[0] || "/images/placeholder.jpg"}
             alt={product.name}
             fill
             priority={priority}
@@ -65,7 +64,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
 
           <div className="absolute right-2 top-2 z-10">
             <WishlistButton product={product} size="sm" />
-        </div>
+          </div>
 
           {/* Quick Action Buttons (Visible on hover) */}
           <div className="absolute bottom-2 left-2 right-2 flex gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
@@ -103,12 +102,12 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             </h3>
             <div className="flex items-center gap-1">
               <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-              <span className="text-xs text-muted-foreground">{product.rating}</span>
+              <span className="text-xs text-muted-foreground">{product.rating || 0}</span>
             </div>
           </div>
           
           <p className="text-xs text-muted-foreground line-clamp-1">
-            {product.colors.length} Colors | {product.sizes.join(", ")}
+            {product.colors?.length || 0} Colors | {product.sizes?.join(", ") || "N/A"}
           </p>
           
           <div className="flex items-center gap-2">

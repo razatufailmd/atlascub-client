@@ -5,18 +5,10 @@ import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { WishlistItem } from "@/lib/store/features/wishlistSlice";
+import { Product } from "@/lib/store/apis/product-api";
 
 interface WishlistButtonProps {
-  product: {
-    id: string;
-    name: string;
-    price: number;
-    compareAtPrice?: number;
-    images: string[];
-    slug: string;
-    gender: string;
-    category: string;
-  };
+  product: Product;
   size?: "sm" | "md" | "lg";
   className?: string;
 }
@@ -49,7 +41,7 @@ export function WishlistButton({ product, size = "md", className = "" }: Wishlis
       image: product.images[0],
       slug: product.slug,
       gender: product.gender,
-      category: product.category,
+      category: product.category?.name || "Other", // Get category name from object
     };
 
     toggleItem(wishlistItem);

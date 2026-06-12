@@ -24,10 +24,11 @@ interface FilterSidebarProps {
   filters: FilterState;
   onChange: (filters: FilterState) => void;
   onClose?: () => void;
+  onApply?: () => void;  // Add this
   isMobile?: boolean;
 }
 
-export function FilterSidebar({ filters, onChange, onClose, isMobile }: FilterSidebarProps) {
+export function FilterSidebar({ filters, onChange, onClose,onApply, isMobile }: FilterSidebarProps) {
   const updateFilters = (updates: Partial<FilterState>) => {
     onChange({ ...filters, ...updates });
   };
@@ -201,7 +202,10 @@ export function FilterSidebar({ filters, onChange, onClose, isMobile }: FilterSi
         <div className="h-[calc(100vh-56px)] overflow-y-auto p-4">
           <FilterContent />
           <div className="sticky bottom-0 mt-6 bg-background pt-4 pb-6">
-            <Button className="w-full" onClick={onClose}>
+            <Button className="w-full" onClick={() => {
+      if (onApply) onApply();
+      if (onClose) onClose();
+    }}>
               Apply Filters
             </Button>
           </div>

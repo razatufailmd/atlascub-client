@@ -9,7 +9,7 @@ export interface WishlistItem {
   image: string;
   slug: string;
   gender: string;
-  category: string;
+  category: string; // This is string (category name) for wishlist display
 }
 
 interface WishlistState {
