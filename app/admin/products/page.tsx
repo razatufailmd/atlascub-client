@@ -46,10 +46,10 @@ export default function AdminProductsPage() {
     includeDeleted: showHidden, // Show hidden products when toggle is on
   });
 
-  console.log(data)
-  console.log("Query params:", { 
-    search, selectedCategory, selectedGender, page, showHidden 
-  });
+  // console.log(data)
+  // console.log("Query params:", { 
+  //   search, selectedCategory, selectedGender, page, showHidden 
+  // });
   
 
   const [softDelete, { isLoading: isSoftDeleting }] = useDeleteProductMutation();
