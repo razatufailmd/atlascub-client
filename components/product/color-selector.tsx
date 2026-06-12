@@ -13,7 +13,12 @@ interface ColorSelectorProps {
 export function ColorSelector({ colors, selectedColor, onSelect }: ColorSelectorProps) {
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium">Select Color</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium">Select Color</h3>
+        {selectedColor && (
+          <span className="text-xs text-primary">Selected: {selectedColor}</span>
+        )}
+      </div>
       <div className="flex flex-wrap gap-3">
         {colors.map((color) => (
           <motion.button
@@ -23,7 +28,7 @@ export function ColorSelector({ colors, selectedColor, onSelect }: ColorSelector
             onClick={() => onSelect(color.name)}
             className={`relative h-10 w-10 rounded-full border-2 transition-all ${
               selectedColor === color.name
-                ? "border-primary scale-110"
+                ? "border-primary scale-110 ring-2 ring-primary/20"
                 : "border-transparent hover:scale-105"
             }`}
             style={{ backgroundColor: color.value }}

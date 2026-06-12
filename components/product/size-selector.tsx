@@ -13,9 +13,9 @@ export function SizeSelector({ sizes, selectedSize, onSelect }: SizeSelectorProp
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium">Select Size</h3>
-        <button className="text-xs text-muted-foreground underline-offset-4 hover:underline">
-          Size Guide
-        </button>
+        {selectedSize && (
+          <span className="text-xs text-primary">Selected: {selectedSize}</span>
+        )}
       </div>
       <div className="flex flex-wrap gap-2">
         {sizes.map((size) => (

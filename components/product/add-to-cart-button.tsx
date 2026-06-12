@@ -6,7 +6,7 @@ import { ShoppingBag, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AddToCartButtonProps {
-  onClick: () => Promise<void>;
+  onClick: () => void | Promise<void>;
   disabled?: boolean;
   inStock?: boolean;
 }
