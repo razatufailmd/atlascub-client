@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -7,9 +8,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { FilterState } from "@/types/globals";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
-
-// Available filter options (will come from API in production)
+// Available options (can be fetched from API later)
 const availableSizes = ["XS", "S", "M", "L", "XL", "XXL"];
 const availableColors = [
   { name: "Black", value: "#1a1a1a" },
@@ -18,51 +25,67 @@ const availableColors = [
   { name: "Sage Green", value: "#9caf88" },
   { name: "Burgundy", value: "#8b2c2c" },
   { name: "Beige", value: "#d4c5a9" },
+  { name: "Charcoal", value: "#4a4a4a" },
 ];
 
 interface FilterSidebarProps {
   filters: FilterState;
   onChange: (filters: FilterState) => void;
   onClose?: () => void;
-  onApply?: () => void;  // Add this
   isMobile?: boolean;
 }
 
-export function FilterSidebar({ filters, onChange, onClose,onApply, isMobile }: FilterSidebarProps) {
+export function FilterSidebar({ filters, onChange, onClose, isMobile }: FilterSidebarProps) {
+  const [localFilters, setLocalFilters] = useState<FilterState>(filters);
+
+  // Sync local filters when props change
+  useEffect(() => {
+    setLocalFilters(filters);
+  }, [filters]);
+
   const updateFilters = (updates: Partial<FilterState>) => {
-    onChange({ ...filters, ...updates });
+    const newFilters = { ...localFilters, ...updates };
+    setLocalFilters(newFilters);
+  };
+
+  const applyFilters = () => {
+    onChange(localFilters);
+    if (onClose) onClose();
   };
 
   const toggleSize = (size: string) => {
-    const newSizes = filters.sizes.includes(size)
-      ? filters.sizes.filter((s) => s !== size)
-      : [...filters.sizes, size];
+    const newSizes = localFilters.sizes.includes(size)
+      ? localFilters.sizes.filter((s) => s !== size)
+      : [...localFilters.sizes, size];
     updateFilters({ sizes: newSizes });
   };
 
-  const toggleColor = (color: string) => {
-    const newColors = filters.colors.includes(color)
-      ? filters.colors.filter((c) => c !== color)
-      : [...filters.colors, color];
+  const toggleColor = (colorName: string) => {
+    const newColors = localFilters.colors.includes(colorName)
+      ? localFilters.colors.filter((c) => c !== colorName)
+      : [...localFilters.colors, colorName];
     updateFilters({ colors: newColors });
   };
 
   const clearAllFilters = () => {
-    onChange({
+    const clearedFilters = {
       sizes: [],
       colors: [],
-      priceRange: [0, 50000],
+      priceRange: [0, 50000] as [number, number],
       inStockOnly: false,
-      sortBy: "newest",
-    });
+      sortBy: "newest" as const,
+    };
+    setLocalFilters(clearedFilters);
+    onChange(clearedFilters);
+    if (onClose) onClose();
   };
 
   const hasActiveFilters =
-    filters.sizes.length > 0 ||
-    filters.colors.length > 0 ||
-    filters.inStockOnly ||
-    filters.priceRange[0] > 0 ||
-    filters.priceRange[1] < 50000;
+    localFilters.sizes.length > 0 ||
+    localFilters.colors.length > 0 ||
+    localFilters.priceRange[0] > 0 ||
+    localFilters.priceRange[1] < 50000 ||
+    localFilters.inStockOnly;
 
   const FilterContent = () => (
     <div className="space-y-6">
@@ -86,43 +109,27 @@ export function FilterSidebar({ filters, onChange, onClose,onApply, isMobile }: 
 
       <Separator />
 
-      {/* Category Section */}
-      <div className="space-y-3">
-        <h4 className="text-sm font-medium">Category</h4>
-        <div className="space-y-2">
-          {["Tops", "Bottoms", "Outerwear", "Accessories"].map((cat) => (
-            <label key={cat} className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
-              <Checkbox checked={false} />
-              <span>{cat}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      <Separator />
-
       {/* Price Range */}
       <div className="space-y-3">
         <h4 className="text-sm font-medium">Price Range</h4>
         <div className="pt-2 px-1">
           <Slider
-            defaultValue={[filters.priceRange[0], filters.priceRange[1]]}
+            value={[localFilters.priceRange[0], localFilters.priceRange[1]]}
             min={0}
             max={50000}
             step={500}
-            value={[filters.priceRange[0], filters.priceRange[1]]}
             onValueChange={(value) => updateFilters({ priceRange: [value[0], value[1]] })}
             className="mb-4"
           />
           <div className="flex items-center justify-between gap-2">
             <div className="flex-1 rounded-md border border-border px-3 py-1.5">
               <span className="text-xs text-muted-foreground">Min</span>
-              <p className="text-sm font-medium">₹{filters.priceRange[0].toLocaleString()}</p>
+              <p className="text-sm font-medium">₹{localFilters.priceRange[0].toLocaleString()}</p>
             </div>
             <span className="text-muted-foreground">—</span>
             <div className="flex-1 rounded-md border border-border px-3 py-1.5">
               <span className="text-xs text-muted-foreground">Max</span>
-              <p className="text-sm font-medium">₹{filters.priceRange[1].toLocaleString()}</p>
+              <p className="text-sm font-medium">₹{localFilters.priceRange[1].toLocaleString()}</p>
             </div>
           </div>
         </div>
@@ -139,7 +146,7 @@ export function FilterSidebar({ filters, onChange, onClose,onApply, isMobile }: 
               key={size}
               onClick={() => toggleSize(size)}
               className={`h-9 w-10 rounded-md border text-sm transition-all ${
-                filters.sizes.includes(size)
+                localFilters.sizes.includes(size)
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-background text-foreground hover:border-primary"
               }`}
@@ -161,11 +168,11 @@ export function FilterSidebar({ filters, onChange, onClose,onApply, isMobile }: 
               key={color.name}
               onClick={() => toggleColor(color.name)}
               className={`relative h-8 w-8 rounded-full border-2 transition-all ${
-                filters.colors.includes(color.name)
+                localFilters.colors.includes(color.name)
                   ? "border-primary scale-110"
                   : "border-transparent hover:scale-105"
               }`}
-              style={{ backgroundColor: color.value, borderColor: color.value === "#ffffff" ? "#e5e5e5" : undefined }}
+              style={{ backgroundColor: color.value }}
               title={color.name}
             />
           ))}
@@ -174,43 +181,52 @@ export function FilterSidebar({ filters, onChange, onClose,onApply, isMobile }: 
 
       <Separator />
 
-      {/* Availability */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="inStock" className="cursor-pointer">
-            In Stock Only
-          </Label>
-          <Checkbox
-            id="inStock"
-            checked={filters.inStockOnly}
-            onCheckedChange={(checked) => updateFilters({ inStockOnly: checked === true })}
-          />
-        </div>
+      {/* In Stock Only */}
+      <div className="flex items-center justify-between">
+        <Label htmlFor="inStock" className="cursor-pointer">
+          In Stock Only
+        </Label>
+        <Checkbox
+          id="inStock"
+          checked={localFilters.inStockOnly}
+          onCheckedChange={(checked) => updateFilters({ inStockOnly: checked === true })}
+        />
       </div>
+
+      {/* Apply Button (for mobile) */}
+      {isMobile && (
+        <div className="sticky bottom-0 mt-6 bg-background pt-4 pb-6">
+          <Button className="w-full" onClick={applyFilters}>
+            Apply Filters
+          </Button>
+        </div>
+      )}
     </div>
   );
 
   if (isMobile) {
     return (
-      <div className="fixed inset-0 z-50 bg-background">
-        <div className="flex h-14 items-center justify-between border-b border-border px-4">
-          <h2 className="text-lg font-semibold">Filters</h2>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-5 w-5" />
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="outline" className="gap-2 lg:hidden">
+            <SlidersHorizontal className="h-4 w-4" />
+            Filters
+            {hasActiveFilters && (
+              <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+                {localFilters.sizes.length + localFilters.colors.length + (localFilters.inStockOnly ? 1 : 0)}
+              </span>
+            )}
           </Button>
-        </div>
-        <div className="h-[calc(100vh-56px)] overflow-y-auto p-4">
-          <FilterContent />
-          <div className="sticky bottom-0 mt-6 bg-background pt-4 pb-6">
-            <Button className="w-full" onClick={() => {
-      if (onApply) onApply();
-      if (onClose) onClose();
-    }}>
-              Apply Filters
-            </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-full max-w-sm p-4 overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Filters</SheetTitle>
+          </SheetHeader>
+          <div className="mt-4">
+            <FilterContent />
           </div>
-        </div>
-      </div>
+        </SheetContent>
+      </Sheet>
     );
   }
 

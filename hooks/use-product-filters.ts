@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export interface ProductFiltersState {
@@ -23,25 +23,33 @@ export function useProductFilters() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const [filters, setFilters] = useState<ProductFiltersState>(() => {
-    // Initialize from URL params
-    const sizes = searchParams.get("sizes")?.split(",") || [];
-    const colors = searchParams.get("colors")?.split(",") || [];
-    const minPrice = parseInt(searchParams.get("minPrice") || "0");
-    const maxPrice = parseInt(searchParams.get("maxPrice") || "50000");
-    const inStockOnly = searchParams.get("inStock") === "true";
-    const sortBy =
-      (searchParams.get("sortBy") as ProductFiltersState["sortBy"]) || "newest";
+  const [filters, setFilters] = useState<ProductFiltersState>(DEFAULT_FILTERS);
 
-    return {
-      sizes,
-      colors,
-      priceRange: [minPrice, maxPrice],
-      inStockOnly,
-      sortBy,
-    };
-  });
+  // Initialize from URL params
+  useEffect(() => {
+    if (!isInitialized) {
+      const sizes = searchParams.get("sizes")?.split(",").filter(Boolean) || [];
+      const colors =
+        searchParams.get("colors")?.split(",").filter(Boolean) || [];
+      const minPrice = parseInt(searchParams.get("minPrice") || "0");
+      const maxPrice = parseInt(searchParams.get("maxPrice") || "50000");
+      const inStockOnly = searchParams.get("inStock") === "true";
+      const sortBy =
+        (searchParams.get("sortBy") as ProductFiltersState["sortBy"]) ||
+        "newest";
+
+      setFilters({
+        sizes,
+        colors,
+        priceRange: [minPrice, maxPrice],
+        inStockOnly,
+        sortBy,
+      });
+      setIsInitialized(true);
+    }
+  }, [searchParams, isInitialized]);
 
   const updateFilters = useCallback(
     (newFilters: Partial<ProductFiltersState>) => {
@@ -73,7 +81,8 @@ export function useProductFilters() {
     }
 
     const queryString = params.toString();
-    router.push(`${pathname}${queryString ? `?${queryString}` : ""}`);
+    const newUrl = `${pathname}${queryString ? `?${queryString}` : ""}`;
+    router.push(newUrl);
   }, [filters, pathname, router]);
 
   const clearFilters = useCallback(() => {

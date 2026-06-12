@@ -15,7 +15,6 @@ export default function CategoryPage() {
   const gender = params.gender as string;
   const categorySlug = params.category as string;
 
-  // Fetch category details dynamically
   const { data: category, isLoading: categoryLoading } = useGetCategoryBySlugQuery({
     gender,
     slug: categorySlug,
@@ -23,7 +22,7 @@ export default function CategoryPage() {
 
   const { filters, updateFilters, hasActiveFilters, clearFilters } = useProductFilters();
 
-  // Build query params for API
+  // Build query params - ensure arrays are sent properly
   const queryParams = {
     gender: gender,
     category: categorySlug,
@@ -42,47 +41,29 @@ export default function CategoryPage() {
   const products = data?.data || [];
   const totalProducts = data?.total || 0;
 
-  // Use dynamic category data or fallback to slug
   const categoryTitle = category?.name || categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1);
   const categoryDescription = category?.description || `Explore our collection of ${categoryTitle.toLowerCase()}`;
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
-      {/* Breadcrumb Navigation */}
+      {/* Breadcrumb */}
       <div className="mb-6">
         <SlugBreadcrumb />
       </div>
 
       {/* Page Header */}
       <div className="mb-8">
-        {categoryLoading ? (
-          <div className="space-y-2">
-            <div className="h-8 w-48 bg-muted animate-pulse rounded" />
-            <div className="h-4 w-96 bg-muted animate-pulse rounded" />
-          </div>
-        ) : (
-          <>
-            <h1 className="heading-lg font-primary">{categoryTitle}</h1>
-            <p className="mt-2 text-muted-foreground">{categoryDescription}</p>
-          </>
-        )}
+        <h1 className="heading-lg font-primary">{categoryTitle}</h1>
+        <p className="mt-2 text-muted-foreground">{categoryDescription}</p>
       </div>
 
       {/* Filters and Sort Row */}
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          {/* Desktop Filters */}
-          <div className="hidden lg:block">
-            <FilterSidebar
-              filters={filters}
-              onChange={updateFilters}
-            />
-          </div>
-          
           {/* Mobile Filters */}
           <MobileFilters filters={filters} onChange={updateFilters} />
           
-          {/* Active Filters Count */}
+          {/* Active Filters Indicator */}
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
@@ -99,11 +80,11 @@ export default function CategoryPage() {
         />
       </div>
 
-      {/* Desktop Layout: Sidebar + Grid */}
-      <div className="flex gap-8">
+      {/* Main Content: Sidebar + Grid */}
+      <div className="flex flex-col gap-8 lg:flex-row">
         {/* Desktop Sidebar */}
-        <aside className="hidden w-64 shrink-0 lg:block">
-          <div className="sticky top-24">
+        <aside className="lg:w-64 lg:shrink-0">
+          <div className="sticky top-24 hidden lg:block">
             <FilterSidebar
               filters={filters}
               onChange={updateFilters}
@@ -115,7 +96,7 @@ export default function CategoryPage() {
         <div className="flex-1">
           <ProductGrid
             products={products}
-            isLoading={isLoading || isFetching}
+            isLoading={isLoading || isFetching || categoryLoading}
             columns={4}
           />
           

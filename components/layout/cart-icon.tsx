@@ -1,24 +1,25 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAppDispatch, useAppSelector } from "@/lib/store/store";
-import { openCart } from "@/lib/store/features/cartSlice";
+import { useCart } from "@/hooks/use-cart";
 
 export function CartIcon() {
-  const dispatch = useAppDispatch();
-  const { items } = useAppSelector((state) => state.cart);
-  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const { itemCount, isSyncing, openCartDrawer } = useCart();
 
   return (
     <Button
       variant="ghost"
       size="icon"
       className="relative"
-      onClick={() => dispatch(openCart())}
+      onClick={openCartDrawer}
     >
-      <ShoppingBag className="h-5 w-5" />
+      {isSyncing ? (
+        <Loader2 className="h-5 w-5 animate-spin" />
+      ) : (
+        <ShoppingBag className="h-5 w-5" />
+      )}
       <AnimatePresence>
         {itemCount > 0 && (
           <motion.span

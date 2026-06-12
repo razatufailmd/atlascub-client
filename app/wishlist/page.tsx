@@ -14,23 +14,47 @@ import { addToCart, openCart } from "@/lib/store/features/cartSlice";
 export default function WishlistPage() {
   const dispatch = useAppDispatch();
   const { items } = useAppSelector((state) => state.wishlist);
+  const cartItems = useAppSelector((state) => state.cart.items);
 
   const handleMoveToCart = (item: typeof items[0]) => {
-    dispatch(
-      addToCart({
-        id: `${item.productId}-${Date.now()}`,
-        productId: item.productId,
-        name: item.name,
-        price: item.price,
-        compareAtPrice: item.compareAtPrice,
-        quantity: 1,
-        size: "M",
-        color: "Default",
-        image: item.image,
-        slug: item.slug,
-        inStock: true,
-      })
+    const defaultSize = "M";
+    const defaultColor = "Default";
+    
+    // Check if item already exists in cart
+    const existingItem = cartItems.find(
+      (cartItem) => 
+        cartItem.productId === item.productId && 
+        cartItem.size === defaultSize && 
+        cartItem.color === defaultColor
     );
+    
+    if (existingItem) {
+      // Update quantity of existing item
+      dispatch(
+        addToCart({
+          ...existingItem,
+          quantity: existingItem.quantity + 1,
+        })
+      );
+    } else {
+      // Add new item
+      dispatch(
+        addToCart({
+          id: `${item.productId}-${defaultSize}-${defaultColor}-${Date.now()}`,
+          productId: item.productId,
+          name: item.name,
+          price: item.price,
+          compareAtPrice: item.compareAtPrice,
+          quantity: 1,
+          size: defaultSize,
+          color: defaultColor,
+          image: item.image,
+          slug: item.slug,
+          inStock: true,
+        })
+      );
+    }
+    
     dispatch(removeFromWishlist(item.productId));
     dispatch(openCart());
   };

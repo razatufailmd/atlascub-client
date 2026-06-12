@@ -1,12 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { Filter } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { FilterSidebar } from "./filter-sidebar";
 import { FilterState } from "@/types/globals";
-
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { SlidersHorizontal } from "lucide-react";
 
 interface MobileFiltersProps {
   filters: FilterState;
@@ -14,31 +12,33 @@ interface MobileFiltersProps {
 }
 
 export function MobileFilters({ filters, onChange }: MobileFiltersProps) {
-  const [open, setOpen] = useState(false);
-
-  const activeFilterCount =
-    filters.sizes.length + filters.colors.length + (filters.inStockOnly ? 1 : 0);
+  const activeCount = filters.sizes.length + filters.colors.length + (filters.inStockOnly ? 1 : 0);
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" className="gap-2 border-border lg:hidden">
-          <Filter className="h-4 w-4" />
+        <Button variant="outline" className="gap-2 lg:hidden">
+          <SlidersHorizontal className="h-4 w-4" />
           Filters
-          {activeFilterCount > 0 && (
+          {activeCount > 0 && (
             <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-              {activeFilterCount}
+              {activeCount}
             </span>
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-full max-w-sm p-0">
-        <FilterSidebar
-          filters={filters}
-          onChange={onChange}
-          onClose={() => setOpen(false)}
-          isMobile
-        />
+      <SheetContent side="left" className="w-full max-w-sm p-4 overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>Filters</SheetTitle>
+        </SheetHeader>
+        <div className="mt-4">
+          <FilterSidebar
+            filters={filters}
+            onChange={onChange}
+            onClose={() => document.body.click()}
+            isMobile
+          />
+        </div>
       </SheetContent>
     </Sheet>
   );

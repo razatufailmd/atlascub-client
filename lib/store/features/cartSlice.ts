@@ -17,11 +17,15 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   isOpen: boolean;
+  isSyncing: boolean;
+  lastSynced: string | null;
 }
 
 const initialState: CartState = {
   items: [],
   isOpen: false,
+  isSyncing: false,
+  lastSynced: null,
 };
 
 const cartSlice = createSlice({
@@ -29,21 +33,37 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addToCart: (state, action: PayloadAction<CartItem>) => {
-      const existing = state.items.find(
+      const { productId, size, color, quantity } = action.payload;
+
+      const existingItem = state.items.find(
         (item) =>
-          item.productId === action.payload.productId &&
-          item.size === action.payload.size &&
-          item.color === action.payload.color
+          item.productId === productId &&
+          item.size === size &&
+          item.color === color
       );
 
-      if (existing) {
-        existing.quantity += action.payload.quantity;
+      if (existingItem) {
+        existingItem.quantity += quantity;
       } else {
         state.items.push(action.payload);
       }
     },
     removeFromCart: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter((item) => item.id !== action.payload);
+    },
+    removeItemFromCart: (
+      state,
+      action: PayloadAction<{ productId: string; size: string; color: string }>
+    ) => {
+      const { productId, size, color } = action.payload;
+      state.items = state.items.filter(
+        (item) =>
+          !(
+            item.productId === productId &&
+            item.size === size &&
+            item.color === color
+          )
+      );
     },
     updateQuantity: (
       state,
@@ -61,6 +81,15 @@ const cartSlice = createSlice({
     clearCart: (state) => {
       state.items = [];
     },
+    hydrateCart: (state, action: PayloadAction<CartItem[]>) => {
+      state.items = action.payload;
+    },
+    setSyncing: (state, action: PayloadAction<boolean>) => {
+      state.isSyncing = action.payload;
+    },
+    setLastSynced: (state, action: PayloadAction<string>) => {
+      state.lastSynced = action.payload;
+    },
     toggleCart: (state) => {
       state.isOpen = !state.isOpen;
     },
@@ -76,10 +105,15 @@ const cartSlice = createSlice({
 export const {
   addToCart,
   removeFromCart,
+  removeItemFromCart,
   updateQuantity,
   clearCart,
+  hydrateCart,
+  setSyncing,
+  setLastSynced,
   toggleCart,
   openCart,
   closeCart,
 } = cartSlice.actions;
+
 export default cartSlice.reducer;
