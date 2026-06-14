@@ -96,7 +96,7 @@ export function QuickViewModal({ product, open, onOpenChange }: QuickViewModalPr
               {/* Category Breadcrumb */}
               <motion.div variants={itemVariants} className="flex items-center gap-1.5">
                 <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-                  {product.category || "Apparel Studio"}
+                  {product?.category || "Apparel Studio"}
                 </span>
                 <span className="text-[8px] text-muted-foreground/50">•</span>
                 <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">

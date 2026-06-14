@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { genderMetadata } from "@/lib/constants/categories";
 
 interface GenderLayoutProps {
@@ -33,6 +34,25 @@ export default async function GenderLayout({ children, params }: GenderLayoutPro
           <p className="mt-2 text-white/80 max-w-md">{metadata.description}</p>
         </div>
       </div>
+      
+      {/* Category Navigation - Add "All" link */}
+      <div className="container mx-auto px-4 mt-6">
+        <div className="flex flex-wrap gap-3 border-b border-border pb-4">
+          <Link
+            href={`/shop/${gender}`}
+            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            Featured
+          </Link>
+          <Link
+            href={`/shop/${gender}/all`}
+            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            All Products
+          </Link>
+        </div>
+      </div>
+      
       {children}
     </div>
   );

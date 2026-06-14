@@ -107,7 +107,7 @@ export const genderGrid: GenderPanel[] = [
     title: "MEN",
     description: "Quiet Confidence. Timeless Essentials & Tailored Kurtas.",
     image: "/images/gender/men.jpg",
-    href: "/men",
+    href: "/shop/men",
     gradientFrom: "from-amber-950/40",
   },
   {
@@ -115,7 +115,7 @@ export const genderGrid: GenderPanel[] = [
     title: "WOMEN",
     description: "Effortless Silhouettes. Organic Knits & Handspun Sarees.",
     image: "/images/gender/women.jpg",
-    href: "/women",
+    href: "/shop/women",
     gradientFrom: "from-[#9b2c2c]/30",
   },
   {
@@ -123,7 +123,7 @@ export const genderGrid: GenderPanel[] = [
     title: "KIDS",
     description: "Hypoallergenic Cottons. Cloud-Soft Daily Playwear.",
     image: "/images/gender/kids.jpg",
-    href: "/kids",
+    href: "/shop/kids",
     gradientFrom: "from-stone-900/30",
   },
 ];

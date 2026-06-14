@@ -4,7 +4,7 @@ import { FeaturedCollection } from "@/components/home/featured-section";
 
 import { CategoryShowcase } from "@/components/home/category-showcase";
 import { BrandValues } from "@/components/home/brand-values";
-import { EditorialStory } from "@/components/home/editorial-story";
+import { DiscoverMore } from "@/components/home/discover-section";
 import { NewsletterSignup } from "@/components/home/newsletter-signup";
 import { FloatingBlobs } from "@/components/home/floating-blob";
 import { TestimonialsSection } from "@/components/home/testimonials";
@@ -28,8 +28,8 @@ export default function HomePage() {
         <GenderGrid />
         {/* best work */}
         <CinematicShowcase/>
-        {/* 5. Editorial Storytelling */}
-        <EditorialStory />
+        {/* 5. discover products */}
+        <DiscoverMore/>
         {/* 6. Category Silhouette Showcase */}
         <CategoryShowcase />
         <FeatureSection/>

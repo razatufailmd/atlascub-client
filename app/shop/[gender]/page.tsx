@@ -70,13 +70,20 @@ export default function GenderPage() {
         )}
       </div>
 
-      {/* New Arrivals Section */}
+      {/* new arrivals */}
       <section className="mb-16">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h2 className="heading-md font-primary">New Arrivals</h2>
             <p className="text-sm text-muted-foreground">Fresh styles just landed</p>
           </div>
+          <Link
+            href={`/shop/${gender}/all?sortBy=newest`}
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary"
+          >
+            View all
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
         <ProductGrid
           products={filteredNewArrivals}
@@ -85,13 +92,20 @@ export default function GenderPage() {
         />
       </section>
 
-      {/* Best Sellers Section */}
+        {/* best sellers */}
       <section>
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h2 className="heading-md font-primary">Best Sellers</h2>
             <p className="text-sm text-muted-foreground">Customer favorites</p>
           </div>
+          <Link
+            href={`/shop/${gender}/all?sortBy=popularity`}
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary"
+          >
+            View all
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
         <ProductGrid
           products={filteredBestSellers}

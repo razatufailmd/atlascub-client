@@ -142,36 +142,37 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             </div>
 
             {/* Quick Action Buttons (Visible on hover) */}
-            <div className="absolute bottom-2 left-2 right-2 flex gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <div className="absolute bottom-2 left-2 right-2 flex gap-2 opacity-0 transition-all duration-300 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 z-10">
               <Button
                 size="sm"
                 variant="secondary"
-                className={`flex-1 gap-1 bg-white/90 text-foreground hover:bg-white ${
-                  isInCart ? "bg-green-500 text-white hover:bg-green-600" : ""
+                // 🛡️ FIX: Forced text-zinc-900 so it doesn't invert to white in dark mode
+                className={`flex-1 gap-1.5 shadow-sm transition-colors ${
+                  isInCart 
+                    ? "bg-green-500 text-white hover:bg-green-600 hover:text-white border-transparent" 
+                    : "bg-white/95 text-zinc-900 hover:bg-white hover:text-black border-transparent"
                 }`}
                 onClick={handleQuickAdd}
               >
                 {isInCart || isAdded ? (
-                  <>
-                    <Check className="h-3.5 w-3.5" />
-                    <span className="text-xs">Added</span>
-                  </>
+                  <><Check className="h-3.5 w-3.5" /><span className="text-xs font-semibold">Added</span></>
                 ) : (
-                  <>
-                    <ShoppingBag className="h-3.5 w-3.5" />
-                    <span className="text-xs">Quick Add</span>
-                  </>
+                  <><ShoppingBag className="h-3.5 w-3.5" /><span className="text-xs font-semibold">Quick Add</span></>
                 )}
               </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                className="h-8 w-8 bg-white/90 p-0 hover:bg-white"
+              <Button 
+                size="sm" 
+                variant="secondary" 
+                // 🛡️ FIX: Forced text-zinc-900
+                className="h-8 w-8 bg-white/95 p-0 text-zinc-900 hover:bg-white hover:text-black border-transparent shadow-sm" 
                 onClick={handleQuickView}
               >
-                <Eye className="h-3.5 w-3.5" />
+                <Eye className="h-4 w-4" />
               </Button>
             </div>
+            
+            {/* Subtle Gradient to ensure buttons are always readable */}
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </div>
 
           {/* Product Info */}
