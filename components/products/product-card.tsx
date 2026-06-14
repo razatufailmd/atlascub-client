@@ -12,6 +12,8 @@ import { WishlistButton } from "../layout/wishlist/wishlist-button";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { addToCart, removeItemFromCart, openCart } from "@/lib/store/features/cartSlice";
 import { QuickViewModal } from "../product/quick-view-modal";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 interface ProductCardProps {
   product: Product;
@@ -22,6 +24,10 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   const dispatch = useAppDispatch();
   const [quickViewOpen, setQuickViewOpen] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+  
+  // Auth Protection
+  const { isSignedIn } = useAuth();
+  const router = useRouter();
   
   const cartItems = useAppSelector((state) => state.cart.items);
   
@@ -41,6 +47,12 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     e.preventDefault();
     e.stopPropagation();
     
+    // REDIRECT IF NOT SIGNED IN
+    if (!isSignedIn) {
+      router.push("/sign-in");
+      return;
+    }
+    
     if (isInCart) {
       // Remove from cart
       dispatch(removeItemFromCart({ 
@@ -53,7 +65,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       // Add to cart
       dispatch(
         addToCart({
-          id: `${product.id}-${defaultSize}-${defaultColor}-${Date.now()}`,
+          id: `${product.id}-${defaultSize}-${defaultColor}`,
           productId: product.id,
           name: product.name,
           price: product.price,

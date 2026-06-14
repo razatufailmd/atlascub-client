@@ -9,7 +9,7 @@ export interface WishlistItem {
   image: string;
   slug: string;
   gender: string;
-  category: string; // This is string (category name) for wishlist display
+  category: string;
 }
 
 interface WishlistState {
@@ -26,11 +26,16 @@ const wishlistSlice = createSlice({
   name: "wishlist",
   initialState,
   reducers: {
-    addToWishlist: (state, action: PayloadAction<WishlistItem>) => {
-      const exists = state.items.some(
+    toggleItem: (state, action: PayloadAction<WishlistItem>) => {
+      const existingIndex = state.items.findIndex(
         (item) => item.productId === action.payload.productId
       );
-      if (!exists) {
+
+      if (existingIndex >= 0) {
+        // Remove if it exists
+        state.items.splice(existingIndex, 1);
+      } else {
+        // Add if it doesn't
         state.items.push(action.payload);
       }
     },
@@ -39,26 +44,12 @@ const wishlistSlice = createSlice({
         (item) => item.productId !== action.payload
       );
     },
-    toggleWishlist: (state, action: PayloadAction<WishlistItem>) => {
-      const exists = state.items.some(
-        (item) => item.productId === action.payload.productId
-      );
-      if (exists) {
-        state.items = state.items.filter(
-          (item) => item.productId !== action.payload.productId
-        );
-      } else {
-        state.items.push(action.payload);
-      }
-    },
     clearWishlist: (state) => {
       state.items = [];
     },
+    // Hydration endpoint to inject LocalStorage data back into Redux on refresh
     hydrateWishlist: (state, action: PayloadAction<WishlistItem[]>) => {
       state.items = action.payload;
-    },
-    toggleWishlistDrawer: (state) => {
-      state.isOpen = !state.isOpen;
     },
     openWishlistDrawer: (state) => {
       state.isOpen = true;
@@ -70,13 +61,12 @@ const wishlistSlice = createSlice({
 });
 
 export const {
-  addToWishlist,
+  toggleItem,
   removeFromWishlist,
-  toggleWishlist,
   clearWishlist,
   hydrateWishlist,
-  toggleWishlistDrawer,
   openWishlistDrawer,
   closeWishlistDrawer,
 } = wishlistSlice.actions;
+
 export default wishlistSlice.reducer;

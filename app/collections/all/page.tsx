@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Tag, Sun, Flame } from "lucide-react";
-import { categories } from "@/lib/constants/navigation";
+import { ArrowRight, Sparkles, Tag, Sun, Flame, Loader2 } from "lucide-react";
 import { SlugBreadcrumb } from "@/components/shared/slug-breadcrumb";
 import { EmptyState } from "@/components/shared/empty-state";
+import { useGetCollectionsQuery } from "@/lib/store/apis/collection-api";
 
 const typeIcons = {
   festival: <Sparkles className="h-5 w-5" />,
@@ -16,19 +15,41 @@ const typeIcons = {
   sale: <Tag className="h-5 w-5" />,
 };
 
-// Mock collection images (replace with actual images later)
-const collectionImages: Record<string, string> = {
-  "modern-festive": "/images/collections/modern-festive.jpg",
-  "pastel-dreams": "/images/collections/pastel-dreams.jpg",
-  "summer-26": "/images/collections/summer-solstice.jpg",
-  sale: "/images/collections/archive-sale.jpg",
-};
-
 export default function CollectionsAllPage() {
-  const collections = categories.collections || [];
+  const { data: collections, isLoading, isError, refetch } = useGetCollectionsQuery();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  if (collections.length === 0) {
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <SlugBreadcrumb />
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="aspect-[4/3] rounded-xl bg-muted" />
+              <div className="mt-4 h-6 w-32 bg-muted rounded" />
+              <div className="mt-2 h-4 w-48 bg-muted rounded" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <SlugBreadcrumb />
+        <EmptyState
+          title="Failed to load collections"
+          description="There was an error loading collections. Please try again."
+          action={{ label: "Retry", onClick: () => refetch() }}
+        />
+      </div>
+    );
+  }
+
+  if (!collections || collections.length === 0) {
     return (
       <div className="container mx-auto px-4 py-12">
         <SlugBreadcrumb />
@@ -42,7 +63,6 @@ export default function CollectionsAllPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
-      
       {/* Breadcrumb */}
       <div className="mb-6">
         <SlugBreadcrumb />
@@ -60,21 +80,21 @@ export default function CollectionsAllPage() {
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
         {collections.map((collection, index) => (
           <motion.div
-            key={collection.slug}
+            key={collection.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             whileHover={{ y: -4 }}
             className="group"
-            onMouseEnter={() => setHoveredId(collection.slug)}
+            onMouseEnter={() => setHoveredId(collection.id)}
             onMouseLeave={() => setHoveredId(null)}
           >
             <Link href={`/collections/${collection.slug}`}>
               <div className="relative overflow-hidden rounded-xl bg-muted aspect-[4/3]">
                 {/* Collection Image */}
-                {collectionImages[collection.slug] ? (
+                {collection.image ? (
                   <Image
-                    src={collectionImages[collection.slug]}
+                    src={collection.image}
                     alt={collection.name}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -135,3 +155,6 @@ export default function CollectionsAllPage() {
     </div>
   );
 }
+
+// Add useState import
+import { useState } from "react";

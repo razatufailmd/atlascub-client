@@ -3,8 +3,7 @@ import {  Libre_Baskerville, IBM_Plex_Mono,Poppins } from "next/font/google";
 import "./globals.css";
 import "../styles/theme-animation.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import StoreProvider from "@/components/providers/store-provider";
-import { ThemeProvider } from "@/components/providers/theme-provider";
+
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { SmoothCursor } from "@/components/ui/smooth-cursor";
@@ -14,6 +13,8 @@ import { AnnouncementBar } from "@/components/shared/announcement-bar";
 import { WhatsappWidget } from "@/components/home/whats-app-widget";
 import { Toaster } from "sonner";
 import { AuthStatus } from "@/components/debug/token-debug";
+
+import { Providers } from "@/components/providers/global-provider";
 
 const fontSans = Poppins({
   subsets: ["latin"],
@@ -106,38 +107,35 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <StoreProvider>
-      <ClerkProvider>
-        <html lang="en" className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased`} suppressHydrationWarning>
-          <body className="min-h-screen bg-background font-body antialiased">
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <SmoothCursor/>
-              <div className="relative flex min-h-screen flex-col">
-                <AnnouncementBar/>
-                <Navbar />
-                <main className="flex-1 pt-16 md:pt-20">{children}</main>
-                <Footer/>
+     // ClerkProvider MUST wrap the HTML to provide Auth to Server & Client components
+     <ClerkProvider>
+     <html lang="en" className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased`} suppressHydrationWarning>
+       <body className="min-h-screen bg-background font-body antialiased">
+         
+         {/* All strictly client-side providers (Redux, Theme, Sync) are injected here */}
+         <Providers>
+           <SmoothCursor />
+           <div className="relative flex min-h-screen flex-col">
+             <AnnouncementBar />
+             <Navbar />
+             
+             <main className="flex-1 pt-16 md:pt-20">{children}</main>
+             
+             <Footer />
 
-                <CartSidebar />
-                <WishlistSidebar />
-                <WhatsappWidget/>
+             {/* Global Overlays */}
+             <CartSidebar />
+             <WishlistSidebar />
+             <WhatsappWidget />
 
+             {/* Development Utilities */}
+             {process.env.NODE_ENV === "development" && <AuthStatus />}
+           </div>
 
-                {/* temp */}
-                {process.env.NODE_ENV === "development" && <AuthStatus />}
-                
-              </div>
-
-              <Toaster position="bottom-right" richColors />
-            </ThemeProvider>
-          </body>
-        </html>
-      </ClerkProvider>
-    </StoreProvider>
+           <Toaster position="bottom-right" richColors />
+         </Providers>
+       </body>
+     </html>
+   </ClerkProvider>
   );
 }

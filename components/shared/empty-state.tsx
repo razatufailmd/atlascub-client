@@ -1,51 +1,37 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
-import { LucideIcon } from 'lucide-react';
+import { Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface EmptyStateProps {
   title: string;
   description: string;
-  icon?: LucideIcon; // Make icon optional with a default
+  // Accept both raw component types (e.g., Package) AND instantiated elements (e.g., <Package className="..." />)
+  icon?: React.ElementType | React.ReactNode;
   action?: {
     label: string;
-    href?: string; // Make href optional
+    href?: string;
     onClick?: () => void;
   };
 }
 
-// Default icon if none provided
-const DefaultIcon = () => (
-  <svg
-    className="h-10 w-10 text-primary"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={1.5}
-      d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-    />
-  </svg>
-);
+export function EmptyState({ title, description, icon = Package, action }: EmptyStateProps) {
+  // Determine if the passed icon is already a JSX element
+  const isReactElement = React.isValidElement(icon);
+  // If it's not an element, treat it as a component reference
+  const IconComponent = !isReactElement ? (icon as React.ElementType) : null;
 
-export function EmptyState({ 
-  title, 
-  description, 
-  icon: Icon, 
-  action 
-}: EmptyStateProps) {
   return (
     <div className="flex min-h-[480px] w-full flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card p-10 text-center shadow-2xs transition-all duration-300 hover:shadow-xs">
       {/* Dynamic Animated Graphic Circle */}
-      <div className="relative mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-secondary/40 text-secondary-foreground">
-        <div className="animate-pulse duration-4000">
-          {Icon ? <Icon className="h-10 w-10 text-primary animate-bounce duration-3000" /> : <DefaultIcon />}
-        </div>
+      <div className="relative mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-secondary/40 text-secondary-foreground animate-pulse duration-4000">
+        {isReactElement ? (
+          icon // Render custom JSX directly
+        ) : (
+          IconComponent && <IconComponent className="h-10 w-10 text-primary animate-bounce duration-3000" />
+        )}
       </div>
       
       {/* Brand Elegant Heading */}
@@ -61,19 +47,13 @@ export function EmptyState({
       {/* Primary Action Trigger */}
       {action && (
         <div className="mt-8 animate-fade-in duration-500">
-          {action.onClick ? (
-            <Button 
-              onClick={action.onClick} 
-              size="lg" 
-              className="rounded-md px-8 py-6 font-medium tracking-wide shadow-sm hover:shadow-md transition-all cursor-pointer"
-            >
-              {action.label}
-            </Button>
-          ) : action.href ? (
-            <Button asChild size="lg" className="rounded-md px-8 py-6 font-medium tracking-wide shadow-sm hover:shadow-md transition-all">
-              <Link href={action.href}>{action.label}</Link>
-            </Button>
-          ) : null}
+          <Button asChild size="lg" className="rounded-md px-8 py-6 font-medium tracking-wide shadow-sm hover:shadow-md transition-all">
+            {action.onClick ? (
+              <button onClick={action.onClick}>{action.label}</button>
+            ) : (
+              <Link href={action.href || "#"}>{action.label}</Link>
+            )}
+          </Button>
         </div>
       )}
     </div>

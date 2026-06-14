@@ -96,6 +96,7 @@ export const productApi = api.injectEndpoints({
           Object.entries(filters).forEach(([key, value]) => {
             if (value !== undefined && value !== null && value !== "") {
               if (Array.isArray(value)) {
+                // For array values, append each item separately
                 value.forEach((v) => params.append(key, v));
               } else {
                 params.append(key, String(value));

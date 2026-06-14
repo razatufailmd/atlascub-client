@@ -28,6 +28,9 @@ const initialState: CartState = {
   lastSynced: null,
 };
 
+// Global max quantity limit per product
+const MAX_QUANTITY = 5;
+
 const cartSlice = createSlice({
   name: "cart",
   initialState,
@@ -43,9 +46,17 @@ const cartSlice = createSlice({
       );
 
       if (existingItem) {
-        existingItem.quantity += quantity;
+        // Safe increment, capped at MAX_QUANTITY (5)
+        existingItem.quantity = Math.min(
+          MAX_QUANTITY,
+          existingItem.quantity + quantity
+        );
       } else {
-        state.items.push(action.payload);
+        // Enforce cap on initial add as well
+        state.items.push({
+          ...action.payload,
+          quantity: Math.min(MAX_QUANTITY, quantity),
+        });
       }
     },
     removeFromCart: (state, action: PayloadAction<string>) => {
@@ -70,10 +81,11 @@ const cartSlice = createSlice({
       action: PayloadAction<{ id: string; quantity: number }>
     ) => {
       const item = state.items.find((item) => item.id === action.payload.id);
+      // Enforce the 5-item hard cap on updates
       if (
         item &&
         action.payload.quantity > 0 &&
-        action.payload.quantity <= 10
+        action.payload.quantity <= MAX_QUANTITY
       ) {
         item.quantity = action.payload.quantity;
       }

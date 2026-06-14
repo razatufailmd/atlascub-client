@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -22,12 +22,14 @@ import {
   useDeleteReviewMutation,
 } from "@/lib/store/apis/review-api";
 import { useGetProductsQuery } from "@/lib/store/apis/product-api";
+import Link from "next/link";
 
 export default function ProductDetailPage() {
   const { product, isLoading, isError, refetch: refetchProduct } = useProduct();
   const { user } = useUser();
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [isDeletingReview, setIsDeletingReview] = useState<string | null>(null);
+  const { isSignedIn } = useAuth();
   
   // Fetch reviews
   const {
@@ -201,8 +203,21 @@ export default function ProductDetailPage() {
                 )}
               </div>
             </div>
-            {user && !showReviewForm && !hasUserReviewed && (
-              <Button onClick={() => setShowReviewForm(true)}>Write a Review</Button>
+            {/* 🛡️ AUTH-AWARE REVIEW BUTTON */}
+            {!showReviewForm && !hasUserReviewed && (
+              <>
+                {isSignedIn ? (
+                  <Button onClick={() => setShowReviewForm(true)}>
+                    Write a Review
+                  </Button>
+                ) : (
+                  <Button asChild variant="outline">
+                    <Link href="/sign-in">
+                      Log in to write a review
+                    </Link>
+                  </Button>
+                )}
+              </>
             )}
           </div>
 

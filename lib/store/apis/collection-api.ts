@@ -1,4 +1,5 @@
 import { api, API_TAGS } from "../api";
+import { Product } from "./product-api";
 
 export interface Collection {
   id: string;
@@ -96,6 +97,20 @@ export const collectionApi = api.injectEndpoints({
       }),
       invalidatesTags: [API_TAGS.COLLECTION, API_TAGS.PRODUCT],
     }),
+
+    getCollectionProducts: builder.query<
+      { collection: Collection; products: Product[]; totalProducts: number },
+      string
+    >({
+      query: (id) => ({
+        url: `/collections/${id}/products`,
+        method: "GET",
+      }),
+      providesTags: (result, error, id) => [
+        { type: API_TAGS.COLLECTION, id },
+        { type: API_TAGS.PRODUCTS, id: `collection-${id}` },
+      ],
+    }),
   }),
   overrideExisting: false,
 });
@@ -108,4 +123,5 @@ export const {
   useDeleteCollectionMutation,
   useAddProductToCollectionMutation,
   useRemoveProductFromCollectionMutation,
+  useGetCollectionProductsQuery,
 } = collectionApi;

@@ -3,10 +3,12 @@
 import { useCallback, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
-  toggleWishlist,
+  toggleItem as toggleItemAction, // Aliased to prevent naming collision
   removeFromWishlist,
   clearWishlist,
   hydrateWishlist,
+  openWishlistDrawer,
+  closeWishlistDrawer,
   WishlistItem,
 } from "@/lib/store/features/wishlistSlice";
 
@@ -15,9 +17,11 @@ const STORAGE_KEY = "atlascub-wishlist";
 export function useWishlist() {
   const dispatch = useAppDispatch();
   const items = useAppSelector((state) => state.wishlist.items);
+  const isOpen = useAppSelector((state) => state.wishlist.isOpen);
   const itemCount = items.length;
 
   // Hydrate from localStorage on mount
+  // (Note: If you are using the new StoreSyncProvider globally, you can safely remove these two useEffects to prevent double-hydration)
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
@@ -45,7 +49,7 @@ export function useWishlist() {
   const addToWishlist = useCallback(
     (item: WishlistItem) => {
       if (!isInWishlist(item.productId)) {
-        dispatch(toggleWishlist(item));
+        dispatch(toggleItemAction(item));
       }
     },
     [dispatch, isInWishlist]
@@ -60,7 +64,7 @@ export function useWishlist() {
 
   const toggleItem = useCallback(
     (item: WishlistItem) => {
-      dispatch(toggleWishlist(item));
+      dispatch(toggleItemAction(item));
     },
     [dispatch]
   );
@@ -72,10 +76,13 @@ export function useWishlist() {
   return {
     items,
     itemCount,
+    isOpen,
     isInWishlist,
     addToWishlist,
     removeFromWishlist: removeFromWishlistById,
     toggleItem,
     clearWishlist: clearAll,
+    openWishlistDrawer: () => dispatch(openWishlistDrawer()),
+    closeWishlistDrawer: () => dispatch(closeWishlistDrawer()),
   };
 }

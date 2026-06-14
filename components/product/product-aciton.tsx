@@ -12,6 +12,8 @@ import { Product } from "@/lib/store/apis/product-api";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { useCart } from "@/hooks/use-cart";
 import { toast } from "sonner";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 interface ProductActionsProps {
   product: Product;
@@ -25,6 +27,10 @@ export function ProductActions({ product }: ProductActionsProps) {
   const { isInWishlist, toggleItem } = useWishlist();
   const { addItem, openCartDrawer } = useCart();
   const inWishlist = isInWishlist(product.id);
+
+  // Auth Protection Context
+  const { isSignedIn, isLoaded } = useAuth();
+  const router = useRouter();
 
   // Set default size and color when product loads
   useEffect(() => {
@@ -43,7 +49,7 @@ export function ProductActions({ product }: ProductActionsProps) {
     }
 
     addItem({
-      id: `${product.id}-${selectedSize}-${selectedColor}-${Date.now()}`,
+      id: `${product.id}-${selectedSize}-${selectedColor}`,
       productId: product.id,
       name: product.name,
       price: product.price,
@@ -102,26 +108,54 @@ export function ProductActions({ product }: ProductActionsProps) {
       {/* Quantity Selector */}
       <QuantitySelector
         quantity={quantity}
-        onIncrease={() => setQuantity((q) => Math.min(q + 1, 10))}
+        // Force limit constraints on UI
+        onIncrease={() => setQuantity((q) => Math.min(q + 1, 5))}
         onDecrease={() => setQuantity((q) => Math.max(q - 1, 1))}
       />
 
-      {/* Add to Cart Button */}
-      <AddToCartButton
-        onClick={handleAddToCart}
-        disabled={isAddToCartDisabled}
-        inStock={product.inStock}
-      />
+      {/* AUTHENTICATION GUARD: Swap buttons if not signed in */}
+      {!isLoaded ? (
+        <div className="space-y-4">
+          <Button disabled className="w-full" size="lg">Loading...</Button>
+        </div>
+      ) : !isSignedIn ? (
+        <div className="space-y-4">
+          <Button 
+            className="w-full" 
+            size="lg" 
+            onClick={() => router.push("/sign-in")}
+          >
+            Sign In to Purchase
+          </Button>
+          <Button
+            variant="outline"
+            className="flex w-full items-center justify-center gap-2"
+            onClick={() => router.push("/sign-in")}
+          >
+            <Heart className="h-4 w-4" />
+            Sign in to Wishlist
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {/* Add to Cart Button */}
+          <AddToCartButton
+            onClick={handleAddToCart}
+            disabled={isAddToCartDisabled}
+            inStock={product.inStock}
+          />
 
-      {/* Wishlist Button */}
-      <Button
-        variant="outline"
-        className="flex w-full items-center justify-center gap-2"
-        onClick={handleWishlistToggle}
-      >
-        <Heart className={`h-4 w-4 ${inWishlist ? "fill-red-500 text-red-500" : ""}`} />
-        {inWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
-      </Button>
+          {/* Wishlist Button */}
+          <Button
+            variant="outline"
+            className="flex w-full items-center justify-center gap-2"
+            onClick={handleWishlistToggle}
+          >
+            <Heart className={`h-4 w-4 ${inWishlist ? "fill-red-500 text-red-500" : ""}`} />
+            {inWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+          </Button>
+        </div>
+      )}
 
       <Separator />
 

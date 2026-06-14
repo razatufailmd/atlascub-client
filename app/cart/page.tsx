@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Trash2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CartItem } from "@/components/cart/cart-item";
@@ -10,10 +9,35 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { SlugBreadcrumb } from "@/components/shared/slug-breadcrumb";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { clearCart, removeFromCart, updateQuantity } from "@/lib/store/features/cartSlice";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 export default function CartPage() {
   const dispatch = useAppDispatch();
   const { items } = useAppSelector((state) => state.cart);
+  
+  // Auth Wall
+  const { isSignedIn, isLoaded } = useAuth();
+  const router = useRouter();
+
+  if (!isLoaded) return null; // Wait for clerk to init
+
+  if (!isSignedIn) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <SlugBreadcrumb />
+        <EmptyState
+          title="Sign in required"
+          description="Please sign in to view and manage your shopping cart."
+          icon={<Lock className="h-10 w-10 text-muted-foreground" />}
+          action={{
+            label: "Sign In / Register",
+            onClick: () => router.push("/sign-in")
+          }}
+        />
+      </div>
+    );
+  }
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -66,11 +90,7 @@ export default function CartPage() {
 
             <div className="border-t border-border p-4">
               <div className="flex items-center justify-between">
-                <Button
-                  variant="ghost"
-                  asChild
-                  className="gap-2"
-                >
+                <Button variant="ghost" asChild className="gap-2">
                   <Link href="/shop">
                     <ArrowLeft className="h-4 w-4" />
                     Continue Shopping
@@ -101,10 +121,10 @@ export default function CartPage() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Shipping</span>
-                <span>Calculated at checkout</span>
+                <span className="text-emerald-600 font-medium">Calculated at checkout</span>
               </div>
               <Separator />
-              <div className="flex justify-between text-base font-semibold">
+              <div className="flex justify-between text-base font-bold">
                 <span>Total</span>
                 <span>₹{subtotal.toLocaleString()}</span>
               </div>

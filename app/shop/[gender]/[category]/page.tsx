@@ -1,38 +1,39 @@
 "use client";
 
+import { useState } from "react";
 import { useParams } from "next/navigation";
-import { FilterSidebar } from "@/components/products/filter-sidebar";
+import { Filter, X } from "lucide-react";
 import { SortDropdown } from "@/components/products/sort-dropdown";
-import { MobileFilters } from "@/components/products/mobile-filters";
 import { ProductGrid } from "@/components/products/product-grid";
 import { SlugBreadcrumb } from "@/components/shared/slug-breadcrumb";
-import { useProductFilters } from "@/hooks/use-product-filters";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useGetProductsQuery } from "@/lib/store/apis/product-api";
 import { useGetCategoryBySlugQuery } from "@/lib/store/apis/category-api";
+
+const availableSizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
 export default function CategoryPage() {
   const params = useParams();
   const gender = params.gender as string;
   const categorySlug = params.category as string;
 
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<"newest" | "price_asc" | "price_desc" | "popularity">("newest");
+  const [page, setPage] = useState(1);
+
   const { data: category, isLoading: categoryLoading } = useGetCategoryBySlugQuery({
     gender,
     slug: categorySlug,
   });
 
-  const { filters, updateFilters, hasActiveFilters, clearFilters } = useProductFilters();
-
-  // Build query params - ensure arrays are sent properly
+  // Build query params - send sizes as array
   const queryParams = {
     gender: gender,
     category: categorySlug,
-    sizes: filters.sizes.length > 0 ? filters.sizes : undefined,
-    colors: filters.colors.length > 0 ? filters.colors : undefined,
-    minPrice: filters.priceRange[0] > 0 ? filters.priceRange[0] : undefined,
-    maxPrice: filters.priceRange[1] < 50000 ? filters.priceRange[1] : undefined,
-    inStock: filters.inStockOnly ? "true" : undefined,
-    sortBy: filters.sortBy !== "newest" ? filters.sortBy : undefined,
-    page: 1,
+    sizes: selectedSizes.length > 0 ? selectedSizes : undefined, // This is already an array
+    sortBy: sortBy !== "newest" ? sortBy : undefined,
+    page,
     limit: 12,
   };
 
@@ -40,9 +41,53 @@ export default function CategoryPage() {
   
   const products = data?.data || [];
   const totalProducts = data?.total || 0;
+  const totalPages = data?.totalPages || 0;
 
   const categoryTitle = category?.name || categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1);
   const categoryDescription = category?.description || `Explore our collection of ${categoryTitle.toLowerCase()}`;
+
+  const toggleSize = (size: string) => {
+    setSelectedSizes(prev =>
+      prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]
+    );
+    setPage(1);
+  };
+
+  const clearSizeFilter = () => {
+    setSelectedSizes([]);
+    setPage(1);
+  };
+
+  const hasActiveFilters = selectedSizes.length > 0;
+
+  // Size Filter Component
+  const SizeFilterContent = () => (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-medium">Size</h3>
+        {hasActiveFilters && (
+          <button onClick={clearSizeFilter} className="text-xs text-muted-foreground hover:text-primary transition-colors">
+            Clear all
+          </button>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {availableSizes.map((size) => (
+          <button
+            key={size}
+            onClick={() => toggleSize(size)}
+            className={`h-10 w-12 rounded-md border text-sm font-medium transition-all ${
+              selectedSizes.includes(size)
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-background hover:border-primary"
+            }`}
+          >
+            {size}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -60,53 +105,88 @@ export default function CategoryPage() {
       {/* Filters and Sort Row */}
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          {/* Mobile Filters */}
-          <MobileFilters filters={filters} onChange={updateFilters} />
-          
-          {/* Active Filters Indicator */}
+          {/* Mobile Filter Button */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="gap-2 lg:hidden">
+                <Filter className="h-4 w-4" />
+                Size
+                {hasActiveFilters && (
+                  <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+                    {selectedSizes.length}
+                  </span>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-full max-w-sm p-4">
+              <SheetHeader>
+                <SheetTitle>Filter by Size</SheetTitle>
+              </SheetHeader>
+              <div className="mt-4">
+                <SizeFilterContent />
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* Desktop Size Filter - Only show on larger screens */}
+          <div className="hidden lg:block">
+            <SizeFilterContent />
+          </div>
+
+          {/* Clear Filters Button - Only show when filters are active */}
           {hasActiveFilters && (
             <button
-              onClick={clearFilters}
-              className="text-xs text-muted-foreground hover:text-primary transition-colors"
+              onClick={clearSizeFilter}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
             >
-              Clear all filters
+              <X className="h-3 w-3" />
+              Clear size filters
             </button>
           )}
         </div>
 
-        <SortDropdown
-          value={filters.sortBy}
-          onChange={(value) => updateFilters({ sortBy: value })}
-        />
+        <SortDropdown value={sortBy} onChange={(value) => { setSortBy(value); setPage(1); }} />
       </div>
 
-      {/* Main Content: Sidebar + Grid */}
-      <div className="flex flex-col gap-8 lg:flex-row">
-        {/* Desktop Sidebar */}
-        <aside className="lg:w-64 lg:shrink-0">
-          <div className="sticky top-24 hidden lg:block">
-            <FilterSidebar
-              filters={filters}
-              onChange={updateFilters}
-            />
+      {/* Product Grid */}
+      <div className="flex-1">
+        <ProductGrid
+          products={products}
+          isLoading={isLoading || isFetching || categoryLoading}
+          columns={4}
+        />
+        
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-8 flex items-center justify-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Page {page} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+            >
+              Next
+            </Button>
           </div>
-        </aside>
-
-        {/* Product Grid */}
-        <div className="flex-1">
-          <ProductGrid
-            products={products}
-            isLoading={isLoading || isFetching || categoryLoading}
-            columns={4}
-          />
-          
-          {/* Results Count */}
-          {!isLoading && products.length > 0 && (
-            <div className="mt-8 text-center text-sm text-muted-foreground">
-              Showing {products.length} of {totalProducts} products
-            </div>
-          )}
-        </div>
+        )}
+        
+        {/* Results Count */}
+        {!isLoading && products.length > 0 && (
+          <div className="mt-4 text-center text-sm text-muted-foreground">
+            Showing {products.length} of {totalProducts} products
+          </div>
+        )}
       </div>
     </div>
   );

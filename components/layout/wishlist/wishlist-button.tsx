@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { WishlistItem } from "@/lib/store/features/wishlistSlice";
 import { Product } from "@/lib/store/apis/product-api";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 interface WishlistButtonProps {
   product: Product;
@@ -16,6 +18,10 @@ interface WishlistButtonProps {
 export function WishlistButton({ product, size = "md", className = "" }: WishlistButtonProps) {
   const { isInWishlist, toggleItem } = useWishlist();
   const inWishlist = isInWishlist(product.id);
+
+  // Auth Protection
+  const { isSignedIn } = useAuth();
+  const router = useRouter();
 
   const getSizeClasses = () => {
     switch (size) {
@@ -31,6 +37,12 @@ export function WishlistButton({ product, size = "md", className = "" }: Wishlis
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // REDIRECT IF NOT SIGNED IN
+    if (!isSignedIn) {
+      router.push("/sign-in");
+      return;
+    }
 
     const wishlistItem: WishlistItem = {
       id: product.id,
