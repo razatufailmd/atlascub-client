@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 
 interface ImageCarouselProps {
@@ -119,6 +119,8 @@ export function ImageCarousel({ images, alt, className = "" }: ImageCarouselProp
       {/* Zoom Dialog */}
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
         <DialogContent className="max-w-5xl border-border bg-background p-0 sm:rounded-xl">
+          <DialogTitle>
+
           <div className="relative flex items-center justify-center p-4">
             <button
               onClick={() => setIsZoomed(false)}
@@ -153,6 +155,7 @@ export function ImageCarousel({ images, alt, className = "" }: ImageCarouselProp
               </>
             )}
           </div>
+          </DialogTitle>
         </DialogContent>
       </Dialog>
     </div>

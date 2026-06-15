@@ -31,12 +31,6 @@ export const companyLinks = [
     description: "Get in touch with our team",
     icon: "📧",
   },
-  {
-    name: "Sustainability",
-    href: "/sustainability",
-    description: "Our commitment to ethical fashion",
-    icon: "🌱",
-  },
 ];
 
 export const categories = {

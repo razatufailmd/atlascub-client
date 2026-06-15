@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background/30">
       <div className="container mx-auto px-4 pt-6">
         <SlugBreadcrumb />
       </div>

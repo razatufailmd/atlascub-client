@@ -1,15 +1,6 @@
 "use client";
 
 import {
-  mockProducts,
-  getProductById,
-  getProductBySlug,
-  getProductsByGender,
-  getProductsByCategory,
-  getNewArrivals,
-  getBestSellers,
-} from "@/lib/mock/products";
-import {
   genderCategories,
   getCategoryBySlug,
   getAllCategories,
@@ -26,13 +17,6 @@ import { mockOrders, getOrderById, getOrdersByStatus } from "@/lib/mock/orders";
 export function useMockData() {
   return {
     // Products
-    products: mockProducts,
-    getProductById,
-    getProductBySlug,
-    getProductsByGender,
-    getProductsByCategory,
-    getNewArrivals,
-    getBestSellers,
 
     // Categories
     genderCategories,
@@ -53,13 +37,6 @@ export function useMockData() {
 
 // Direct exports for non-hook usage
 export {
-  mockProducts,
-  getProductById,
-  getProductBySlug,
-  getProductsByGender,
-  getProductsByCategory,
-  getNewArrivals,
-  getBestSellers,
   genderCategories,
   getCategoryBySlug,
   getAllCategories,

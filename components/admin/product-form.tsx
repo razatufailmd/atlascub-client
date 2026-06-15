@@ -28,6 +28,7 @@ import {
   useCreateProductMutation,
   useUpdateProductMutation,
 } from "@/lib/store/apis/product-api";
+import { TagsInput } from "./tags-input";
 
 const genderOptions = ["men", "women", "kids"];
 
@@ -42,6 +43,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
   const [images, setImages] = useState<string[]>(initialData?.images || []);
   const [sizes, setSizes] = useState<string[]>(initialData?.sizes || []);
   const [colors, setColors] = useState(initialData?.colors || []);
+  const [tags, setTags] = useState<string[]>(initialData?.tags || []);
 
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
@@ -64,9 +66,11 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
       isNew: false,
       isBestSeller: false,
       inventory: 0,
-      ...initialData,
+      tags: initialData?.tags || [],
+      gender: initialData?.gender || "men",
       // Override category with the slug from the category object
       category: initialCategorySlug,
+      ...initialData,
     },
   });
 
@@ -90,6 +94,14 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
   useEffect(() => {
     setValue("colors", colors);
   }, [colors, setValue]);
+
+  useEffect(() => {
+    setValue("tags", tags);
+  }, [tags, setValue]);
+
+  useEffect(() => {
+    setValue("gender", selectedGender);
+  }, [selectedGender, setValue]);
 
   const onSubmit = async (data: ProductFormData) => {
     try {
@@ -310,6 +322,18 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
               <CardTitle>Additional Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+               {/* Tags Input */}
+              <div>
+                <Label htmlFor="tags">Tags (for search)</Label>
+                <TagsInput
+                  value={tags}
+                  onChange={setTags}
+                  placeholder="e.g., linen, summer, premium, cotton"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Tags help customers find products through search
+                </p>
+              </div>
               <div>
                 <Label htmlFor="details">Product Details</Label>
                 <Textarea

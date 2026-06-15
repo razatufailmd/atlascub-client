@@ -10,7 +10,6 @@ const iconMap = {
   "✨": <Sparkles className="h-4 w-4" />,
   "🎧": <HelpCircle className="h-4 w-4" />,
   "📧": <Mail className="h-4 w-4" />,
-  "🌱": <Leaf className="h-4 w-4" />,
 };
 
 import { Sparkles } from "lucide-react";

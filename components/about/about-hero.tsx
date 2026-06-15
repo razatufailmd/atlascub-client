@@ -7,7 +7,7 @@ export function AboutHero() {
   const { hero } = aboutData;
 
   return (
-    <section className="relative min-h-[70vh] overflow-hidden bg-muted">
+    <section className="relative min-h-[70vh] overflow-hidden bg-background/30">
       {/* Background Pattern */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/10" />

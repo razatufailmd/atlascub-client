@@ -77,10 +77,24 @@ export const aboutData = {
   team: [
     {
       id: 1,
+      name: "Imran Ansari",
+      role: "Founder & PM",
+      bio: "",
+      image: "/images/team/profileTemp.svg",
+    },
+    {
+      id: 2,
+      name: "Tufail Ansari",
+      role: "Co-Founder",
+      bio: "",
+      image: "/images/team/profileTemp.svg",
+    },
+    {
+      id: 3,
       name: "Md Danish Raza",
-      role: "Founder & Creative Director",
-      bio: "Combining technical software architecture with a deep passion for modern aesthetics, Danish leads both the digital platform and the creative design vision for Atlascub.",
-      image: "/images/team/danish.jpg",
+      role: "Developer and Maintainer",
+      bio: "",
+      image: "/images/team/profileTemp.svg",
     },
     // Add more team members as needed
   ],

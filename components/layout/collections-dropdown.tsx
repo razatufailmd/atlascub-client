@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Sparkles, Tag, Sun, Flame } from "lucide-react";
+import { ChevronDown, Sparkles, Tag, Sun, Flame, Loader2 } from "lucide-react";
 import { categories } from "@/lib/constants/navigation";
+import { useGetCollectionsQuery } from "@/lib/store/apis/collection-api";
 
-const typeIcons = {
+const typeIcons: Record<string, React.ReactNode> = {
   festival: <Sparkles className="h-4 w-4" />,
   campaign: <Sun className="h-4 w-4" />,
   season: <Flame className="h-4 w-4" />,
@@ -15,7 +16,31 @@ const typeIcons = {
 
 export function CollectionsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const collections = categories.collections;
+  
+  // 🛡️ API Integration
+  const { data: dbCollections, isLoading, isError } = useGetCollectionsQuery();
+
+  // Smart Fallback Logic
+  const displayCollections = useMemo(() => {
+    if (isLoading) return []; // Optional: could show skeletons here, but skipping to avoid nav flickering
+    
+    if (!isError && dbCollections && dbCollections.length > 0) {
+      // Map database collections to match the UI structure
+      return dbCollections
+        .filter((c) => c.isActive)
+        .map((c) => ({
+          name: c.name,
+          slug: c.slug,
+          description: c.description || "Explore this collection",
+          type: c.type || "season",
+          badge: c.badge,
+          href: `/collections/${c.slug}`,
+        }));
+    }
+    
+    // Fallback to static mock data on error or empty DB
+    return categories.collections || [];
+  }, [dbCollections, isLoading, isError]);
 
   return (
     <div
@@ -23,9 +48,6 @@ export function CollectionsDropdown() {
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
-
-      
-
       <Link
         href="/collections/all"
         className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary"
@@ -45,14 +67,15 @@ export function CollectionsDropdown() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-0 top-full pt-4"
+            className="absolute left-0 top-full pt-4 z-50"
           >
             <div className="w-80 rounded-lg border bg-popover p-4 shadow-lg">
-              <div className="mb-3 px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Curated for you
+              <div className="mb-3 flex items-center justify-between px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <span>Curated for you</span>
+                {isLoading && <Loader2 className="h-3 w-3 animate-spin" />}
               </div>
               <div className="grid gap-2">
-                {collections.map((collection) => (
+                {displayCollections.map((collection) => (
                   <Link
                     key={collection.slug}
                     href={collection.href}
@@ -70,7 +93,7 @@ export function CollectionsDropdown() {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground line-clamp-1">
                         {collection.description}
                       </p>
                     </div>

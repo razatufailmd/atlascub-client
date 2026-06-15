@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Menu, X, ChevronDown, Sparkles, Building2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,6 +16,7 @@ import {
 
 import { genderLinks, categories, companyLinks } from "@/lib/constants/navigation";
 import { useUserRole } from "@/hooks/use-user-role";
+import { useGetCollectionsQuery } from "@/lib/store/apis/collection-api";
 
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
@@ -23,6 +24,24 @@ export function MobileMenu() {
   const [expandedCollections, setExpandedCollections] = useState(false);
   const [expandedCompany, setExpandedCompany] = useState(false);
   const { isAdmin } = useUserRole();
+
+  // 🛡️ API Integration
+  const { data: dbCollections, isError } = useGetCollectionsQuery();
+
+  // Smart Fallback Logic for Mobile
+  const displayCollections = useMemo(() => {
+    if (!isError && dbCollections && dbCollections.length > 0) {
+      return dbCollections
+        .filter((c) => c.isActive)
+        .map((c) => ({
+          name: c.name,
+          slug: c.slug,
+          description: c.description || "Explore this collection",
+          href: `/collections/${c.slug}`,
+        }));
+    }
+    return categories.collections || [];
+  }, [dbCollections, isError]);
 
   const toggleGender = (gender: string) => {
     setExpandedGender(expandedGender === gender ? null : gender);
@@ -57,7 +76,6 @@ export function MobileMenu() {
               {/* Gender Sections */}
               {genderLinks.map((gender) => (
                 <div key={gender.name} className="space-y-2">
-                  {/* Parent Gender Link - Now Clickable */}
                   <div className="flex items-center justify-between">
                     <Link
                       href={gender.href}
@@ -89,7 +107,7 @@ export function MobileMenu() {
                         className="overflow-hidden pl-4"
                       >
                         <div className="space-y-2 border-l-2 border-primary/20 pl-3">
-                          {categories[gender.slug as "men" | "women" | "kids"].map((cat) => (
+                          {categories[gender.slug as "men" | "women" | "kids"]?.map((cat) => (
                             <Link
                               key={cat.name}
                               href={cat.href}
@@ -109,9 +127,8 @@ export function MobileMenu() {
                 </div>
               ))}
 
-              {/* Collections Section */}
+              {/* Dynamic Collections Section */}
               <div className="space-y-2">
-                {/* Parent Collections Link - Now Clickable */}
                 <div className="flex items-center justify-between">
                   <Link
                     href="/collections/all"
@@ -144,7 +161,7 @@ export function MobileMenu() {
                       className="overflow-hidden pl-4"
                     >
                       <div className="space-y-2 border-l-2 border-primary/20 pl-3">
-                        {categories.collections?.map((collection) => (
+                        {displayCollections.map((collection) => (
                           <Link
                             key={collection.slug}
                             href={collection.href}
@@ -165,7 +182,6 @@ export function MobileMenu() {
 
               {/* Company Section */}
               <div className="space-y-2">
-                {/* Parent Company Link - Now Clickable */}
                 <div className="flex items-center justify-between">
                   <Link
                     href="/about"

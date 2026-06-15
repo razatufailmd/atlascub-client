@@ -22,6 +22,7 @@ export const productSchema = z.object({
   details: z.string().optional(),
   sizing: z.string().optional(),
   shipping: z.string().optional(),
+  tags: z.array(z.string()).optional(),
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;
