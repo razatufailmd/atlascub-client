@@ -53,7 +53,6 @@ export function SearchSuggestions({ query, onSelect, isOpen, onClose, className 
     
     if (debouncedQuery.length >= 2) {
       setIsLoading(true);
-      // NOTE: Replace NEXT_PUBLIC_API_URL logic with your actual RTK Query endpoint if desired.
       fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/products/suggestions?q=${encodeURIComponent(debouncedQuery)}`)
         .then(res => res.json())
         .then(data => {
@@ -117,8 +116,8 @@ export function SearchSuggestions({ query, onSelect, isOpen, onClose, className 
           initial="hidden"
           animate="visible"
           exit="exit"
-          // 🛡️ SMART POSITIONING: Flows naturally on mobile, pops out absolute on desktop
-          className={`w-full relative md:absolute md:top-full md:left-0 md:right-0 md:mt-3 z-50 rounded-xl border border-border/50 bg-background/95 backdrop-blur-xl shadow-2xl overflow-hidden ${className}`}
+          // 🛡️ FIX: Made absolute on ALL screen sizes and used z-[100] bracket syntax
+          className={`absolute top-full left-0 right-0 w-full mt-2 z-[100] rounded-xl border border-border/50 bg-background/95 backdrop-blur-xl shadow-2xl overflow-hidden ${className}`}
         >
           <div className="max-h-[60vh] md:max-h-96 overflow-y-auto overscroll-contain">
             

@@ -12,21 +12,25 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   async (config) => {
     try {
-      // Axios interceptors run outside of React render cycles, so we fetch tokens
-      // via window.__clerk_client if available, or dynamically import the template handler.
-      const { getToken } = await import("@clerk/nextjs");
+      // Because we are running in the browser, we can access the global Clerk object.
+      // This is much safer and more reliable than dynamically importing the server-side getToken.
 
-      // PASS YOUR TEMPLATE NAME HERE to get a verified asymmetric signature
-      const token = await getToken({ template: "nestjs" });
+      let token = null;
 
-      // console.log(
-      //   "🔑 Token retrieved:",
-      //   token ? `${token.substring(0, 50)}...` : "NO TOKEN"
-      // );
+      // 🛡️ FIX: Use the window.Clerk object provided by <ClerkProvider>
+      // We pass NO arguments to session.getToken(), which automatically
+      // requests the default Session Token (the one containing your names/email)
+      if (
+        typeof window !== "undefined" &&
+        window.Clerk &&
+        window.Clerk.session
+      ) {
+        token = await window.Clerk.session.getToken();
+      }
 
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
-        console.log("✅ Token added to headers");
+        console.log("✅ Session Token added to headers");
       } else {
         console.warn("⚠️ No token available - user may not be signed in");
       }

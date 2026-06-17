@@ -23,15 +23,15 @@ export default function HomePage() {
         {/* 2. Brand Sourcing Values */}
         <BrandValues />
         {/* 3. Featured Collections */}
-        <FeaturedCollection/>
-        {/* 4. Gender/Department Split Grid */}
+        {/* 5. discover products */}
+        <DiscoverMore/>
         <GenderGrid />
         {/* best work */}
         <CinematicShowcase/>
-        {/* 5. discover products */}
-        <DiscoverMore/>
         {/* 6. Category Silhouette Showcase */}
         <CategoryShowcase />
+        <FeaturedCollection/>
+        {/* 4. Gender/Department Split Grid */}
         <FeatureSection/>
         {/* 7. Dynamic Newsletter Signup */}
         <NewsletterSignup />

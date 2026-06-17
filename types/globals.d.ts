@@ -6,6 +6,16 @@ declare global {
   }
 }
 
+declare global {
+  interface Window {
+    Clerk?: {
+      session?: {
+        getToken: () => Promise<string | null>;
+      };
+    };
+  }
+}
+
 export interface Product {
   id: string;
   name: string;
