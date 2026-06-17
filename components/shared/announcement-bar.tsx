@@ -20,23 +20,23 @@ const STATIC_ANNOUNCEMENTS: Announcement[] = [
 {
 id: "ann_1",
 overline: "Complimentary",
-text: "Enjoy complimentary shipping on all orders over ₹2,499 across India.",
+text: "Enjoy complimentary shipping on all orders over ₹4999 across India.",
 ctaText: "Details",
-ctaHref: "/shipping-policy",
+ctaHref: "/support",
 },
 {
 id: "ann_2",
 overline: "Launch Offer",
-text: "Take 15% off your first Atlascub Studio order. Use code: FIRST15.",
+text: "Grab heavy discounts on every product.",
 ctaText: "Shop Originals",
-ctaHref: "/shop",
+ctaHref: "/search",
 },
 {
 id: "ann_3",
 overline: "Limited Drop",
 text: "Our Summer Solstice French Linen collection is now live.",
 ctaText: "Explore Collection",
-ctaHref: "/collections/summer-26",
+ctaHref: "/collections",
 },
 ];
 

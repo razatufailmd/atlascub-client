@@ -10,19 +10,12 @@ interface ReviewItemProps {
   canDelete?: boolean;
   onDelete?: () => void;
   isDeleting?: boolean;
-  hasReviewed?: boolean;
 }
 
-export function ReviewItem({ review, canDelete, onDelete, isDeleting, hasReviewed = false  }: ReviewItemProps) {
+export function ReviewItem({ review, canDelete, onDelete, isDeleting }: ReviewItemProps) {
+  // 🛡️ FIX: Removed the "hasReviewed" early return from here!
+  // This component should ONLY be responsible for rendering the review itself.
 
-    if (hasReviewed) {
-        return (
-          <div className="rounded-lg border border-border bg-muted/30 p-5 text-center">
-            <p className="text-muted-foreground">You have already reviewed this product.</p>
-            <p className="text-sm text-muted-foreground mt-1">Thank you for your feedback!</p>
-          </div>
-        );
-      }
   return (
     <div className="border-b border-border pb-4 last:border-0">
       <div className="flex items-start justify-between">
@@ -30,32 +23,37 @@ export function ReviewItem({ review, canDelete, onDelete, isDeleting, hasReviewe
           <div className="flex items-center gap-2">
             <span className="font-medium text-foreground">{review.userName}</span>
             {review.isVerified && (
-              <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700">
+              <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700 uppercase tracking-wider">
                 Verified
               </span>
             )}
           </div>
           <ReviewStar rating={review.rating} size="sm" />
         </div>
+        
+        {/* 🛡️ Delete button will now correctly show if canDelete is true */}
         {canDelete && (
           <button
             onClick={onDelete}
             disabled={isDeleting}
-            className="text-xs text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
+            className="text-xs font-medium text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50 flex items-center gap-1 bg-muted/50 px-2 py-1 rounded-md"
           >
             {isDeleting ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
+              <>
+                <Loader2 className="h-3 w-3 animate-spin" /> Deleting...
+              </>
             ) : (
-              "Delete"
+              "Delete Review"
             )}
           </button>
         )}
       </div>
+      
       {review.title && (
-        <h4 className="mt-2 font-medium text-foreground">{review.title}</h4>
+        <h4 className="mt-3 font-medium text-foreground">{review.title}</h4>
       )}
-      <p className="mt-1 text-sm text-muted-foreground">{review.comment}</p>
-      <p className="mt-2 text-xs text-muted-foreground">
+      <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{review.comment}</p>
+      <p className="mt-3 text-xs text-muted-foreground">
         {formatDistanceToNow(new Date(review.createdAt), { addSuffix: true })}
       </p>
     </div>

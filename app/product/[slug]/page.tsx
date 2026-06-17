@@ -186,94 +186,71 @@ export default function ProductDetailPage() {
           />
         </div>
 
-        {/* Reviews Section */}
-        <div className="mt-12">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div>
-              <h2 className="heading-sm font-primary">Customer Reviews</h2>
-              <div className="flex items-center gap-3 mt-1">
-                <ReviewStar rating={Math.round(averageRating)} />
-                <span className="text-sm text-muted-foreground">
-                  {totalReviews} {totalReviews === 1 ? "review" : "reviews"}
-                </span>
-                {averageRating > 0 && (
-                  <span className="text-sm font-medium text-foreground">
-                    {averageRating.toFixed(1)} / 5
-                  </span>
-                )}
-              </div>
-            </div>
-            {/* 🛡️ AUTH-AWARE REVIEW BUTTON */}
-            {!showReviewForm && !hasUserReviewed && (
-              <>
-                {isSignedIn ? (
-                  <Button onClick={() => setShowReviewForm(true)}>
-                    Write a Review
-                  </Button>
-                ) : (
-                  <Button asChild variant="outline">
-                    <Link href="/sign-in">
-                      Log in to write a review
-                    </Link>
-                  </Button>
-                )}
-              </>
-            )}
-          </div>
+        <div className="mb-8">
+  {!user ? (
+    <div className="rounded-xl border border-border bg-muted/20 p-6 text-center">
+      <p className="text-muted-foreground">
+        Please <a href="/sign-in" className="text-primary hover:underline font-medium">sign in</a> to write a review.
+      </p>
+    </div>
+  ) : hasUserReviewed ? (
+    <div className="rounded-xl border border-border bg-primary/5 p-6 text-center">
+      <p className="text-foreground font-medium">You have already reviewed this product.</p>
+      <p className="text-sm text-muted-foreground mt-1">Thank you for sharing your feedback with the community!</p>
+    </div>
+  ) : showReviewForm ? (
+    <div className="mb-6">
+      <ReviewForm
+        productId={product.id}
+        onSubmit={handleSubmitReview}
+        onCancel={() => setShowReviewForm(false)}
+        isSubmitting={isSubmittingReview}
+      />
+    </div>
+  ) : (
+    <Button onClick={() => setShowReviewForm(true)} className="w-full sm:w-auto">
+      Write a Review
+    </Button>
+  )}
+</div>
 
-          {/* Review Form */}
-          {showReviewForm && (
-            <div className="mb-6">
-              <ReviewForm
-                productId={product.id}
-                onSubmit={handleSubmitReview}
-                onCancel={() => setShowReviewForm(false)}
-                isSubmitting={isSubmittingReview}
-              />
-            </div>
-          )}
-
-          {/* Reviews List */}
-          {reviewsLoading ? (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="border-b border-border pb-4">
-                  <Skeleton className="h-5 w-32 mb-2" />
-                  <Skeleton className="h-4 w-24 mb-2" />
-                  <Skeleton className="h-16 w-full" />
-                </div>
-              ))}
-            </div>
-          ) : reviewsError ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">Failed to load reviews</p>
-              <Button
-                variant="link"
-                onClick={() => refetchReviews()}
-                className="mt-2"
-              >
-                Try again
-              </Button>
-            </div>
-          ) : reviews && reviews.length > 0 ? (
-            <div className="space-y-4 max-h-[500px] overflow-auto pr-2">
-              {reviews.map((review) => (
-                <ReviewItem
-                  key={review.id}
-                  review={review}
-                  canDelete={review.userId === user?.id}
-                  onDelete={() => handleDeleteReview(review.id)}
-                  isDeleting={isDeletingReview === review.id}
-                  hasReviewed={hasUserReviewed}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground border border-dashed border-border rounded-lg">
-              No reviews yet. Be the first to review this product!
-            </div>
-          )}
-        </div>
+{/* Reviews List */}
+{reviewsLoading ? (
+  <div className="space-y-6">
+    {[1, 2, 3].map((i) => (
+      <div key={i} className="border-b border-border pb-4">
+        <Skeleton className="h-5 w-32 mb-2" />
+        <Skeleton className="h-4 w-24 mb-3" />
+        <Skeleton className="h-16 w-full" />
+      </div>
+    ))}
+  </div>
+) : reviewsError ? (
+  <div className="text-center py-12 bg-muted/20 rounded-xl">
+    <p className="text-muted-foreground mb-3">Failed to load reviews</p>
+    <Button variant="outline" onClick={() => refetchReviews()}>
+      Try again
+    </Button>
+  </div>
+) : reviews && reviews.length > 0 ? (
+  <div className="space-y-6 max-h-[600px] overflow-y-auto pr-4 custom-scrollbar">
+    {reviews.map((review) => (
+      <ReviewItem
+        key={review.id}
+        review={review}
+        canDelete={review.userId === user?.id}
+        onDelete={() => handleDeleteReview(review.id)}
+        isDeleting={isDeletingReview === review.id}
+        // Removed hasReviewed from here!
+      />
+    ))}
+  </div>
+) : (
+  <div className="text-center py-12 text-muted-foreground border border-dashed border-border rounded-xl bg-muted/10">
+    No reviews yet. Be the first to review this product!
+  </div>
+)}
+          
 
         {/* Related Products Section */}
         {relatedProducts.length > 0 && (
