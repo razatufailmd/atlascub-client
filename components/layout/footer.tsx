@@ -112,8 +112,7 @@ export function Footer() {
             <ul className="space-y-4 text-sm font-body">
               {[
                 { name: "About Us", href: "/about" },
-                { name: "Our Weavers", href: "/weavers" },
-                { name: "Sourcing Map", href: "/sourcing-map" },
+              
               ].map((item, idx) => (
                 <li key={idx}>
                   <Link 
@@ -137,7 +136,7 @@ export function Footer() {
     { name: "Help Center", href: "/support" },
     { name: "Shipping Info", href: "/support#shipping" },
     { name: "Returns & Exchanges", href: "/support#returns" },
-    { name: "Size Guide", href: "/size-guide" },
+    
     { name: "Contact Us", href: "/contact" },
   ].map((link, idx) => (
                 <li key={idx}>

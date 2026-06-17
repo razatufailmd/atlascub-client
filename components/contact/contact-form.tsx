@@ -60,7 +60,7 @@ export function ContactForm() {
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
-      className="rounded-lg border border-border bg-card p-6 md:p-8"
+      className="rounded-lg border border-border bg-card p-6 md:p-8 self-start"
     >
       <div className="mb-6">
         <h2 className="heading-sm font-primary">Send a Message</h2>

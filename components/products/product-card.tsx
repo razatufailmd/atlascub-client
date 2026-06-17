@@ -142,15 +142,21 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             </div>
 
             {/* Quick Action Buttons (Visible on hover) */}
+             {/* Wishlist Button */}
+             <div className="absolute right-2 top-2 z-10">
+              <WishlistButton product={product} size="sm" />
+            </div>
+
+            {/* Quick Action Buttons (Visible on hover) */}
             <div className="absolute bottom-2 left-2 right-2 flex gap-2 opacity-0 transition-all duration-300 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 z-10">
               <Button
                 size="sm"
                 variant="secondary"
                 // 🛡️ FIX: Forced text-zinc-900 so it doesn't invert to white in dark mode
-                className={`flex-1 gap-1.5 shadow-sm transition-colors ${
+                className={`flex-1 gap-1.5 shadow-sm transition-colors cursor-pointer ${
                   isInCart 
                     ? "bg-green-500 text-white hover:bg-green-600 hover:text-white border-transparent" 
-                    : "bg-white/95 text-zinc-900 hover:bg-white hover:text-black border-transparent"
+                    : "bg-white/80 text-zinc-900 hover:bg-white hover:text-accent-foreground border-transparent"
                 }`}
                 onClick={handleQuickAdd}
               >
@@ -173,7 +179,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             
             {/* Subtle Gradient to ensure buttons are always readable */}
             <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-          </div>
+            </div>
 
           {/* Product Info */}
           <div className="mt-3 space-y-1">

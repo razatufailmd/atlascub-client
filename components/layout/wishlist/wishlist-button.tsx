@@ -67,11 +67,11 @@ export function WishlistButton({ product, size = "md", className = "" }: Wishlis
       <Button
         variant="ghost"
         size="icon"
-        className={`${getSizeClasses()} rounded-full bg-white/80 backdrop-blur-sm hover:bg-white ${className}`}
+        className={`${getSizeClasses()} rounded-full bg-grey/80 backdrop-blur-sm hover:bg-white ${className}`}
         onClick={handleClick}
       >
         <Heart
-          className={`h-4 w-4 transition-all ${
+          className={`h-4 w-4 transition-all hover:text-accent-foreground ${
             inWishlist ? "fill-red-500 text-red-500" : "text-foreground"
           }`}
         />
