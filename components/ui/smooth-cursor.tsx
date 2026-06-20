@@ -205,6 +205,16 @@ export function SmoothCursor({
         return
       }
 
+      // 🛡️ CRITICAL FIX: Hide custom cursor and bypass tracking if Razorpay modal is open.
+      // This prevents the cursor from freezing over the iframe.
+      if (document.body.classList.contains("razorpay-active")) {
+        setIsVisible(false)
+        document.body.style.cursor = "auto"
+        return
+      } else {
+        document.body.style.cursor = "none"
+      }
+
       if (rafId) return
 
       rafId = requestAnimationFrame(() => {

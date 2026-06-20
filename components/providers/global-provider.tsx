@@ -13,6 +13,7 @@ import { StoreSyncProvider } from "./store-sync-provider";
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <StoreProvider>
+    
       <StoreSyncProvider>
         <ThemeProvider
           attribute="class"
@@ -23,6 +24,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           {children}
         </ThemeProvider>
       </StoreSyncProvider>
+      
     </StoreProvider>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { clearCart } from "@/lib/store/features/cartSlice";
@@ -12,8 +12,8 @@ import {
 import { InitiateCheckoutPayload, ShippingAddress } from "@/types/checkout";
 import { toast } from "sonner";
 import { isApiError } from "@/lib/store/apis/checkout-api";
+import apiClient from "@/lib/store/apis/axios-client";
 
-// 🛡️ FIX: Added keyId to the state interface
 export interface CheckoutState {
   orderId: string | null;
   razorpayOrderId: string | null;
@@ -79,24 +79,29 @@ export function useCheckout() {
     [dispatch, router, state.orderNumber]
   );
 
-  const handlePaymentFailure = useCallback((error?: any) => {
-    const errorMessage =
-      error?.message ||
-      error?.description ||
-      "Payment was declined. Please try again.";
+  const handlePaymentFailure = useCallback(
+    (error?: any) => {
+      const errorMessage =
+        error?.message ||
+        error?.description ||
+        "Payment was declined. Please try again.";
 
-    // 🔑 Navigate to failure page with error message
-    router.push(`/checkout/failure?error=${encodeURIComponent(errorMessage)}`);
+      // 🔑 Navigate to failure page with error message
+      router.push(
+        `/checkout/failure?error=${encodeURIComponent(errorMessage)}`
+      );
 
-    setState((prev) => ({
-      ...prev,
-      step: "failed",
-      error: errorMessage,
-      isProcessing: false,
-    }));
+      setState((prev) => ({
+        ...prev,
+        step: "failed",
+        error: errorMessage,
+        isProcessing: false,
+      }));
 
-    toast.error(errorMessage);
-  }, []);
+      toast.error(errorMessage);
+    },
+    [router]
+  );
 
   const handlePlaceOrder = useCallback(
     async (shippingAddress: ShippingAddress) => {
@@ -119,21 +124,30 @@ export function useCheckout() {
           paymentMethod: "razorpay",
         };
 
-        const result = await initiateCheckout(payload).unwrap();
+        // 🛡️ STEP 1: Create the Order in the Database
+        // Cast to 'any' because RTK Query expects the full Razorpay response,
+        // but our backend correctly just returns the DB Order object here.
+        const orderResult = (await initiateCheckout(payload).unwrap()) as any;
 
-        // 🛡️ FIX: Save all necessary data to state, including keyId
+        // 🛡️ STEP 2: Request the Secure Razorpay Transaction ID
+        // We use apiClient to ensure our Clerk Auth Bearer token is automatically attached
+        const { data: paymentResult } = await apiClient.post(
+          "/payments/create-order",
+          {
+            orderId: orderResult.id,
+          }
+        );
+
+        // 🛡️ STEP 3: Save ALL data to state to instantly trigger the Payment Modal
         setState((prev) => ({
           ...prev,
-          orderId: result.orderId,
-          razorpayOrderId: result.razorpayOrderId,
-          orderNumber: result.orderNumber,
-          amount: result.amount,
-          keyId: result.keyId,
+          orderId: orderResult.id,
+          orderNumber: orderResult.orderNumber || orderResult.id,
+          razorpayOrderId: paymentResult.razorpayOrderId,
+          keyId: paymentResult.keyId,
+          amount: paymentResult.amount,
           isSubmitting: false,
         }));
-
-        // Note: We no longer manually open the modal here.
-        // The React component in the Page will detect this state change and open automatically!
       } catch (error: any) {
         let errorMessage = "Failed to place order. Please try again.";
 
@@ -147,6 +161,9 @@ export function useCheckout() {
             errorMessage =
               "Some products in your cart are no longer available.";
           }
+        } else if (error.response?.data?.message) {
+          // Handle axios errors from apiClient
+          errorMessage = error.response.data.message;
         }
 
         setState((prev) => ({
@@ -170,25 +187,33 @@ export function useCheckout() {
     return useGetOrderByIdQuery(orderNumber, { skip: !orderNumber });
   }, []);
 
-  // 🛡️ FIX: Bundle the required orderData object for the PaymentModal component
-  const orderData =
-    state.orderId &&
-    state.razorpayOrderId &&
-    state.orderNumber &&
-    state.amount &&
-    state.keyId
-      ? {
-          orderId: state.orderId,
-          orderNumber: state.orderNumber,
-          razorpayOrderId: state.razorpayOrderId,
-          keyId: state.keyId,
-          amount: state.amount,
-        }
-      : null;
+  const orderData = useMemo(() => {
+    if (
+      state.orderId &&
+      state.razorpayOrderId &&
+      state.keyId &&
+      state.amount !== null
+    ) {
+      return {
+        orderId: state.orderId,
+        orderNumber: state.orderNumber || state.orderId,
+        razorpayOrderId: state.razorpayOrderId,
+        keyId: state.keyId,
+        amount: state.amount,
+      };
+    }
+    return null;
+  }, [
+    state.orderId,
+    state.razorpayOrderId,
+    state.keyId,
+    state.amount,
+    state.orderNumber,
+  ]);
 
   return {
     ...state,
-    orderData, // Exposed safely to the component
+    orderData,
     isSubmitting: state.isSubmitting,
     isProcessing: state.isProcessing,
     isInitiating,

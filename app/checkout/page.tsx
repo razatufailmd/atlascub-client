@@ -24,6 +24,7 @@ export default function CheckoutPage() {
   const {
     orderData,
     isSubmitting,
+    isProcessing, // 🛡️ CRITICAL FIX: Pulled in the processing state
     error,
     handlePlaceOrder,
     handlePaymentSuccess,
@@ -31,12 +32,12 @@ export default function CheckoutPage() {
     resetCheckout,
   } = useCheckout();
 
-  // Redirect if cart is empty
+  // 🛡️ CRITICAL FIX: Only redirect if cart is empty AND we are NOT processing a successful payment
   useEffect(() => {
-    if (cartItems.length === 0) {
+    if (cartItems.length === 0 && !isProcessing && !showPayment) {
       router.push("/cart");
     }
-  }, [cartItems, router]);
+  }, [cartItems, router, isProcessing, showPayment]);
 
   // Redirect if not signed in
   useEffect(() => {
@@ -53,7 +54,8 @@ export default function CheckoutPage() {
   }, [orderData]);
 
   // Premium Loading State
-  if (!authLoaded || cartItems.length === 0) {
+  // Notice we bypass the empty cart check visually if we are processing the success transition
+  if (!authLoaded || (cartItems.length === 0 && !isProcessing)) {
     return (
       <div className="min-h-[70vh] w-full flex flex-col items-center justify-center space-y-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -100,7 +102,7 @@ export default function CheckoutPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 relative">
           
-          {/* Left Column: Form (Slides up gracefully) */}
+          {/* Left Column: Form */}
           <div className="lg:col-span-7 xl:col-span-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100 fill-mode-both">
             <CheckoutForm
               onSubmit={handlePlaceOrder}
@@ -113,9 +115,8 @@ export default function CheckoutPage() {
             />
           </div>
 
-          {/* Right Column: Order Summary (Slides up gracefully, Sticky on Desktop) */}
+          {/* Right Column: Order Summary */}
           <div className="lg:col-span-5 xl:col-span-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-both">
-            {/* The sticky wrapper keeps the summary in view when filling long forms */}
             <div className="sticky top-24"> 
               <OrderSummary />
             </div>
@@ -138,7 +139,7 @@ export default function CheckoutPage() {
         user={{
           name: `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Customer",
           email: user?.primaryEmailAddress?.emailAddress || "",
-          phone: "", // Captured in DB, not needed strictly for Razorpay prefill unless explicitly requested
+          phone: "", 
         }}
       />
     </div>

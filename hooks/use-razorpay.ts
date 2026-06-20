@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 
-// Razorpay options type definition
 export interface RazorpayOptions {
   key: string;
   amount: number;
@@ -35,7 +34,6 @@ declare global {
 export function useRazorpay() {
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // 1. Load the script exactly once when the hook mounts
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -59,16 +57,14 @@ export function useRazorpay() {
     document.body.appendChild(script);
 
     return () => {
-      // Optional: Cleanup if needed, but usually safe to leave the script
       if (document.body.contains(script)) {
         document.body.removeChild(script);
       }
     };
   }, []);
 
-  // 2. The initialization function to be called by your components
   const initializePayment = useCallback(
-    (options: RazorpayOptions, onPaymentFailure?: (error: string) => void) => {
+    (options: RazorpayOptions, onFatalError?: (error: string) => void) => {
       if (!isLoaded || !window.Razorpay) {
         toast.error("Payment gateway is not ready. Please try again.");
         return;
@@ -77,15 +73,14 @@ export function useRazorpay() {
       try {
         const razorpay = new window.Razorpay(options);
 
-        // Bind custom failure event listener
         razorpay.on("payment.failed", (response: any) => {
           const errorMsg =
             response.error?.description || "Payment failed. Please try again.";
-          if (onPaymentFailure) {
-            onPaymentFailure(errorMsg);
-          } else {
-            toast.error(errorMsg);
-          }
+
+          toast.error(errorMsg);
+          // 🛡️ CRITICAL FIX: We DO NOT trigger a React failure callback here.
+          // Razorpay keeps the modal open natively on a card failure so the user can just type a new card.
+          // Routing away here would orphan the iframe!
         });
 
         razorpay.open();
@@ -93,6 +88,7 @@ export function useRazorpay() {
       } catch (error) {
         console.error("Razorpay initialization error:", error);
         toast.error("Failed to initialize payment gateway");
+        if (onFatalError) onFatalError("Initialization failed");
       }
     },
     [isLoaded]

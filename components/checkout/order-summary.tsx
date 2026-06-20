@@ -4,32 +4,66 @@ import { useAppSelector } from "@/lib/store/store";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
-import { ShoppingBag, Truck, CheckCircle2 } from "lucide-react";
-
-const FREE_SHIPPING_THRESHOLD = 5000;
-const SHIPPING_COST = 200;
+import { ShoppingBag, Truck, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
+import { useGetSettingsQuery } from "@/lib/store/apis/store-settings-api";
 
 export function OrderSummary() {
   const { items } = useAppSelector((state) => state.cart);
-
-  // Calculate totals
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
-  const shipping = isFreeShipping ? 0 : SHIPPING_COST;
-  const tax = Math.round(subtotal * 0.18 * 100) / 100;
-  const total = subtotal + shipping + tax;
   
-  const shippingProgress = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
+  // 🛡️ Fetch live store settings
+  const { data: settings, isLoading } = useGetSettingsQuery();
+
+  // Fallbacks while loading to prevent UI flashes
+  const FREE_SHIPPING_THRESHOLD = settings?.freeShippingThreshold ?? 5000;
+  const SHIPPING_COST = settings?.shippingCost ?? 200;
+  const TAX_RATE = settings?.taxRate ?? 0.18;
+  const IS_TAX_INCLUSIVE = settings?.isTaxInclusive ?? true;
+  const IS_ACCEPTING_ORDERS = settings?.isAcceptingOrders ?? true;
+
+  // Dynamic Calculations
+  const rawSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const isFreeShipping = rawSubtotal >= FREE_SHIPPING_THRESHOLD;
+  const shipping = isFreeShipping ? 0 : SHIPPING_COST;
+  
+  // Inclusive vs Exclusive Tax Logic
+  const baseAmount = rawSubtotal / (1 + TAX_RATE);
+  const tax = IS_TAX_INCLUSIVE 
+    ? rawSubtotal - baseAmount 
+    : rawSubtotal * TAX_RATE;
+    
+  const total = IS_TAX_INCLUSIVE 
+    ? rawSubtotal + shipping 
+    : rawSubtotal + shipping + tax;
+  
+  const shippingProgress = Math.min((rawSubtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
+
+  if (isLoading) {
+    return (
+      <div className="rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 md:p-8 flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 md:p-8 shadow-sm relative overflow-hidden group">
-      {/* Subtle decorative background gradient */}
-      <div className="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 rounded-full bg-primary/5 blur-3xl transition-transform group-hover:scale-150 duration-700" />
+      <div className="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 rounded-full bg-primary/5 blur-3xl transition-transform group-hover:scale-150 duration-700 pointer-events-none" />
 
       <div className="flex items-center gap-2 mb-6">
         <ShoppingBag className="h-5 w-5 text-primary" />
         <h2 className="heading-sm font-primary m-0">Order Summary</h2>
       </div>
+
+      {/* 🛑 STORE INACTIVE BANNER */}
+      {!IS_ACCEPTING_ORDERS && (
+        <div className="mb-6 bg-destructive/10 border border-destructive/20 rounded-lg p-4 flex gap-3 text-destructive animate-in fade-in">
+          <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-bold">Ordering Currently Paused</p>
+            <p className="mt-1 opacity-90">We are currently not accepting new orders as we update our inventory. Please check back later.</p>
+          </div>
+        </div>
+      )}
 
       {/* Empty State */}
       {items.length === 0 && (
@@ -46,21 +80,18 @@ export function OrderSummary() {
             className="flex gap-4 pb-4 border-b border-border/40 last:border-0 last:pb-0 animate-in fade-in slide-in-from-right-4 fill-mode-both"
             style={{ animationDelay: `${index * 100}ms` }}
           >
-            {/* Product Image with Quantity Badge */}
-            <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted border border-border/50 group-hover:border-border transition-colors">
+            <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted border border-border/50 transition-colors">
               <Image
                 src={item.image || "/images/placeholder.jpg"}
                 alt={item.name}
                 fill
-                className="object-cover transition-transform duration-500 hover:scale-105"
+                className="object-cover"
               />
-              {/* Modern Quantity Badge */}
               <div className="absolute -top-1 -right-1 bg-foreground text-background text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full shadow-sm ring-2 ring-card z-10">
                 {item.quantity}
               </div>
             </div>
 
-            {/* Product Details */}
             <div className="flex-1 min-w-0 flex flex-col justify-center">
               <p className="text-sm font-medium line-clamp-1 text-foreground">{item.name}</p>
               <p className="text-xs text-muted-foreground mt-1 tracking-wide">
@@ -82,8 +113,7 @@ export function OrderSummary() {
           <div className="bg-muted/40 rounded-lg p-3 space-y-2 border border-border/30">
             <div className="flex items-center justify-between text-xs font-medium">
               <span className="flex items-center gap-1.5 text-muted-foreground">
-                <Truck className="h-3.5 w-3.5" />
-                Shipping
+                <Truck className="h-3.5 w-3.5" /> Shipping
               </span>
               {isFreeShipping ? (
                 <span className="text-emerald-600 flex items-center gap-1">
@@ -91,11 +121,10 @@ export function OrderSummary() {
                 </span>
               ) : (
                 <span className="text-muted-foreground">
-                  ₹{formatPrice(FREE_SHIPPING_THRESHOLD - subtotal)} away from Free
+                  ₹{formatPrice(FREE_SHIPPING_THRESHOLD - rawSubtotal)} away from Free
                 </span>
               )}
             </div>
-            {/* Progress Bar */}
             <div className="h-1.5 w-full bg-secondary overflow-hidden rounded-full">
               <div 
                 className={`h-full transition-all duration-1000 ease-out ${isFreeShipping ? 'bg-emerald-500' : 'bg-primary'}`}
@@ -105,25 +134,25 @@ export function OrderSummary() {
           </div>
 
           <div className="space-y-3 px-1 text-sm text-muted-foreground">
-            {/* Subtotal */}
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span className="text-foreground">{formatPrice(subtotal)}</span>
+              <span className="text-foreground">{formatPrice(rawSubtotal)}</span>
             </div>
 
-            {/* Shipping */}
             <div className="flex justify-between">
               <span>Delivery</span>
-              <span className={shipping === 0 ? "text-emerald-600" : "text-foreground"}>
+              <span className={shipping === 0 ? "text-emerald-600 font-medium" : "text-foreground"}>
                 {shipping === 0 ? "FREE" : formatPrice(shipping)}
               </span>
             </div>
 
-            {/* Tax */}
-            <div className="flex justify-between">
-              <span>Estimated Tax (18%)</span>
-              <span className="text-foreground">{formatPrice(tax)}</span>
-            </div>
+            {/* Exclusive Tax Display (Added on top) */}
+            {!IS_TAX_INCLUSIVE && (
+              <div className="flex justify-between">
+                <span>Estimated GST ({(TAX_RATE * 100).toFixed(0)}%)</span>
+                <span className="text-foreground">{formatPrice(tax)}</span>
+              </div>
+            )}
           </div>
 
           <Separator className="bg-border/60" />
@@ -132,7 +161,11 @@ export function OrderSummary() {
           <div className="flex justify-between items-end px-1 pt-2">
             <div className="space-y-1">
               <span className="text-base font-bold text-foreground">Total</span>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Including Taxes</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                {IS_TAX_INCLUSIVE 
+                  ? `Includes ₹${tax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} in GST` 
+                  : "GST Applied"}
+              </p>
             </div>
             <div className="text-right">
               <span className="text-2xl font-black text-primary tracking-tight">
