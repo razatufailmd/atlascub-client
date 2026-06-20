@@ -79,32 +79,29 @@ export function useCheckout() {
     [dispatch, router, state.orderNumber]
   );
 
-  const handlePaymentFailure = useCallback(
-    (error?: any) => {
-      const errorMessage =
-        error?.message ||
-        error?.description ||
-        "Payment was declined. Please try again.";
+  const handlePaymentFailure = useCallback((error?: any) => {
+    const errorMessage =
+      error?.message ||
+      error?.description ||
+      "Payment process was interrupted or declined. Please try again.";
 
-      // 🔑 Navigate to failure page with error message
-      router.push(
-        `/checkout/failure?error=${encodeURIComponent(errorMessage)}`
-      );
+    // 🛡️ CRITICAL FIX: Do NOT route to /checkout/failure here.
+    // Keeping the user on the page prevents the iframe unmount race condition
+    // and preserves their checkout state so they can fix details and retry.
+    setState((prev) => ({
+      ...prev,
+      step: "failed",
+      error: errorMessage,
+      isSubmitting: false,
+      isProcessing: false,
+    }));
 
-      setState((prev) => ({
-        ...prev,
-        step: "failed",
-        error: errorMessage,
-        isProcessing: false,
-      }));
-
-      toast.error(errorMessage);
-    },
-    [router]
-  );
+    toast.error(errorMessage);
+  }, []);
 
   const handlePlaceOrder = useCallback(
-    async (shippingAddress: ShippingAddress) => {
+    async (addressId: string) => {
+      // 🛡️ REPLACED ShippingAddress object with string ID
       if (cartItems.length === 0) {
         toast.error("Your cart is empty. Please add some items.");
         return;
@@ -118,16 +115,18 @@ export function useCheckout() {
       }));
 
       try {
-        const payload: InitiateCheckoutPayload = {
+        const payload = {
           cartItems: mapCartItemsToCheckout(cartItems),
-          shippingAddress,
+          addressId, // 🛡️ REPLACED shippingAddress object
           paymentMethod: "razorpay",
         };
 
         // 🛡️ STEP 1: Create the Order in the Database
         // Cast to 'any' because RTK Query expects the full Razorpay response,
         // but our backend correctly just returns the DB Order object here.
-        const orderResult = (await initiateCheckout(payload).unwrap()) as any;
+        const orderResult = (await initiateCheckout(
+          payload as any
+        ).unwrap()) as any;
 
         // 🛡️ STEP 2: Request the Secure Razorpay Transaction ID
         // We use apiClient to ensure our Clerk Auth Bearer token is automatically attached

@@ -107,11 +107,7 @@ export default function CheckoutPage() {
             <CheckoutForm
               onSubmit={handlePlaceOrder}
               isSubmitting={isSubmitting}
-              defaultValues={{
-                firstName: user?.firstName || "",
-                lastName: user?.lastName || "",
-                email: user?.primaryEmailAddress?.emailAddress || "",
-              }}
+              
             />
           </div>
 

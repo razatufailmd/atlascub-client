@@ -188,10 +188,10 @@ export function PaymentModal({
         },
         modal: {
           ondismiss: () => {
-            // 🛡️ Cleanup cursor lock on dismiss (user clicked X)
             document.body.classList.remove("razorpay-active");
-            document.body.style.cursor = "none"; // Restore custom cursor
             setIsProcessing(false);
+            onOpenChange(false); // Simply closes the modal UI state wrapper safely
+            onFailure("Payment window closed."); 
           },
         },
       },

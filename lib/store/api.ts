@@ -57,6 +57,7 @@ export const API_TAGS = {
   CART: "Cart",
   COLLECTION: "Collection",
   SETTINGS: "Settings",
+  ADDRESSES: "Addresses",
 } as const;
 
 export type APITagType = (typeof API_TAGS)[keyof typeof API_TAGS];

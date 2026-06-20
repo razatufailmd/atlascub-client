@@ -1,70 +1,59 @@
 "use client";
 
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, AlertTriangle } from "lucide-react";
-import * as z from "zod";
-
+import { useState, useEffect } from "react";
+import { Loader2, AlertTriangle, Plus, MapPin, CheckCircle2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-// 🛡️ Import our live settings query
 import { useGetSettingsQuery } from "@/lib/store/apis/store-settings-api";
-import { checkoutSchema, type CheckoutFormValues } from "@/lib/validations/checkout-schema";
-
-const INDIAN_STATES = [
-  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
-  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
-  "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
-  "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
-  "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
-  "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli",
-  "Daman and Diu", "Delhi", "Lakshadweep", "Puducherry"
-];
+import { useGetAddressesQuery } from "@/lib/store/apis/account/address-api";
+import { toast } from "sonner";
 
 interface CheckoutFormProps {
-  onSubmit: SubmitHandler<CheckoutFormValues>;
+  onSubmit: (addressId: string) => void;
   isSubmitting: boolean;
-  defaultValues?: Partial<CheckoutFormValues>;
 }
 
-export function CheckoutForm({ onSubmit, isSubmitting, defaultValues }: CheckoutFormProps) {
-  // 🛡️ Fetch global store settings
+export function CheckoutForm({ onSubmit, isSubmitting }: CheckoutFormProps) {
+  const router = useRouter();
   const { data: settings } = useGetSettingsQuery();
+  const { data: addresses, isLoading: addressesLoading } = useGetAddressesQuery();
+  
   const isAcceptingOrders = settings?.isAcceptingOrders ?? true;
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<z.input<typeof checkoutSchema>, any, CheckoutFormValues>({
-    resolver: zodResolver(checkoutSchema),
-    defaultValues: {
-      firstName: defaultValues?.firstName || "",
-      lastName: defaultValues?.lastName || "",
-      email: defaultValues?.email || "",
-      phone: defaultValues?.phone || "",
-      addressLine1: defaultValues?.addressLine1 || "",
-      addressLine2: defaultValues?.addressLine2 || "",
-      city: defaultValues?.city || "",
-      state: defaultValues?.state || "",
-      pincode: defaultValues?.pincode || "",
-      country: "India",
-    },
-  });
+  // Auto-select the default address if available
+  useEffect(() => {
+    if (addresses && addresses.length > 0 && !selectedAddressId) {
+      const defaultAddress = addresses.find(a => a.isDefault) || addresses[0];
+      setSelectedAddressId(defaultAddress.id);
+    }
+  }, [addresses, selectedAddressId]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedAddressId) {
+      toast.error("Please select a shipping address");
+      return;
+    }
+    onSubmit(selectedAddressId);
+  };
 
   return (
-    <div className="bg-card p-6 rounded-lg border shadow-sm relative overflow-hidden">
-      <h2 className="text-xl font-semibold mb-6">Shipping Address</h2>
+    <div className="bg-card p-6 md:p-8 rounded-xl border shadow-sm relative overflow-hidden">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold flex items-center gap-2">
+          <MapPin className="h-5 w-5 text-primary" /> Delivery Address
+        </h2>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="gap-1 rounded-full h-8"
+          onClick={() => router.push("/account/address?redirect=/checkout")}
+        >
+          <Plus className="h-3.5 w-3.5" /> Add New
+        </Button>
+      </div>
 
-      {/* 🛑 Form Lock Overlay / Warning */}
       {!isAcceptingOrders && (
         <div className="mb-6 bg-destructive/10 border border-destructive/20 rounded-lg p-4 flex gap-3 text-destructive animate-in fade-in">
           <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
@@ -77,179 +66,75 @@ export function CheckoutForm({ onSubmit, isSubmitting, defaultValues }: Checkout
         </div>
       )}
 
-      {/* Adding opacity-50 and pointer-events-none if orders are not accepted to visually disable the form */}
       <form 
-        onSubmit={handleSubmit(onSubmit)} 
+        onSubmit={handleSubmit} 
         className={`space-y-6 transition-opacity duration-300 ${!isAcceptingOrders ? "opacity-50 pointer-events-none" : ""}`}
       >
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">First Name</label>
-            <Controller
-              name="firstName"
-              control={control}
-              render={({ field }) => (
-                <Input placeholder="John" disabled={!isAcceptingOrders} {...field} className={errors.firstName ? "border-red-500" : ""} />
-              )}
-            />
-            {errors.firstName && <p className="text-[0.8rem] font-medium text-destructive">{errors.firstName.message}</p>}
+        {addressesLoading ? (
+          <div className="py-12 flex justify-center border border-dashed rounded-lg bg-muted/20">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Last Name</label>
-            <Controller
-              name="lastName"
-              control={control}
-              render={({ field }) => (
-                <Input placeholder="Doe" disabled={!isAcceptingOrders} {...field} className={errors.lastName ? "border-red-500" : ""} />
-              )}
-            />
-            {errors.lastName && <p className="text-[0.8rem] font-medium text-destructive">{errors.lastName.message}</p>}
+        ) : !addresses || addresses.length === 0 ? (
+          <div className="py-12 text-center border border-dashed border-border rounded-lg bg-muted/10">
+            <MapPin className="h-8 w-8 text-muted-foreground mx-auto mb-3 opacity-50" />
+            <p className="text-foreground font-medium mb-1">No addresses found</p>
+            <p className="text-sm text-muted-foreground mb-4">Add a delivery address to proceed with your order.</p>
+            <Button 
+              type="button" 
+              onClick={() => router.push("/account/address?redirect=/checkout")}
+            >
+              Create New Address
+            </Button>
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Email Address</label>
-            <Controller
-              name="email"
-              control={control}
-              render={({ field }) => (
-                <Input type="email" placeholder="john@example.com" disabled={!isAcceptingOrders} {...field} className={errors.email ? "border-red-500" : ""} />
-              )}
-            />
-            {errors.email && <p className="text-[0.8rem] font-medium text-destructive">{errors.email.message}</p>}
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {addresses.map((address) => (
+              <div 
+                key={address.id}
+                onClick={() => setSelectedAddressId(address.id)}
+                className={`relative p-5 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+                  selectedAddressId === address.id 
+                    ? "border-primary bg-primary/5 shadow-sm" 
+                    : "border-border/60 hover:border-primary/50 bg-card hover:bg-muted/20"
+                }`}
+              >
+                {selectedAddressId === address.id && (
+                  <div className="absolute top-4 right-4 text-primary">
+                    <CheckCircle2 className="h-5 w-5 fill-primary text-primary-foreground" />
+                  </div>
+                )}
+                <div className="pr-8">
+                  <p className="font-semibold text-foreground mb-1">
+                    {address.firstName} {address.lastName}
+                    {address.isDefault && (
+                      <span className="ml-2 text-[10px] uppercase tracking-wider font-bold bg-muted px-2 py-0.5 rounded-full text-muted-foreground">Default</span>
+                    )}
+                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {address.addressLine1}
+                    {address.addressLine2 && <>, {address.addressLine2}</>}
+                    <br />
+                    {address.city}, {address.state} {address.pincode}
+                    <br />
+                    <span className="text-foreground/80 mt-1 block">📞 +91 {address.phone}</span>
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Phone Number</label>
-            <Controller
-              name="phone"
-              control={control}
-              render={({ field }) => (
-                <Input 
-                  placeholder="9876543210" 
-                  type="tel" 
-                  maxLength={10}
-                  disabled={!isAcceptingOrders}
-                  {...field} 
-                  className={errors.phone ? "border-red-500" : ""}
-                />
-              )}
-            />
-            {errors.phone && <p className="text-[0.8rem] font-medium text-destructive">{errors.phone.message}</p>}
-          </div>
-        </div>
-
-        <hr className="my-4 border-muted" />
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Address Line 1</label>
-          <Controller
-            name="addressLine1"
-            control={control}
-            render={({ field }) => (
-              <Input placeholder="House/Flat No., Building Name, Street" disabled={!isAcceptingOrders} {...field} className={errors.addressLine1 ? "border-red-500" : ""} />
-            )}
-          />
-          {errors.addressLine1 && <p className="text-[0.8rem] font-medium text-destructive">{errors.addressLine1.message}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Address Line 2 (Optional)</label>
-          <Controller
-            name="addressLine2"
-            control={control}
-            render={({ field }) => (
-              <Input placeholder="Landmark, Locality" disabled={!isAcceptingOrders} {...field} className={errors.addressLine2 ? "border-red-500" : ""} />
-            )}
-          />
-          {errors.addressLine2 && <p className="text-[0.8rem] font-medium text-destructive">{errors.addressLine2.message}</p>}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">City</label>
-            <Controller
-              name="city"
-              control={control}
-              render={({ field }) => (
-                <Input placeholder="Mumbai" disabled={!isAcceptingOrders} {...field} className={errors.city ? "border-red-500" : ""} />
-              )}
-            />
-            {errors.city && <p className="text-[0.8rem] font-medium text-destructive">{errors.city.message}</p>}
-          </div>
-          
-          <div className="space-y-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">State</label>
-            <Controller
-              name="state"
-              control={control}
-              render={({ field }) => (
-                <Select disabled={!isAcceptingOrders} onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger className={errors.state ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select a state" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {INDIAN_STATES.map((state) => (
-                      <SelectItem key={state} value={state}>
-                        {state}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.state && <p className="text-[0.8rem] font-medium text-destructive">{errors.state.message}</p>}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">PIN Code</label>
-            <Controller
-              name="pincode"
-              control={control}
-              render={({ field }) => (
-                <Input 
-                  placeholder="400001" 
-                  maxLength={6}
-                  disabled={!isAcceptingOrders}
-                  {...field} 
-                  className={errors.pincode ? "border-red-500" : ""}
-                />
-              )}
-            />
-            {errors.pincode && <p className="text-[0.8rem] font-medium text-destructive">{errors.pincode.message}</p>}
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Country</label>
-            <Controller
-              name="country"
-              control={control}
-              render={({ field }) => (
-                <Input {...field} disabled className="bg-muted" />
-              )}
-            />
-            {errors.country && <p className="text-[0.8rem] font-medium text-destructive">{errors.country.message}</p>}
-          </div>
-        </div>
+        )}
 
         <Button 
           type="submit" 
-          className="w-full h-12 text-lg mt-8"
-          disabled={isSubmitting || !isAcceptingOrders}
+          className="w-full h-14 text-lg mt-8 rounded-full shadow-md"
+          disabled={isSubmitting || !isAcceptingOrders || !addresses || addresses.length === 0 || !selectedAddressId}
         >
           {!isAcceptingOrders ? (
             "Ordering Paused"
           ) : isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Processing...
-            </>
+            <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Processing...</>
           ) : (
-            "Proceed to Payment"
+            "Proceed to Secure Payment"
           )}
         </Button>
       </form>
