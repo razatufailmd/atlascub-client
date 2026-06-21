@@ -19,6 +19,7 @@ const isPublicRoute = createRouteMatcher([
   "/wishlist",
   "/privacy",
   "/terms",
+  "/returns",
 ]);
 
 // Define authentication pages specifically

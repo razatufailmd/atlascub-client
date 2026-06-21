@@ -1,265 +1,317 @@
 "use client";
 
 import { useState } from "react";
-import { 
-  Package, 
-  Clock, 
-  CheckCircle, 
-  Truck, 
-  XCircle, 
-  ShoppingBag,
-  AlertCircle,
-  RefreshCcw
-} from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { ArrowLeft, Package, MapPin, Receipt, Truck, Calendar, RotateCcw, AlertCircle, ArrowUpRight, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/shared/empty-state";
+import { OrderStatusBadge } from "@/components/orders/order-status-badge";
+import { OrderTimeline } from "@/components/orders/order-timeline";
+import { ReturnRequestModal } from "@/components/orders/return-request-modal";
+import { useGetOrderByIdQuery, useInitiateReturnMutation } from "@/lib/store/apis/checkout-api";
+import { formatPrice } from "@/lib/utils";
+import { toast } from "sonner";
 
+export default function AccountOrderDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const id = params.id as string;
 
+  // 🛡️ Live API Hooks
+  const { data: order, isLoading, isError, refetch } = useGetOrderByIdQuery(id);
+  const [initiateReturn, { isLoading: isSubmittingReturn }] = useInitiateReturnMutation();
+  
+  const [showReturnModal, setShowReturnModal] = useState(false);
 
-const EmptyState = ({ title, description, action, icon: Icon }: any) => (
-  <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
-    {Icon && <Icon className="h-12 w-12 mb-4 opacity-50" />}
-    <h3 className="text-lg font-semibold text-foreground">{title}</h3>
-    <p className="mb-4 max-w-sm">{description}</p>
-    {action && (
-      <Button onClick={action.onClick} variant="outline">
-        {action.label}
-      </Button>
-    )}
-  </div>
-);
-
-const useGetUserOrdersQuery = (options: any) => ({
-  data: { data: [], total: 0, totalPages: 0 },
-  isLoading: false,
-  isFetching: false,
-  isError: false,
-  refetch: () => {}
-});
-
-const ActualOrderCard = ({ order, variant }: any) => (
-  <div className="border p-4 rounded-lg bg-card">
-    <p className="font-medium">Order #{order.id}</p>
-  </div>
-);
-// -------------------------------------
-
-// Status tabs configuration
-const statusTabs: { value: string; label: string; icon: React.ElementType }[] = [
-  { value: "all", label: "All Orders", icon: Package },
-  { value: "PENDING", label: "Pending/Failed", icon: Clock }, // 🛡️ Updated label to reflect business logic
-  { value: "PAID", label: "Paid", icon: CheckCircle },
-  { value: "SHIPPED", label: "Shipped", icon: Truck },
-  { value: "DELIVERED", label: "Delivered", icon: Package },
-  { value: "CANCELLED", label: "Cancelled", icon: XCircle },
-];
-
-export default function AccountOrdersPage() {
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [page, setPage] = useState(1);
-  const limit = 10;
-
-  // 🛡️ FIX 1: Unfiltered query to calculate stable tab counts (cached automatically)
-  const { data: statsData } = useGetUserOrdersQuery({ limit: 100 } as any);
-
-  // 🛡️ FIX 2: Filtered query for the actual paginated table
-  const { data, isLoading, isError, isFetching, refetch } = useGetUserOrdersQuery({
-    status: statusFilter !== "all" ? statusFilter : undefined,
-    page,
-    limit,
-  } as any);
-
-  const orders = data?.data || [];
-  const filteredTotal = data?.total || 0;
-  const totalPages = data?.totalPages || 0;
-
-  const globalTotal = statsData?.total || 0;
-
-  // Calculate persistent status counts from the UNFILTERED dataset
-  const statusCounts = (statsData?.data || []).reduce((acc: any, order: any) => {
-    acc[order.status] = (acc[order.status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const handleStatusChange = (value: string) => {
-    setStatusFilter(value);
-    setPage(1);
-  };
-
-  // Loading State
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-64 mt-1" />
-        </div>
-        <Skeleton className="h-10 w-full max-w-2xl rounded-full" />
-        <div className="space-y-4 pt-4">
-          {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} className="h-32 w-full rounded-xl" />
-          ))}
+      <div className="container mx-auto px-4 py-8 max-w-3xl">
+        <Skeleton className="h-6 w-32 mb-6" />
+        <div className="space-y-6">
+          <Skeleton className="h-32 w-full" />
+          <div className="grid gap-6 md:grid-cols-2">
+            <Skeleton className="h-48 w-full" />
+            <Skeleton className="h-48 w-full" />
+          </div>
+          <Skeleton className="h-64 w-full" />
         </div>
       </div>
     );
   }
 
-  // Error State
-  if (isError) {
+  if (isError || !order) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="heading-md font-primary">My Orders</h1>
-            <p className="text-muted-foreground">Track and manage your orders</p>
-          </div>
-          <Button onClick={() => refetch()} variant="outline">
-            <RefreshCcw className="h-4 w-4 mr-2" />
-            Retry
-          </Button>
-        </div>
-        <Card className="border-destructive/20 bg-destructive/5">
-          <CardContent className="py-12">
-            <EmptyState
-              title="Failed to load orders"
-              description="There was an error loading your orders. Please check your connection and try again."
-              action={{ label: "Retry Connection", onClick: () => refetch() }}
-              icon={AlertCircle}
-            />
-          </CardContent>
-        </Card>
+      <div className="container mx-auto px-4 py-12 max-w-3xl">
+        <Button variant="ghost" onClick={() => router.push("/account/orders")} className="mb-6">
+          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Orders
+        </Button>
+        <EmptyState
+          title="Order not found"
+          description="The order you're looking for doesn't exist."
+          action={{ label: "View All Orders", href: "/account/orders" }}
+        />
       </div>
     );
   }
+
+  // 🛡️ Logic to calculate if the order is within the 7-day return window
+  const deliveredDate = new Date(order.updatedAt);
+  const daysSinceDelivery = (Date.now() - deliveredDate.getTime()) / (1000 * 3600 * 24);
+  const isReturnEligible = order.status === "DELIVERED" && daysSinceDelivery <= 7 && !order.returnStatus;
+  
+  const handleReturnSubmit = async (data: { returnType: string; reason: string }) => {
+    try {
+      await initiateReturn({
+        id: order.id,
+        returnType: data.returnType,
+        reason: data.reason
+      }).unwrap();
+      
+      toast.success("Return request submitted successfully");
+      setShowReturnModal(false);
+      refetch(); // Reload data to show updated status
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to submit return request");
+    }
+  };
+
+  const orderDate = new Date(order.createdAt).toLocaleDateString("en-IN", {
+    day: "numeric", month: "long", year: "numeric",
+  });
+  const orderTime = new Date(order.createdAt).toLocaleTimeString("en-IN", {
+    hour: "2-digit", minute: "2-digit",
+  });
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-primary font-bold tracking-tight text-foreground">My Orders</h1>
-          <p className="text-muted-foreground mt-1">Track, manage, and review your past purchases.</p>
+    <div className="container mx-auto px-4 py-8 max-w-3xl animate-in fade-in duration-500">
+      <Button variant="ghost" onClick={() => router.push("/account/orders")} className="mb-6">
+        <ArrowLeft className="h-4 w-4 mr-2" /> Back to Orders
+      </Button>
+
+      {/* 🛡️ FIXED Dynamic Status / Return Banner */}
+      {order.returnStatus && (
+        <div className={`mb-6 rounded-lg border p-4 sm:p-5 flex items-start gap-3 shadow-sm ${
+          order.status === 'REFUNDED' || order.status === 'REPLACED' 
+            ? 'border-blue-200 bg-blue-50 dark:bg-blue-950/20 text-blue-800 dark:text-blue-400' :
+          order.returnStatus === 'REQUESTED' 
+            ? 'border-amber-200 bg-amber-50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-400' :
+          order.returnStatus === 'APPROVED' 
+            ? 'border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-400' :
+          'border-red-200 bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-400'
+        }`}>
+          {order.status === 'REFUNDED' || order.status === 'REPLACED' ? (
+            <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0" />
+          ) : (
+            <RotateCcw className="h-5 w-5 mt-0.5 shrink-0" />
+          )}
+          <div className="flex-1">
+            <h3 className="font-semibold text-base">
+              {order.status === 'REFUNDED' && "Refund Successfully Processed"}
+              {order.status === 'REPLACED' && "Replacement Completed"}
+              {order.status !== 'REFUNDED' && order.status !== 'REPLACED' && order.returnStatus === 'REQUESTED' && "Return Request Processing"}
+              {order.status !== 'REFUNDED' && order.status !== 'REPLACED' && order.returnStatus === 'APPROVED' && "Return Request Approved"}
+              {order.returnStatus === 'REJECTED' && "Return Request Declined"}
+            </h3>
+            <p className="text-sm opacity-90 mt-1 leading-relaxed">
+              {order.status === 'REFUNDED' && "Your refund has been dispatched to your original payment method. Please allow 3-5 business days for it to reflect in your account."}
+              {order.status === 'REPLACED' && "Your replacement item has been successfully delivered. Thank you for shopping with us!"}
+              {order.status !== 'REFUNDED' && order.status !== 'REPLACED' && order.returnStatus === 'REQUESTED' && "Your request has been sent to our team. We will review it and update you within 24-48 hours. Please keep the item packed with original tags."}
+              {order.status !== 'REFUNDED' && order.status !== 'REPLACED' && order.returnStatus === 'APPROVED' && "Your request was approved. Our courier partner will contact you shortly to pick up the package."}
+              {order.returnStatus === 'REJECTED' && "Unfortunately, your return request did not meet our policy criteria. Check your email for detailed context."}
+            </p>
+          </div>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => refetch()} 
-          disabled={isLoading || isFetching}
-          className="w-fit"
-        >
-          <RefreshCcw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
-          {isFetching ? "Refreshing..." : "Refresh"}
-        </Button>
+      )}
+
+      {/* Order Header & Return Trigger */}
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="heading-lg font-primary">Order #{order.orderNumber}</h1>
+          <div className="flex flex-wrap items-center gap-3 mt-1">
+            {/* 🛡️ FIXED: Always use the raw order.status so the backend state drives the UI */}
+            <OrderStatusBadge status={order.status as any} size="lg" />
+            <span className="text-sm text-muted-foreground flex items-center gap-1">
+              <Calendar className="h-3.5 w-3.5" />
+              {orderDate} at {orderTime}
+            </span>
+          </div>
+        </div>
+        
+        {/* The Action Button */}
+        {isReturnEligible && (
+          <Button 
+            variant="outline" 
+            className="gap-2 border-primary/20 hover:bg-primary/5 text-primary"
+            onClick={() => setShowReturnModal(true)}
+          >
+            <RotateCcw className="h-4 w-4" /> Return / Exchange
+          </Button>
+        )}
       </div>
 
-      {/* Status Tabs (Now Stable!) */}
-      <Tabs value={statusFilter} onValueChange={handleStatusChange} className="w-full">
-        <div className="overflow-x-auto pb-2 custom-scrollbar">
-          <TabsList className="flex w-max h-auto gap-2 bg-transparent p-0">
-            {statusTabs.map((tab) => {
-              // 🛡️ Pulls count from the stable global dataset instead of the filtered one
-              const count = tab.value === "all" 
-                ? globalTotal 
-                : statusCounts[tab.value] || 0;
-              
-              return (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="flex items-center gap-2 rounded-full border border-border/60 bg-card px-5 py-2 text-sm transition-all hover:bg-muted/50 data-[state=active]:border-primary data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                >
-                  <tab.icon className="h-4 w-4" />
-                  <span className="font-medium">{tab.label}</span>
-                  {count > 0 && (
-                    <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-muted text-[10px] font-bold text-muted-foreground data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                      {count}
-                    </span>
-                  )}
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
+      {order.status === "PENDING" ? (
+        <div className="mb-6 rounded-lg border border-destructive/20 bg-destructive/5 p-5 text-destructive flex items-start gap-3 shadow-sm">
+          <AlertCircle className="h-5 w-5 mt-0.5 shrink-0" />
+          <div>
+            <h3 className="font-semibold text-base">Payment Incomplete</h3>
+            <p className="text-sm opacity-90 mt-1 leading-relaxed">
+              The payment for this order was not completed or failed. For security reasons, a new transaction session cannot be restarted for this specific reference. 
+              <br/><br/>
+              <strong>Action required:</strong> Please place a new order if you still wish to purchase these items.
+            </p>
+          </div>
         </div>
-      </Tabs>
+      ) : (
+        <Card className="mb-6">
+          <CardHeader><CardTitle className="text-base">Order Timeline</CardTitle></CardHeader>
+          {/* 🛡️ FIXED: Let the timeline naturally react to REFUND_PROCESSING / REFUNDED */}
+          <CardContent><OrderTimeline status={order.status as any} /></CardContent>
+        </Card>
+      )}
 
-      {/* Orders List */}
-      {orders.length === 0 ? (
-        <Card className="border-border/60 shadow-sm bg-muted/10">
-          <CardContent className="py-16">
-            <EmptyState
-              title={statusFilter === "all" ? "No orders yet" : `No ${statusFilter.toLowerCase()} orders`}
-              description={
-                statusFilter === "all" 
-                  ? "You haven't placed any orders yet. Start shopping to see your orders here."
-                  : `You don't have any orders currently marked as ${statusFilter.toLowerCase()}.`
-              }
-              icon={ShoppingBag}
-              action={statusFilter === "all" ? {
-                label: "Start Shopping",
-                onClick: () => {},
-              } : {
-                label: "Clear Filters",
-                onClick: () => handleStatusChange("all"),
-              }}
-            />
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Shipping Address */}
+        <Card>
+          <CardHeader><CardTitle className="flex items-center gap-2 text-base"><MapPin className="h-4 w-4" /> Shipping Address</CardTitle></CardHeader>
+          <CardContent className="space-y-1 text-sm">
+            <p className="font-medium">{order.shippingAddress.firstName} {order.shippingAddress.lastName}</p>
+            <p className="text-muted-foreground">{order.shippingAddress.email}</p>
+            <p className="text-muted-foreground">{order.shippingAddress.phone}</p>
+            <Separator className="my-2" />
+            <p>{order.shippingAddress.addressLine1}</p>
+            {order.shippingAddress.addressLine2 && <p>{order.shippingAddress.addressLine2}</p>}
+            <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.pincode}</p>
+            <p className="text-muted-foreground">{order.shippingAddress.country}</p>
           </CardContent>
         </Card>
-      ) : (
-        <Card className="border-border/60 shadow-sm overflow-hidden">
-          <CardHeader className="border-b border-border/40 bg-muted/20 pb-4">
-            <CardTitle className="text-lg font-medium flex items-center gap-2">
-              {statusFilter === "all" ? "Order History" : `${statusTabs.find(t => t.value === statusFilter)?.label} Orders`}
-              <span className="text-xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                {filteredTotal} found
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0 sm:p-6">
-            <div className="space-y-0 sm:space-y-4 divide-y divide-border sm:divide-none">
-              {orders.map((order: any) => (
-                <div key={order.id} className="p-4 sm:p-0">
-                  <ActualOrderCard 
-                    order={order} 
-                    variant="user"
-                  />
-                </div>
-              ))}
+
+        {/* Order Summary */}
+        <Card>
+          <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Receipt className="h-4 w-4" /> Order Summary</CardTitle></CardHeader>
+          <CardContent>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span>₹{formatPrice(order.subtotal)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Shipping</span>
+                <span>₹{formatPrice(order.shippingCost)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Tax</span>
+                <span>₹{formatPrice(order.tax)}</span>
+              </div>
+              <Separator className="my-2" />
+              <div className="flex justify-between font-semibold">
+                <span>Total</span>
+                <span className="text-lg text-primary">₹{formatPrice(order.totalAmount)}</span>
+              </div>
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between gap-4 border-t border-border/60 p-4 sm:p-0 sm:pt-6 sm:mt-6">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Page {page} of {totalPages}
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className="rounded-full px-6"
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
-                    className="rounded-full px-6"
-                  >
-                    Next
-                  </Button>
-                </div>
+            <div className="mt-4 pt-4 border-t border-border">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Payment Method</span>
+                <span className="capitalize">{order.paymentMethod}</span>
               </div>
-            )}
+              {order.paymentId && (
+                <div className="flex justify-between text-sm mt-1">
+                  <span className="text-muted-foreground">Payment ID</span>
+                  <span className="font-mono text-xs">{order.paymentId}</span>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Shiprocket Tracking Section */}
+      {(order.awbCode || order.trackingNumber) && (
+        <Card className="mt-6 border-primary/20 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Truck className="h-4 w-4 text-primary" /> Shipment Tracking
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex-1 space-y-3">
+                {order.awbCode && (
+                  <div>
+                    <p className="text-sm font-medium">Shiprocket AWB</p>
+                    <p className="text-sm text-muted-foreground font-mono mt-0.5">{order.awbCode}</p>
+                  </div>
+                )}
+                {order.courierName && (
+                  <div>
+                    <p className="text-sm font-medium">Courier Partner</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{order.courierName}</p>
+                  </div>
+                )}
+                {order.trackingNumber && (
+                  <div>
+                    <p className="text-sm font-medium">Additional Reference</p>
+                    <p className="text-sm text-muted-foreground font-mono mt-0.5">{order.trackingNumber}</p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="shrink-0 mt-4 sm:mt-0">
+                {order.awbCode ? (
+                  <Button asChild variant="default" size="sm" className="w-full sm:w-auto gap-2">
+                    <a href={`https://shiprocket.co/tracking/${order.awbCode}`} target="_blank" rel="noopener noreferrer">
+                      Track via Shiprocket <ArrowUpRight className="h-3.5 w-3.5" />
+                    </a>
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" disabled>Status: En Route</Button>
+                )}
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}
+
+      {/* Order Items */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Package className="h-4 w-4" /> Order Items ({order.items.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {order.items.map((item: any, index: number) => (
+              <div key={index} className="flex items-start justify-between border-b border-border pb-3 last:border-0 last:pb-0">
+                <div className="flex-1">
+                  <p className="font-medium">{item.name}</p>
+                  <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mt-1">
+                    <span>Size: {item.size}</span>
+                    <span>Color: {item.color}</span>
+                    <span>Qty: {item.quantity}</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-medium">₹{item.price.toLocaleString()}</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    ₹{(item.price * item.quantity).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <ReturnRequestModal 
+        open={showReturnModal} 
+        onOpenChange={setShowReturnModal} 
+        onSubmit={handleReturnSubmit}
+        isSubmitting={isSubmittingReturn}
+      />
     </div>
   );
 }

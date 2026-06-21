@@ -16,13 +16,13 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
+import { OrderCard } from "@/components/orders/order-card";
 import { useGetUserOrdersQuery } from "@/lib/store/apis/checkout-api";
-import { OrderCard as ActualOrderCard } from "@/components/orders/order-card";
 
 // Status tabs configuration
 const statusTabs: { value: string; label: string; icon: React.ElementType }[] = [
   { value: "all", label: "All Orders", icon: Package },
-  { value: "PENDING", label: "Pending/Failed", icon: Clock }, // 🛡️ Updated label to reflect business logic
+  { value: "PENDING", label: "Pending/Failed", icon: Clock },
   { value: "PAID", label: "Paid", icon: CheckCircle },
   { value: "SHIPPED", label: "Shipped", icon: Truck },
   { value: "DELIVERED", label: "Delivered", icon: Package },
@@ -34,24 +34,23 @@ export default function AccountOrdersPage() {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  // 🛡️ FIX 1: Unfiltered query to calculate stable tab counts (cached automatically)
-  const { data: statsData } = useGetUserOrdersQuery({ limit: 100 } as any);
+  // 1. Unfiltered query to calculate stable tab counts (cached automatically)
+  const { data: statsData } = useGetUserOrdersQuery({ limit: 100 });
 
-  // 🛡️ FIX 2: Filtered query for the actual paginated table
+  // 2. Filtered query for the actual paginated table
   const { data, isLoading, isError, isFetching, refetch } = useGetUserOrdersQuery({
     status: statusFilter !== "all" ? statusFilter : undefined,
     page,
     limit,
-  } as any);
+  });
 
   const orders = data?.data || [];
   const filteredTotal = data?.total || 0;
   const totalPages = data?.totalPages || 0;
-
   const globalTotal = statsData?.total || 0;
 
   // Calculate persistent status counts from the UNFILTERED dataset
-  const statusCounts = (statsData?.data || []).reduce((acc, order) => {
+  const statusCounts = (statsData?.data || []).reduce((acc: any, order: any) => {
     acc[order.status] = (acc[order.status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -109,7 +108,6 @@ export default function AccountOrdersPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -128,16 +126,12 @@ export default function AccountOrdersPage() {
         </Button>
       </div>
 
-      {/* Status Tabs (Now Stable!) */}
+      {/* Status Tabs */}
       <Tabs value={statusFilter} onValueChange={handleStatusChange} className="w-full">
         <div className="overflow-x-auto pb-2 custom-scrollbar">
           <TabsList className="flex w-max h-auto gap-2 bg-transparent p-0">
             {statusTabs.map((tab) => {
-              // 🛡️ Pulls count from the stable global dataset instead of the filtered one
-              const count = tab.value === "all" 
-                ? globalTotal 
-                : statusCounts[tab.value] || 0;
-              
+              const count = tab.value === "all" ? globalTotal : statusCounts[tab.value] || 0;
               return (
                 <TabsTrigger
                   key={tab.value}
@@ -172,7 +166,7 @@ export default function AccountOrdersPage() {
               icon={ShoppingBag}
               action={statusFilter === "all" ? {
                 label: "Start Shopping",
-                href: "/shop",
+                href: "/shop"
               } : {
                 label: "Clear Filters",
                 onClick: () => handleStatusChange("all"),
@@ -192,12 +186,9 @@ export default function AccountOrdersPage() {
           </CardHeader>
           <CardContent className="p-0 sm:p-6">
             <div className="space-y-0 sm:space-y-4 divide-y divide-border sm:divide-none">
-              {orders.map((order) => (
+              {orders.map((order: any) => (
                 <div key={order.id} className="p-4 sm:p-0">
-                  <ActualOrderCard 
-                    order={order} 
-                    variant="user"
-                  />
+                  <OrderCard order={order} />
                 </div>
               ))}
             </div>
