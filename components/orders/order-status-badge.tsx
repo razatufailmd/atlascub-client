@@ -1,0 +1,79 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { getOrderStatus, getStatusIcon, OrderStatusType } from "@/lib/constants/order-status";
+
+interface OrderStatusBadgeProps {
+  status: OrderStatusType;
+  size?: "sm" | "md" | "lg";
+  showIcon?: boolean;
+  showLabel?: boolean;
+  className?: string;
+  pulse?: boolean;
+}
+
+const sizeClasses = {
+  sm: "px-2 py-0.5 text-[10px] gap-1",
+  md: "px-3 py-1 text-xs gap-1.5",
+  lg: "px-4 py-1.5 text-sm gap-2",
+};
+
+const iconSizes = {
+  sm: "h-3 w-3",
+  md: "h-3.5 w-3.5",
+  lg: "h-4 w-4",
+};
+
+const pulseStatuses: OrderStatusType[] = ["PENDING", "SHIPPED", "RETURN_REQUESTED"];
+
+export function OrderStatusBadge({
+  status,
+  size = "md",
+  showIcon = true,
+  showLabel = true,
+  className = "",
+  pulse = false,
+}: OrderStatusBadgeProps) {
+  const config = getOrderStatus(status);
+  const Icon = getStatusIcon(status);
+
+  // Auto-pulse for active statuses unless explicitly disabled
+  const shouldPulse = pulse !== undefined ? pulse : pulseStatuses.includes(status);
+
+  return (
+    <motion.span
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{
+        opacity: 1,
+        scale: 1,
+        ...(shouldPulse && {
+          boxShadow: [
+            "0 0 0 0 rgba(251, 191, 36, 0.2)",
+            "0 0 0 6px rgba(251, 191, 36, 0)",
+          ],
+        }),
+      }}
+      transition={{
+        duration: 0.2,
+        ...(shouldPulse && {
+          boxShadow: {
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+          },
+        }),
+      }}
+      className={`
+        inline-flex items-center rounded-full border font-medium
+        ${config.color.badge}
+        ${sizeClasses[size]}
+        ${className}
+      `}
+    >
+      {showIcon && Icon && (
+        <Icon className={`${iconSizes[size]} flex-shrink-0`} />
+      )}
+      {showLabel && config.label}
+    </motion.span>
+  );
+}

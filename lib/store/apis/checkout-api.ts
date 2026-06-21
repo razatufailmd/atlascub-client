@@ -76,13 +76,22 @@ export const checkoutApi = api.injectEndpoints({
         limit: number;
         totalPages: number;
       },
-      { page?: number; limit?: number }
+      { status?: string; page?: number; limit?: number }
     >({
-      query: ({ page = 1, limit = 10 }) => ({
-        url: `/orders/user`,
-        method: "GET",
-        params: { page, limit },
-      }),
+      query: ({ status, page = 1, limit = 10 }) => {
+        const params: Record<string, string> = {
+          page: String(page),
+          limit: String(limit),
+        };
+        if (status) {
+          params.status = status;
+        }
+        return {
+          url: `/orders/user`,
+          method: "GET",
+          params,
+        };
+      },
       providesTags: [API_TAGS.ORDERS],
     }),
 

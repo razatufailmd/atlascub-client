@@ -1,5 +1,7 @@
 // types/checkout.ts
 
+import { OrderItem } from "./product";
+
 export interface ShippingAddress {
   firstName: string;
   lastName: string;
@@ -28,13 +30,33 @@ export interface CartItemCheckout {
 }
 
 // Represents the data structure returned by your NestJS POST /api/orders endpoint
+// export interface OrderResponse {
+//   id: string; // Your database order ID
+//   orderNumber: string; // e.g., ATL-2026-043
+//   status: string; // e.g., PENDING
+//   totalAmount: number; // Subtotal + Shipping + Tax
+//   shippingAddress: ShippingAddress;
+//   razorpayOrderId?: string;
+//   createdAt: string;
+//   updatedAt: string;
+// }
+
 export interface OrderResponse {
-  id: string; // Your database order ID
-  orderNumber: string; // e.g., ATL-2026-043
-  status: string; // e.g., PENDING
-  totalAmount: number; // Subtotal + Shipping + Tax
+  id: string;
+  orderNumber: string;
+  userId: string;
+  status: string;
+  items: OrderItem[]; // ✅ Add this
   shippingAddress: ShippingAddress;
+  subtotal: number;
+  shippingCost: number;
+  tax: number;
+  totalAmount: number;
+  paymentMethod: string;
+  currency: string;
   razorpayOrderId?: string;
+  paymentId?: string;
+  trackingNumber?: string;
   createdAt: string;
   updatedAt: string;
 }

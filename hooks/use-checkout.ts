@@ -9,7 +9,7 @@ import {
   mapCartItemsToCheckout,
   useGetOrderByIdQuery,
 } from "@/lib/store/apis/checkout-api";
-import { InitiateCheckoutPayload, ShippingAddress } from "@/types/checkout";
+
 import { toast } from "sonner";
 import { isApiError } from "@/lib/store/apis/checkout-api";
 import apiClient from "@/lib/store/apis/axios-client";
