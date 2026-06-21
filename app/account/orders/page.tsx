@@ -16,8 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
-
 import { useGetUserOrdersQuery } from "@/lib/store/apis/checkout-api";
+import { OrderCard as ActualOrderCard } from "@/components/orders/order-card";
 
 // Status tabs configuration
 const statusTabs: { value: string; label: string; icon: React.ElementType }[] = [
@@ -28,9 +28,6 @@ const statusTabs: { value: string; label: string; icon: React.ElementType }[] = 
   { value: "DELIVERED", label: "Delivered", icon: Package },
   { value: "CANCELLED", label: "Cancelled", icon: XCircle },
 ];
-
-// Fallback import for your specific OrderCard location
-import { OrderCard as ActualOrderCard } from "@/components/orders/order-card";
 
 export default function AccountOrdersPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");

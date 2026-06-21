@@ -117,12 +117,12 @@ export const checkoutApi = api.injectEndpoints({
     // Update order status (admin only)
     updateOrderStatus: builder.mutation<
       OrderResponse,
-      { id: string; status: string; trackingNumber?: string }
+      { id: string; status: string } // 🛡️ Simplified, tracking moved to its own endpoint
     >({
-      query: ({ id, status, trackingNumber }) => ({
+      query: ({ id, status }) => ({
         url: `/orders/${id}/status`,
         method: "PATCH",
-        data: { status, trackingNumber },
+        data: { status },
       }),
       invalidatesTags: (result, error, { id }) => [
         { type: API_TAGS.ORDER, id },
@@ -130,15 +130,51 @@ export const checkoutApi = api.injectEndpoints({
       ],
     }),
 
-    // Update order tracking number (admin only)
+    // Update order tracking number & Shiprocket Details (admin only)
     updateOrderTracking: builder.mutation<
       OrderResponse,
-      { id: string; trackingNumber: string }
+      {
+        id: string;
+        trackingNumber?: string;
+        awbCode?: string;
+        courierName?: string;
+      }
     >({
-      query: ({ id, trackingNumber }) => ({
-        url: `/orders/${id}`,
+      query: ({ id, trackingNumber, awbCode, courierName }) => ({
+        url: `/orders/${id}/tracking`,
         method: "PATCH",
-        data: { trackingNumber },
+        data: { trackingNumber, awbCode, courierName },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: API_TAGS.ORDER, id },
+        { type: API_TAGS.ORDERS },
+      ],
+    }),
+    // 🔄 Customer initiates a return/replacement
+    initiateReturn: builder.mutation<
+      OrderResponse,
+      { id: string; reason: string; returnType: string }
+    >({
+      query: ({ id, reason, returnType }) => ({
+        url: `/orders/${id}/return`,
+        method: "POST",
+        data: { reason, returnType },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: API_TAGS.ORDER, id },
+        { type: API_TAGS.ORDERS },
+      ],
+    }),
+
+    // 🛡️ Admin approves or rejects a return
+    adminReturnAction: builder.mutation<
+      OrderResponse,
+      { id: string; action: "APPROVED" | "REJECTED" }
+    >({
+      query: ({ id, action }) => ({
+        url: `/orders/${id}/return-action`,
+        method: "PATCH",
+        data: { action },
       }),
       invalidatesTags: (result, error, { id }) => [
         { type: API_TAGS.ORDER, id },
@@ -158,4 +194,6 @@ export const {
   useGetAllOrdersQuery,
   useUpdateOrderStatusMutation,
   useUpdateOrderTrackingMutation,
+  useInitiateReturnMutation,
+  useAdminReturnActionMutation,
 } = checkoutApi;

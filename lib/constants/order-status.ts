@@ -6,9 +6,11 @@ import {
   XCircle,
   RotateCcw,
   AlertCircle,
+  RefreshCw,
+  Banknote,
 } from "lucide-react";
 
-// Status type definition
+// Status type definition (Expanded for Returns/Refunds)
 export type OrderStatusType =
   | "PENDING"
   | "PAID"
@@ -16,7 +18,11 @@ export type OrderStatusType =
   | "DELIVERED"
   | "CANCELLED"
   | "RETURN_REQUESTED"
-  | "RETURNED";
+  | "REFUND_PROCESSING"
+  | "REFUNDED"
+  | "REPLACEMENT_REQUESTED"
+  | "REPLACEMENT_PROCESSING"
+  | "REPLACED";
 
 // Status configuration
 export interface OrderStatusConfig {
@@ -38,7 +44,7 @@ export interface OrderStatusConfig {
 
 export const ORDER_STATUS_CONFIG: Record<OrderStatusType, OrderStatusConfig> = {
   PENDING: {
-    label: "Pending",
+    label: "Pending / Failed",
     color: {
       badge:
         "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800",
@@ -48,10 +54,7 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatusType, OrderStatusConfig> = {
       dark: "bg-amber-900/30",
     },
     icon: Clock,
-    timeline: {
-      step: 1,
-      label: "Order Placed",
-    },
+    timeline: { step: 1, label: "Order Placed" },
     nextStatuses: ["PAID", "CANCELLED"],
   },
 
@@ -66,10 +69,7 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatusType, OrderStatusConfig> = {
       dark: "bg-blue-900/30",
     },
     icon: CheckCircle,
-    timeline: {
-      step: 2,
-      label: "Payment Confirmed",
-    },
+    timeline: { step: 2, label: "Payment Confirmed" },
     nextStatuses: ["SHIPPED", "CANCELLED"],
   },
 
@@ -84,10 +84,7 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatusType, OrderStatusConfig> = {
       dark: "bg-purple-900/30",
     },
     icon: Truck,
-    timeline: {
-      step: 3,
-      label: "Order Shipped",
-    },
+    timeline: { step: 3, label: "Order Shipped" },
     nextStatuses: ["DELIVERED"],
   },
 
@@ -102,11 +99,8 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatusType, OrderStatusConfig> = {
       dark: "bg-green-900/30",
     },
     icon: Package,
-    timeline: {
-      step: 4,
-      label: "Order Delivered",
-    },
-    nextStatuses: ["RETURN_REQUESTED"],
+    timeline: { step: 4, label: "Order Delivered" },
+    nextStatuses: ["RETURN_REQUESTED", "REPLACEMENT_REQUESTED"],
   },
 
   CANCELLED: {
@@ -120,12 +114,10 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatusType, OrderStatusConfig> = {
       dark: "bg-red-900/30",
     },
     icon: XCircle,
-    timeline: {
-      step: 0,
-      label: "Order Cancelled",
-    },
+    timeline: { step: 0, label: "Order Cancelled" },
   },
 
+  // --- REFUND FLOW ---
   RETURN_REQUESTED: {
     label: "Return Requested",
     color: {
@@ -137,28 +129,78 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatusType, OrderStatusConfig> = {
       dark: "bg-orange-900/30",
     },
     icon: AlertCircle,
-    timeline: {
-      step: 0,
-      label: "Return Requested",
-    },
-    nextStatuses: ["RETURNED"],
+    timeline: { step: 5, label: "Return Requested" },
+    nextStatuses: ["REFUND_PROCESSING"],
   },
-
-  RETURNED: {
-    label: "Returned",
+  REFUND_PROCESSING: {
+    label: "Processing Refund",
     color: {
       badge:
-        "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-700",
+        "bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:border-indigo-800",
+      text: "text-indigo-600 dark:text-indigo-400",
+      border: "border-indigo-200 dark:border-indigo-800",
+      light: "bg-indigo-50 dark:bg-indigo-950/20",
+      dark: "bg-indigo-900/30",
+    },
+    icon: RotateCcw,
+    timeline: { step: 6, label: "Processing Refund" },
+    nextStatuses: ["REFUNDED"],
+  },
+  REFUNDED: {
+    label: "Refunded",
+    color: {
+      badge:
+        "bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700",
       text: "text-gray-600 dark:text-gray-400",
-      border: "border-gray-200 dark:border-gray-700",
+      border: "border-gray-300 dark:border-gray-700",
       light: "bg-gray-50 dark:bg-gray-900/20",
       dark: "bg-gray-800/30",
     },
-    icon: RotateCcw,
-    timeline: {
-      step: 0,
-      label: "Order Returned",
+    icon: Banknote,
+    timeline: { step: 7, label: "Refund Complete" },
+  },
+
+  // --- REPLACEMENT FLOW ---
+  REPLACEMENT_REQUESTED: {
+    label: "Replacement Requested",
+    color: {
+      badge:
+        "bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800",
+      text: "text-yellow-600 dark:text-yellow-400",
+      border: "border-yellow-200 dark:border-yellow-800",
+      light: "bg-yellow-50 dark:bg-yellow-950/20",
+      dark: "bg-yellow-900/30",
     },
+    icon: RefreshCw,
+    timeline: { step: 5, label: "Replacement Requested" },
+    nextStatuses: ["REPLACEMENT_PROCESSING"],
+  },
+  REPLACEMENT_PROCESSING: {
+    label: "Processing Replacement",
+    color: {
+      badge:
+        "bg-cyan-100 text-cyan-700 border-cyan-200 dark:bg-cyan-900/30 dark:text-cyan-400 dark:border-cyan-800",
+      text: "text-cyan-600 dark:text-cyan-400",
+      border: "border-cyan-200 dark:border-cyan-800",
+      light: "bg-cyan-50 dark:bg-cyan-950/20",
+      dark: "bg-cyan-900/30",
+    },
+    icon: Package,
+    timeline: { step: 6, label: "Dispatching Replacement" },
+    nextStatuses: ["REPLACED"],
+  },
+  REPLACED: {
+    label: "Replaced",
+    color: {
+      badge:
+        "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800",
+      text: "text-emerald-600 dark:text-emerald-400",
+      border: "border-emerald-200 dark:border-emerald-800",
+      light: "bg-emerald-50 dark:bg-emerald-950/20",
+      dark: "bg-emerald-900/30",
+    },
+    icon: CheckCircle,
+    timeline: { step: 7, label: "Replacement Delivered" },
   },
 };
 
@@ -172,28 +214,7 @@ export function getNextStatuses(
   currentStatus: OrderStatusType
 ): OrderStatusType[] {
   const config = getOrderStatus(currentStatus);
-  // For delivered, allow return request
-  if (currentStatus === "DELIVERED") {
-    return ["RETURN_REQUESTED"];
-  }
-  // For pending, allow paid or cancelled
-  if (currentStatus === "PENDING") {
-    return ["PAID", "CANCELLED"];
-  }
-  // For paid, allow shipped or cancelled
-  if (currentStatus === "PAID") {
-    return ["SHIPPED", "CANCELLED"];
-  }
-  // For shipped, allow delivered only
-  if (currentStatus === "SHIPPED") {
-    return ["DELIVERED"];
-  }
-  // For return requested, allow returned only
-  if (currentStatus === "RETURN_REQUESTED") {
-    return ["RETURNED"];
-  }
-  // Terminal statuses
-  return [];
+  return config.nextStatuses || [];
 }
 
 // Helper: Get all status options for dropdown (excluding terminal statuses)
@@ -201,7 +222,11 @@ export function getStatusOptionsForAdmin(): Array<{
   value: OrderStatusType;
   label: string;
 }> {
-  const terminalStatuses: OrderStatusType[] = ["CANCELLED", "RETURNED"];
+  const terminalStatuses: OrderStatusType[] = [
+    "CANCELLED",
+    "REFUNDED",
+    "REPLACED",
+  ];
   return (Object.keys(ORDER_STATUS_CONFIG) as OrderStatusType[])
     .filter((key) => !terminalStatuses.includes(key))
     .map((key) => ({
@@ -225,7 +250,7 @@ export function getStatusIcon(status: OrderStatusType): React.ElementType {
   return getOrderStatus(status).icon;
 }
 
-// Order status timeline steps
+// Order status timeline steps (Base standard delivery)
 export const ORDER_TIMELINE_STEPS = [
   { status: "PENDING", label: "Order Placed" },
   { status: "PAID", label: "Payment Confirmed" },

@@ -1,62 +1,75 @@
 "use client";
 
-import { useState } from "react";
-import { Truck, Loader2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
+import { Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface TrackingInputProps {
-  currentTracking?: string;
-  onUpdate: (trackingNumber: string) => Promise<void>;
-  isLoading?: boolean;
+  order: any;
+  onUpdate: (data: { trackingNumber?: string; awbCode?: string; courierName?: string }) => void;
+  isLoading: boolean;
 }
 
-export function TrackingInput({
-  currentTracking,
-  onUpdate,
-  isLoading = false,
-}: TrackingInputProps) {
-  const [trackingNumber, setTrackingNumber] = useState(currentTracking || "");
-  const [isUpdating, setIsUpdating] = useState(false);
+export function TrackingInput({ order, onUpdate, isLoading }: TrackingInputProps) {
+  const [awbCode, setAwbCode] = useState(order?.awbCode || "");
+  const [courierName, setCourierName] = useState(order?.courierName || "");
+  const [trackingNumber, setTrackingNumber] = useState(order?.trackingNumber || "");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!trackingNumber.trim()) {
-      toast.error("Please enter a tracking number");
-      return;
-    }
+  // Keep local state in sync if data changes externally
+  useEffect(() => {
+    setAwbCode(order?.awbCode || "");
+    setCourierName(order?.courierName || "");
+    setTrackingNumber(order?.trackingNumber || "");
+  }, [order]);
 
-    setIsUpdating(true);
-    try {
-      await onUpdate(trackingNumber.trim());
-      toast.success("Tracking number updated");
-    } catch (error) {
-      toast.error("Failed to update tracking number");
-    } finally {
-      setIsUpdating(false);
-    }
+  const handleSave = () => {
+    onUpdate({ awbCode, courierName, trackingNumber });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
-      <div className="relative flex-1">
-        <Truck className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+    <div className="space-y-5 p-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-xs uppercase tracking-wider text-muted-foreground">Shiprocket AWB Code</Label>
+          <Input
+            placeholder="e.g. 1435267890"
+            value={awbCode}
+            onChange={(e) => setAwbCode(e.target.value)}
+            className="font-mono bg-muted/20"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs uppercase tracking-wider text-muted-foreground">Courier Partner</Label>
+          <Input
+            placeholder="e.g. Delhivery, Bluedart"
+            value={courierName}
+            onChange={(e) => setCourierName(e.target.value)}
+            className="bg-muted/20"
+          />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs uppercase tracking-wider text-muted-foreground">Fallback Tracking Link</Label>
         <Input
+          placeholder="Direct tracking URL (Optional)"
           value={trackingNumber}
           onChange={(e) => setTrackingNumber(e.target.value)}
-          placeholder={currentTracking || "Enter tracking number..."}
-          className="pl-9"
-          disabled={isLoading || isUpdating}
+          className="bg-muted/20"
         />
       </div>
-      <Button type="submit" disabled={isLoading || isUpdating}>
-        {isUpdating ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          "Update"
-        )}
-      </Button>
-    </form>
+      
+      <div className="pt-2">
+        <Button 
+          onClick={handleSave} 
+          disabled={isLoading}
+          className="w-full gap-2"
+        >
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          Save Logistics Details
+        </Button>
+      </div>
+    </div>
   );
 }
