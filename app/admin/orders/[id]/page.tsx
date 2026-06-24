@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Package, User, MapPin, Receipt, RotateCcw, ShieldCheck, XCircle, Banknote, Loader2, Printer, AlertCircle } from "lucide-react";
+import { ArrowLeft, Package, User, MapPin, Receipt, RotateCcw, ShieldCheck, XCircle, Banknote, Loader2, Printer, AlertCircle,RefreshCcw  } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -22,12 +22,13 @@ export default function AdminOrderDetailPage() {
   const id = params.id as string;
 
   // 🛡️ Live API Integrations
-  const { data: order, isLoading, isError, refetch } = useGetOrderByIdQuery(id);
+  const { data: order, isLoading, isError,isFetching, refetch } = useGetOrderByIdQuery(id);
   const {
     updateOrderStatus,
     addTrackingInfo,
     handleReturnAction, // Exposed from updated hook
     isUpdating,
+    
   } = useOrderActions({
     orderId: id,
     currentStatus: order?.status as any,
@@ -53,9 +54,14 @@ export default function AdminOrderDetailPage() {
   if (isError || !order) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <Button variant="ghost" onClick={() => router.push("/admin/orders")} className="mb-6">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back
-        </Button>
+        <div className="flex items-center justify-between mb-6">
+          <Button variant="ghost" onClick={() => router.push("/admin/orders")}>
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back
+          </Button>
+          <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCcw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+          </Button>
+        </div>
         <EmptyState
           title="Order not found"
           description="The order you're looking for doesn't exist."
@@ -75,9 +81,24 @@ export default function AdminOrderDetailPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl animate-in fade-in duration-500">
-      <Button variant="ghost" onClick={() => router.push("/admin/orders")} className="mb-6">
-        <ArrowLeft className="h-4 w-4 mr-2" /> Back to Orders
-      </Button>
+      {/* ✅ Back Button + Refresh Button */}
+      <div className="flex items-center justify-between mb-6">
+        <Button variant="ghost" onClick={() => router.push("/admin/orders")}>
+          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Orders
+        </Button>
+        
+        {/* ✅ Refresh Button */}
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => refetch()}
+          disabled={isLoading || isFetching}
+          className="h-9 w-9 rounded-full"
+          title="Refresh Order Data"
+        >
+          <RefreshCcw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+        </Button>
+      </div>
 
       {/* 🛡️ ADMIN RETURN MANAGEMENT BANNER */}
       {activeReturnStatus && (

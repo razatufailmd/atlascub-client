@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Package, MapPin, Receipt, Truck, Calendar, RotateCcw, AlertCircle, ArrowUpRight, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Package, MapPin, Receipt, Truck, Calendar, RotateCcw, AlertCircle, ArrowUpRight, CheckCircle2, RefreshCcw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -21,7 +21,7 @@ export default function AccountOrderDetailPage() {
   const id = params.id as string;
 
   // 🛡️ Live API Hooks
-  const { data: order, isLoading, isError, refetch } = useGetOrderByIdQuery(id);
+  const { data: order, isLoading, isError, isFetching, refetch } = useGetOrderByIdQuery(id);
   const [initiateReturn, { isLoading: isSubmittingReturn }] = useInitiateReturnMutation();
   
   const [showReturnModal, setShowReturnModal] = useState(false);
@@ -42,16 +42,22 @@ export default function AccountOrderDetailPage() {
     );
   }
 
+ 
   if (isError || !order) {
     return (
-      <div className="container mx-auto px-4 py-12 max-w-3xl">
-        <Button variant="ghost" onClick={() => router.push("/account/orders")} className="mb-6">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Orders
-        </Button>
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center justify-between mb-6">
+          <Button variant="ghost" onClick={() => router.push("/account/orders")}>
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back to Orders
+          </Button>
+          <Button variant="outline" size="icon" onClick={refetch} disabled={isFetching}>
+            <RefreshCcw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+          </Button>
+        </div>
         <EmptyState
           title="Order not found"
           description="The order you're looking for doesn't exist."
-          action={{ label: "View All Orders", href: "/account/orders" }}
+          action={{ label: "Back to Orders", href: "/account/orders" }}
         />
       </div>
     );
@@ -87,9 +93,26 @@ export default function AccountOrderDetailPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl animate-in fade-in duration-500">
-      <Button variant="ghost" onClick={() => router.push("/account/orders")} className="mb-6">
+       {/* ✅ Back Button + Refresh Button */}
+       <div className="flex items-center justify-between mb-6">
+       <Button variant="ghost" onClick={() => router.push("/account/orders")} className="mb-6">
         <ArrowLeft className="h-4 w-4 mr-2" /> Back to Orders
       </Button>
+        
+        {/* ✅ Refresh Button */}
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => refetch()}
+          disabled={isLoading || isFetching}
+          className="h-9 w-9 rounded-full"
+          title="Refresh Order Data"
+        >
+          <RefreshCcw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+        </Button>
+      </div>
+
+    
 
       {/* 🛡️ FIXED Dynamic Status / Return Banner */}
       {order.returnStatus && (

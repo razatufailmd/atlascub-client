@@ -1,11 +1,10 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { useUser, UserProfile } from "@clerk/nextjs";
 import { motion } from "framer-motion";
-import { Mail, Calendar, Shield } from "lucide-react";
+import { Mail, Calendar, Shield, UserCog } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { EmptyState } from "@/components/shared/empty-state";
 
 export default function AccountProfilePage() {
   const { user } = useUser();
@@ -26,29 +25,29 @@ export default function AccountProfilePage() {
   const isAdmin = user?.publicMetadata?.role === "admin";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       {/* Welcome Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="rounded-lg bg-gradient-to-r from-primary/10 to-secondary/10 p-6"
       >
-        <h1 className="heading-md font-primary">
+        <h1 className="text-3xl font-bold tracking-tight">
           Welcome back, {user?.firstName}!
         </h1>
         <p className="mt-1 text-muted-foreground">
-          Manage your account, track orders, and update preferences
+          Manage your account settings, security, and personal preferences.
         </p>
       </motion.div>
 
-      {/* User Info Card */}
+      {/* User Info Overview Card */}
       <Card>
         <CardHeader>
           <CardTitle>Profile Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-4">
-            <Avatar className="h-20 w-20">
+            <Avatar className="h-20 w-20 border-2 border-primary/20">
               <AvatarImage src={user?.imageUrl} />
               <AvatarFallback className="bg-primary/10 text-primary text-xl">
                 {getInitials()}
@@ -62,12 +61,12 @@ export default function AccountProfilePage() {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="flex items-center gap-3 rounded-lg border border-border p-3">
               <Mail className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">Email</p>
-                <p className="text-sm font-medium">
+                <p className="text-sm font-medium truncate">
                   {user?.emailAddresses[0]?.emailAddress}
                 </p>
               </div>
@@ -92,39 +91,28 @@ export default function AccountProfilePage() {
         </CardContent>
       </Card>
 
-      {/* Quick Stats */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Recent Orders</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <EmptyState
-              title="No orders yet"
-              description="Your order history will appear here"
-              action={{
-                label: "Start Shopping",
-                href: "/shop",
-              }}
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Saved Addresses</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <EmptyState
-              title="No addresses saved"
-              description="Add your first shipping address"
-              action={{
-                label: "Add Address",
-                href: "/account/address",
-              }}
-            />
-          </CardContent>
-        </Card>
+      {/* Clerk UserProfile Wrapper */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <UserCog className="h-5 w-5 text-primary" />
+          <h2 className="text-xl font-semibold">Account Settings</h2>
+        </div>
+        <div className="overflow-hidden rounded-xl border border-border shadow-sm">
+          <UserProfile 
+            appearance={{
+              variables: {
+                borderRadius: '0.5rem',
+                colorPrimary: 'hsl(var(--primary))',
+              },
+              elements: {
+                rootBox: "w-full",
+                card: "shadow-none border-none rounded-none w-full",
+                navbar: "hidden md:flex", // Hide sidebar on mobile for better flow
+                pageScrollBox: "p-0",
+              }
+            }}
+          />
+        </div>
       </div>
     </div>
   );
