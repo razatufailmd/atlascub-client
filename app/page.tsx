@@ -20,11 +20,11 @@ export default function HomePage() {
       <FloatingBlobs />
        {/* 1. Hero Section with Scroll Parallax */}
        <HeroSection />
+        {/* 5. discover products */}
+        <DiscoverMore/>
         {/* 2. Brand Sourcing Values */}
         <BrandValues />
         {/* 3. Featured Collections */}
-        {/* 5. discover products */}
-        <DiscoverMore/>
         <GenderGrid />
         {/* best work */}
         <CinematicShowcase/>
@@ -34,7 +34,7 @@ export default function HomePage() {
         {/* 4. Gender/Department Split Grid */}
         <FeatureSection/>
         {/* 7. Dynamic Newsletter Signup */}
-        <NewsletterSignup />
+        {/* <NewsletterSignup /> */}
         {/*  */}
         <TestimonialsSection/>
         {/* 8. Instagram Community Grid */}

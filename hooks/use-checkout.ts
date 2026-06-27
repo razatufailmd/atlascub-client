@@ -85,9 +85,6 @@ export function useCheckout() {
       error?.description ||
       "Payment process was interrupted or declined. Please try again.";
 
-    // 🛡️ CRITICAL FIX: Do NOT route to /checkout/failure here.
-    // Keeping the user on the page prevents the iframe unmount race condition
-    // and preserves their checkout state so they can fix details and retry.
     setState((prev) => ({
       ...prev,
       step: "failed",
@@ -100,8 +97,10 @@ export function useCheckout() {
   }, []);
 
   const handlePlaceOrder = useCallback(
-    async (addressId: string) => {
-      // 🛡️ REPLACED ShippingAddress object with string ID
+    async (
+      addressId: string,
+      paymentMethodSelected: "PREPAID" | "COD" = "PREPAID"
+    ) => {
       if (cartItems.length === 0) {
         toast.error("Your cart is empty. Please add some items.");
         return;
@@ -115,21 +114,43 @@ export function useCheckout() {
       }));
 
       try {
+        // Map the frontend payment methodology to the correct backend format
+        const backendPaymentMethod =
+          paymentMethodSelected === "COD" ? "COD" : "razorpay";
+
         const payload = {
           cartItems: mapCartItemsToCheckout(cartItems),
-          addressId, // 🛡️ REPLACED shippingAddress object
-          paymentMethod: "razorpay",
+          addressId,
+          paymentMethod: backendPaymentMethod,
         };
 
         // 🛡️ STEP 1: Create the Order in the Database
-        // Cast to 'any' because RTK Query expects the full Razorpay response,
-        // but our backend correctly just returns the DB Order object here.
         const orderResult = (await initiateCheckout(
           payload as any
         ).unwrap()) as any;
 
-        // 🛡️ STEP 2: Request the Secure Razorpay Transaction ID
-        // We use apiClient to ensure our Clerk Auth Bearer token is automatically attached
+        // 🛡️ STEP 2: Branch logic based on COD vs PREPAID selection
+        if (paymentMethodSelected === "COD") {
+          dispatch(clearCart());
+          setState((prev) => ({
+            ...prev,
+            orderId: orderResult.id,
+            orderNumber: orderResult.orderNumber || orderResult.id,
+            isSubmitting: false,
+            isProcessing: false,
+            step: "success",
+          }));
+
+          toast.success("COD Order requested successfully!");
+          router.push(
+            `/checkout/success?orderNumber=${
+              orderResult.orderNumber || orderResult.id
+            }`
+          );
+          return;
+        }
+
+        // 🛡️ STEP 3: Request the Secure Razorpay Transaction ID (Prepaid Flow)
         const { data: paymentResult } = await apiClient.post(
           "/payments/create-order",
           {
@@ -137,7 +158,7 @@ export function useCheckout() {
           }
         );
 
-        // 🛡️ STEP 3: Save ALL data to state to instantly trigger the Payment Modal
+        // 🛡️ STEP 4: Save data to state to instantly trigger the Payment Modal
         setState((prev) => ({
           ...prev,
           orderId: orderResult.id,
@@ -161,7 +182,6 @@ export function useCheckout() {
               "Some products in your cart are no longer available.";
           }
         } else if (error.response?.data?.message) {
-          // Handle axios errors from apiClient
           errorMessage = error.response.data.message;
         }
 
@@ -179,7 +199,7 @@ export function useCheckout() {
         }
       }
     },
-    [cartItems, initiateCheckout, router]
+    [cartItems, initiateCheckout, router, dispatch]
   );
 
   const getOrderForSuccess = useCallback((orderNumber: string) => {

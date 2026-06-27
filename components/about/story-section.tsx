@@ -72,7 +72,7 @@ export function StorySection() {
               <p className="font-primary text-lg italic text-foreground">
                 "Clothing that carries the weight of history but sits light on the skin."
               </p>
-              <p className="mt-2 text-sm text-muted-foreground">— Danish Raza, Founder</p>
+             
             </motion.div>
           </motion.div>
         </div>

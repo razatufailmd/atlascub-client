@@ -130,13 +130,13 @@ export function UserMenu() {
             </Link>
           </DropdownMenuItem>
           
-          <DropdownMenuItem asChild>
+          {/* <DropdownMenuItem asChild>
             <Link href="/account/settings" className="flex cursor-pointer items-center gap-2">
               <Settings className="h-4 w-4" />
               <span>Settings</span>
               <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
             </Link>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
         </DropdownMenuGroup>
         
         {isAdmin && (

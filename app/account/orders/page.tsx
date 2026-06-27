@@ -9,7 +9,8 @@ import {
   XCircle, 
   ShoppingBag,
   AlertCircle,
-  RefreshCcw
+  RefreshCcw,
+  Coins
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,10 +20,11 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { OrderCard } from "@/components/orders/order-card";
 import { useGetUserOrdersQuery } from "@/lib/store/apis/checkout-api";
 
-// Status tabs configuration
+// Status tabs configuration for customers
 const statusTabs: { value: string; label: string; icon: React.ElementType }[] = [
   { value: "all", label: "All Orders", icon: Package },
-  { value: "PENDING", label: "Pending/Failed", icon: Clock },
+  { value: "COD_REQUESTED", label: "COD Pending", icon: Coins }, // 🛡️ Added: Customer tracking of COD requests
+  { value: "PENDING", label: "Prepaid Pending", icon: Clock },
   { value: "PAID", label: "Paid", icon: CheckCircle },
   { value: "SHIPPED", label: "Shipped", icon: Truck },
   { value: "DELIVERED", label: "Delivered", icon: Package },
@@ -126,17 +128,18 @@ export default function AccountOrdersPage() {
         </Button>
       </div>
 
+    
       {/* Status Tabs */}
       <Tabs value={statusFilter} onValueChange={handleStatusChange} className="w-full">
-        <div className="overflow-x-auto pb-2 custom-scrollbar">
-          <TabsList className="flex w-max h-auto gap-2 bg-transparent p-0">
+        <div className="w-full overflow-x-auto pb-2 scrollbar-hide">
+          <TabsList className="inline-flex h-auto w-max gap-2 bg-transparent p-0">
             {statusTabs.map((tab) => {
               const count = tab.value === "all" ? globalTotal : statusCounts[tab.value] || 0;
               return (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="flex items-center gap-2 rounded-full border border-border/60 bg-card px-5 py-2 text-sm transition-all hover:bg-muted/50 data-[state=active]:border-primary data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                  className="flex shrink-0 items-center gap-2 rounded-full border border-border/60 bg-card px-4 py-2 text-sm whitespace-nowrap transition-all hover:bg-muted/50 data-[state=active]:border-primary data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-sm"
                 >
                   <tab.icon className="h-4 w-4" />
                   <span className="font-medium">{tab.label}</span>

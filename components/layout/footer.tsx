@@ -134,8 +134,8 @@ export function Footer() {
             <ul className="space-y-4 text-sm font-body">
               { [
     { name: "Help Center", href: "/support" },
-    { name: "Shipping Info", href: "/support#shipping" },
-    { name: "Returns & Exchanges", href: "/support#returns" },
+    { name: "Shipping Info", href: "/shipping-policy" },
+    { name: "Returns & Exchanges", href: "/returns" },
     
     { name: "Contact Us", href: "/contact" },
   ].map((link, idx) => (

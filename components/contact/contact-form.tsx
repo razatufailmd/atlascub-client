@@ -14,6 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
+import apiClient from "@/lib/store/apis/axios-client";
+
 
 interface FormData {
   name: string;
@@ -36,22 +39,52 @@ export function ContactForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields explicitly
+    if (!formData.name.trim() || !formData.email.trim() || !formData.subject || !formData.message.trim()) {
+      toast.error("Please fill out all required fields marked with an asterisk (*).");
+      return;
+    }
+
+    if (formData.message.trim().length < 10) {
+      toast.error("Your message must be at least 10 characters long.");
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const payload = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        orderNumber: formData.orderNumber.trim() || undefined,
+        subject: formData.subject,
+        message: formData.message.trim(),
+      };
 
-    setIsSubmitting(false);
-    setIsSuccess(true);
-    setFormData({
-      name: "",
-      email: "",
-      orderNumber: "",
-      subject: "",
-      message: "",
-    });
+      await apiClient.post("/communication/contact", payload);
 
-    setTimeout(() => setIsSuccess(false), 5000);
+      setIsSuccess(true);
+      toast.success("Support ticket compiled. A receipt has been sent to your email!");
+      
+      // Clear form inputs
+      setFormData({
+        name: "",
+        email: "",
+        orderNumber: "",
+        subject: "",
+        message: "",
+      });
+
+      // Clear the visual success checkbox state after a brief delay
+      setTimeout(() => setIsSuccess(false), 5000);
+    } catch (error: any) {
+      console.error("Failed to submit support inquiry:", error);
+      const errorMsg = error.response?.data?.message || "Failed to deliver message. Please check your internet connection.";
+      toast.error(errorMsg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -60,7 +93,7 @@ export function ContactForm() {
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
-      className="rounded-lg border border-border bg-card p-6 md:p-8 self-start"
+      className="rounded-lg border border-border bg-card p-6 md:p-8 self-start shadow-sm"
     >
       <div className="mb-6">
         <h2 className="heading-sm font-primary">Send a Message</h2>
@@ -69,6 +102,7 @@ export function ContactForm() {
         </p>
       </div>
 
+      {}
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div className="space-y-2">
@@ -96,12 +130,13 @@ export function ContactForm() {
           </div>
         </div>
 
+        {}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="orderNumber">Order Number (Optional)</Label>
             <Input
               id="orderNumber"
-              placeholder="ATL-XXXXX"
+              placeholder="ATC12345678"
               value={formData.orderNumber}
               onChange={(e) =>
                 setFormData({ ...formData, orderNumber: e.target.value })
@@ -144,6 +179,7 @@ export function ContactForm() {
           />
         </div>
 
+        {}
         <Button
           type="submit"
           disabled={isSubmitting || isSuccess}

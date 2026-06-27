@@ -20,7 +20,7 @@ export const quickSupportLinks = [
     title: "FAQs",
     description: "Sizing, shipping, and care instructions",
     icon: "HelpCircle",
-    href: "/faq",
+    href: "/support",
     action: "Read FAQs →",
   },
   {
@@ -28,16 +28,14 @@ export const quickSupportLinks = [
     title: "Size Guide",
     description: "Find your perfect fit with our measurement chart",
     icon: "Ruler",
-    href: "/size-guide",
+    href: "/support",
     action: "View Guide →",
   },
 ];
 
 export const contactInfo = {
   email: {
-    primary: "hello@atlascub.in",
     support: "support@atlascub.in",
-    press: "press@atlascub.in",
   },
   phone: {
     whatsapp: "+91 98765 43210",
@@ -68,17 +66,16 @@ export const faqs = [
   {
     question: "How long does shipping take?",
     answer:
-      "Domestic orders typically arrive within 3-5 business days. International orders take 7-14 business days. You'll receive a tracking link via email once your order ships.",
+      "Domestic orders typically arrive within 8-14 business days. business days. You'll receive a tracking link via email once your order ships.",
   },
   {
     question: "What is your return policy?",
     answer:
-      "We offer 15-day easy returns from the date of delivery. Items must be unused, with original tags attached. Initiate returns through your account dashboard.",
+      "We offer 7-day easy returns from the date of delivery. Items must be unused, with original tags attached. Initiate returns through your account dashboard.",
   },
   {
     question: "Do you ship internationally?",
-    answer:
-      "Yes, we ship worldwide. Shipping costs and delivery times vary by destination. Customs duties may apply and are the responsibility of the customer.",
+    answer: "No,Right now we are only available in Tier cities of India",
   },
   {
     question: "How do I find my size?",

@@ -8,6 +8,8 @@ export interface StoreSettings {
   taxRate: number;
   isTaxInclusive: boolean;
   updatedAt: string;
+  isCodEnabled: boolean;
+  codFee: number;
 }
 
 export const settingsApi = api.injectEndpoints({

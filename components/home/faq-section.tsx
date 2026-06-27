@@ -11,23 +11,24 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { 
-  LayoutGridIcon, 
+  LayoutGrid, 
   Truck, 
   RotateCcw, 
   Scissors, 
-  Ruler 
+  Ruler
 } from "lucide-react";
+import { shippingInfo, businessPolicies } from "@/lib/constants/legal";
 
 const categories = [
   {
-    icon: <LayoutGridIcon className="size-4" />,
+    icon: <LayoutGrid className="size-4" />,
     id: "all",
     label: "All Queries",
   },
   {
     icon: <Truck className="size-4" />,
     id: "shipping",
-    label: "Shipping & Delivery",
+    label: "Shipping & Logistics",
   },
   {
     icon: <RotateCcw className="size-4" />,
@@ -37,7 +38,7 @@ const categories = [
   {
     icon: <Scissors className="size-4" />,
     id: "fabrics",
-    label: "Fabrics & Care",
+    label: "Craftsmanship & Care",
   },
   {
     icon: <Ruler className="size-4" />,
@@ -51,50 +52,69 @@ const faqs = [
     id: 1,
     category: "shipping",
     title: "Do you offer international shipping?",
-    content:
-      "Currently, we fulfill and ship orders exclusively within India. However, we are actively working on expanding our logistics to support international fulfillment by the end of the year.",
+    content: shippingInfo.internationalShipping
+      ? `Yes, we support global shipping across select networks. Standard international transits average ${shippingInfo.internationalShippingTime}.`
+      : "Currently, our logistics network is configured strictly for domestic deliveries within India. We do not accept or process international shipping coordinates in our current phase.",
   },
   {
     id: 2,
     category: "shipping",
     title: "How long will my order take to arrive?",
-    content:
-      "Standard orders are processed within 24 hours and typically delivered within 3-5 business days across major metro cities in India. Bespoke or customized studio pieces may take an additional 2 days for final finishing.",
+    content: `Garments are processed and dispatched within 24 business hours. Deliveries within Faridabad and Haryana take ${shippingInfo.regionalHaryanaTime}, major metro cities take ${shippingInfo.metroCitiesTime}, and other domestic regions take ${shippingInfo.domesticShippingTime}. All shipments are handled by ${shippingInfo.logisticsPartner}.`,
   },
   {
     id: 3,
-    category: "returns",
-    title: "What is your return policy?",
-    content:
-      "We offer a seamless 7-day return policy for all unworn garments with original tags attached. Please note that customized tailored pieces or final-sale archive items are not eligible for standard returns.",
+    category: "shipping",
+    title: "What are your delivery charges?",
+    content: `Standard prepaid orders over ₹${shippingInfo.freeShippingThreshold.toLocaleString("en-IN")} qualify for complimentary shipping. Orders below this threshold carry a flat delivery fee of ₹${shippingInfo.shippingCost.toLocaleString("en-IN")} applied automatically at checkout.`,
   },
   {
     id: 4,
-    category: "returns",
-    title: "How do I initiate an exchange for a different size?",
-    content:
-      "You can initiate a direct size exchange through your Account Dashboard under 'Orders'. Our courier partner will pick up the incorrect size and deliver the replacement simultaneously.",
+    category: "shipping",
+    title: "Is there an extra charge for Cash on Delivery (COD)?",
+    content: `Yes. To offset the high administrative and collection costs associated with Cash on Delivery courier handling, a flat non-refundable surcharge of ₹${shippingInfo.codFee.toLocaleString("en-IN")} is added to your total during checkout.`,
   },
   {
     id: 5,
-    category: "fabrics",
-    title: "Are your linen shirts prone to heavy shrinking?",
-    content:
-      "Our premium French linens are pre-washed and treated during production to minimize shrinkage. To maintain their drape and texture, we recommend cold machine washing and line drying.",
+    category: "returns",
+    title: "What is your return policy?",
+    content: `We offer a strict return/exchange audit window of ${businessPolicies.returnWindow} from the date of delivery. Items must be returned in pristine condition, meaning ${businessPolicies.returnConditions}.`,
   },
   {
     id: 6,
-    category: "fabrics",
-    title: "What is 'Raw Silk' and how should I care for it?",
-    content:
-      "Raw silk is a natural, slightly textured fiber with a beautiful matte sheen. Because it is a delicate handloom fabric, our raw silk bandhgalas and kurtas must be strictly dry-cleaned only.",
+    category: "returns",
+    title: "Are returns completely free of cost?",
+    content: `If you received a damaged, stained, or incorrect item, return logistics are fully free. For size changes or change of mind, a flat reverse logistics fee of ${businessPolicies.reverseLogisticsCharge} is deducted from your final refund payout.`,
   },
   {
     id: 7,
+    category: "returns",
+    title: "Can I exchange an item for a different size?",
+    content: `${businessPolicies.exchangePolicy} Exchanges can be initiated easily by logging into your account dashboard.`,
+  },
+  {
+    id: 8,
+    category: "returns",
+    title: "How long does a refund take?",
+    content: `Once your returned garment reaches our warehouse and passes the strict handloom audit, your refund will be processed and returned to your original payment method within ${businessPolicies.refundTime}.`,
+  },
+  {
+    id: 9,
+    category: "fabrics",
+    title: "What fabrics do you use and how should I care for them?",
+    content: "We use premium natural fibers, including French linen, organic combed cotton, hypoallergenic mulberry silk-blends, and handloomed Indian textiles. Most of our cottons and linens are machine washable on a delicate, cold cycle. However, raw silk edits, textured handlooms, and structured drapes require dry cleaning only to preserve their tactile properties.",
+  },
+  {
+    id: 10,
+    category: "sizing",
+    title: "How do I choose my correct size?",
+    content: "Every product page features a detailed structural Size Guide. Please reference specific shoulder and chest measurements rather than standard retail sizes, as our garments are cut with bespoke, relaxed outlines.",
+  },
+  {
+    id: 11,
     category: "sizing",
     title: "Do your oversized tees fit true to size?",
-    content:
-      "Yes. Our oversized silhouettes are intentionally engineered with a drop-shoulder and relaxed body. You should order your standard true size to achieve the intended oversized look. Do not size up.",
+    content: "Yes. Our oversized silhouettes are intentionally engineered with a drop-shoulder and relaxed body structure. Order your standard true size to achieve the intended oversized look; do not size up.",
   },
 ];
 
@@ -141,7 +161,7 @@ export function FaqsSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mt-4 text-muted-foreground font-body text-sm md:text-base max-w-lg"
           >
-            Find quick answers regarding our fits, premium fabrics, and shipping procedures.
+            Find quick answers regarding our fits, premium handloom fabrics, and shipping procedures.
           </motion.p>
         </div>
 
@@ -161,8 +181,10 @@ export function FaqsSection() {
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
                   variant={activeCategory === cat.id ? "default" : "ghost"}
-                  className={`w-full justify-start gap-3 h-11 ${
-                    activeCategory === cat.id ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground"
+                  className={`w-full justify-start gap-3 h-11 transition-all ${
+                    activeCategory === cat.id 
+                      ? "bg-primary text-primary-foreground shadow-sm" 
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {cat.icon}

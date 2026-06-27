@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { 
   Package, 
@@ -12,7 +11,8 @@ import {
   RotateCcw,
   Search,
   AlertCircle,
-  RefreshCcw
+  RefreshCcw,
+  Coins
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,10 +23,11 @@ import { OrderCard } from "@/components/orders/order-card";
 
 import { useGetAllOrdersQuery } from "@/lib/store/apis/checkout-api";
 
-// Status tabs configuration
+// Status tabs configuration for Administrators
 const statusTabs: { value: string; label: string; icon: React.ElementType }[] = [
   { value: "all", label: "All", icon: Package },
-  { value: "PENDING", label: "Pending/Failed", icon: Clock }, // 🛡️ Updated label
+  { value: "COD_REQUESTED", label: "COD Requests", icon: Coins }, // 🛡️ Added: Admin Verification Queue for COD
+  { value: "PENDING", label: "Prepaid Pending", icon: Clock }, 
   { value: "PAID", label: "Paid", icon: CheckCircle },
   { value: "SHIPPED", label: "Shipped", icon: Truck },
   { value: "DELIVERED", label: "Delivered", icon: Package },
@@ -40,9 +41,10 @@ export default function AdminOrdersPage() {
   const [page, setPage] = useState(1);
   const limit = 10;
 
+  // 1. Unfiltered query for calculating persistent metrics across statuses
   const { data: statsData } = useGetAllOrdersQuery({ limit: 500 });
 
-  // 🛡️ Added isFetching to trigger animations on manual refresh
+  // 2. Filtered, paginated query for the table list
   const { data, isLoading, isFetching, isError, refetch } = useGetAllOrdersQuery({
     status: statusFilter !== "all" ? statusFilter : undefined,
     page,
@@ -54,6 +56,7 @@ export default function AdminOrdersPage() {
   const totalPages = data?.totalPages || 0;
   const globalTotal = statsData?.total || 0;
 
+  // Calculate status counts dynamically from statsData
   const statusCounts = (statsData?.data || []).reduce((acc, order) => {
     acc[order.status] = (acc[order.status] || 0) + 1;
     return acc;
@@ -85,15 +88,15 @@ export default function AdminOrdersPage() {
           </div>
           <Skeleton className="h-10 w-32" />
         </div>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7">
-          {[...Array(7)].map((_, i) => (
-            <Skeleton key={i} className="h-20 w-full" />
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-8">
+          {[...Array(8)].map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full animate-pulse" />
           ))}
         </div>
         <Skeleton className="h-10 w-full max-w-sm" />
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} className="h-24 w-full" />
+            <Skeleton key={i} className="h-24 w-full rounded-xl animate-pulse" />
           ))}
         </div>
       </div>
@@ -105,8 +108,8 @@ export default function AdminOrdersPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="heading-md font-primary">Orders</h1>
-            <p className="text-muted-foreground">Manage customer orders</p>
+            <h1 className="heading-md font-primary">Orders Pipeline</h1>
+            <p className="text-muted-foreground">Manage and track customer orders</p>
           </div>
           <Button onClick={() => refetch()} variant="outline">
             <RefreshCcw className="h-4 w-4 mr-2" />
@@ -145,7 +148,7 @@ export default function AdminOrdersPage() {
               <RefreshCcw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
             </Button>
           </h1>
-          <p className="text-muted-foreground mt-1">Manage and track customer orders</p>
+          <p className="text-muted-foreground mt-1 text-sm">Manage and track customer orders</p>
         </div>
         <div className="text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded-lg border border-border">
           Total System Orders: <span className="font-bold text-foreground">{globalTotal}</span>
@@ -156,7 +159,7 @@ export default function AdminOrdersPage() {
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7"
+        className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8"
       >
         {statusTabs.map((tab) => {
           const count = tab.value === "all" ? globalTotal : statusCounts[tab.value] || 0;
@@ -172,8 +175,8 @@ export default function AdminOrdersPage() {
                   : "border-border/60 bg-card hover:border-primary/30 hover:bg-muted/50"
               }`}
             >
-              <div className="flex items-center justify-center gap-1.5 mb-1.5">
-                <tab.icon className={`h-4 w-4 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-1.5 mb-1.5 text-center">
+                <tab.icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
                 <span className={`text-[10px] uppercase tracking-wider font-semibold ${isActive ? "text-primary" : "text-muted-foreground"}`}>
                   {tab.label}
                 </span>

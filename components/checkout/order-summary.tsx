@@ -4,13 +4,17 @@ import { useAppSelector } from "@/lib/store/store";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
-import { ShoppingBag, Truck, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
+import { ShoppingBag, Truck, CheckCircle2, AlertTriangle, Loader2, Coins } from "lucide-react";
 import { useGetSettingsQuery } from "@/lib/store/apis/store-settings-api";
 
-export function OrderSummary() {
+interface OrderSummaryProps {
+  isCod?: boolean;
+}
+
+export function OrderSummary({ isCod = false }: OrderSummaryProps) {
   const { items } = useAppSelector((state) => state.cart);
   
-  // 🛡️ Fetch live store settings
+  // 🛡️ Fetch live store settings from NestJS API
   const { data: settings, isLoading } = useGetSettingsQuery();
 
   // Fallbacks while loading to prevent UI flashes
@@ -19,11 +23,13 @@ export function OrderSummary() {
   const TAX_RATE = settings?.taxRate ?? 0.18;
   const IS_TAX_INCLUSIVE = settings?.isTaxInclusive ?? true;
   const IS_ACCEPTING_ORDERS = settings?.isAcceptingOrders ?? true;
+  const COD_FEE = settings?.codFee ?? 0;
 
   // Dynamic Calculations
   const rawSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const isFreeShipping = rawSubtotal >= FREE_SHIPPING_THRESHOLD;
   const shipping = isFreeShipping ? 0 : SHIPPING_COST;
+  const appliedCodFee = isCod ? COD_FEE : 0;
   
   // Inclusive vs Exclusive Tax Logic
   const baseAmount = rawSubtotal / (1 + TAX_RATE);
@@ -32,8 +38,8 @@ export function OrderSummary() {
     : rawSubtotal * TAX_RATE;
     
   const total = IS_TAX_INCLUSIVE 
-    ? rawSubtotal + shipping 
-    : rawSubtotal + shipping + tax;
+    ? rawSubtotal + shipping + appliedCodFee 
+    : rawSubtotal + shipping + tax + appliedCodFee;
   
   const shippingProgress = Math.min((rawSubtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
 
@@ -145,6 +151,16 @@ export function OrderSummary() {
                 {shipping === 0 ? "FREE" : formatPrice(shipping)}
               </span>
             </div>
+
+            {/* 🛡️ Dynamic Cash on Delivery handling fee element */}
+            {isCod && COD_FEE > 0 && (
+              <div className="flex justify-between text-amber-700 dark:text-amber-400 font-medium animate-in fade-in duration-300">
+                <span className="flex items-center gap-1.5">
+                  <Coins className="h-3.5 w-3.5 animate-pulse" /> COD Surcharge
+                </span>
+                <span>{formatPrice(COD_FEE)}</span>
+              </div>
+            )}
 
             {/* Exclusive Tax Display (Added on top) */}
             {!IS_TAX_INCLUSIVE && (

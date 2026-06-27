@@ -11,9 +11,10 @@ import { toast } from "sonner";
 interface CheckoutFormProps {
   onSubmit: (addressId: string) => void;
   isSubmitting: boolean;
+  paymentMethod?: "PREPAID" | "COD"; // 🛡️ Accept active payment method parameters
 }
 
-export function CheckoutForm({ onSubmit, isSubmitting }: CheckoutFormProps) {
+export function CheckoutForm({ onSubmit, isSubmitting, paymentMethod = "PREPAID" }: CheckoutFormProps) {
   const router = useRouter();
   const { data: settings } = useGetSettingsQuery();
   const { data: addresses, isLoading: addressesLoading } = useGetAddressesQuery();
@@ -133,6 +134,8 @@ export function CheckoutForm({ onSubmit, isSubmitting }: CheckoutFormProps) {
             "Ordering Paused"
           ) : isSubmitting ? (
             <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Processing...</>
+          ) : paymentMethod === "COD" ? (
+            "Request Cash on Delivery"
           ) : (
             "Proceed to Secure Payment"
           )}

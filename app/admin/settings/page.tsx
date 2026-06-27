@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Save, AlertCircle, Store, CreditCard, Truck, Loader2 } from "lucide-react";
+import { Save, AlertCircle, Store, CreditCard, Truck, Loader2, Landmark } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ const settingsSchema = z.object({
   shippingCost: z.coerce.number().min(0),
   taxRate: z.coerce.number().min(0).max(100),
   isTaxInclusive: z.boolean(),
+  isCodEnabled: z.boolean(),
+  codFee: z.coerce.number().min(0),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -41,6 +43,8 @@ export default function StoreSettingsPage() {
       shippingCost: 200,
       taxRate: 18,
       isTaxInclusive: true,
+      isCodEnabled: false,
+      codFee: 100,
     },
   });
 
@@ -52,6 +56,8 @@ export default function StoreSettingsPage() {
         shippingCost: settings.shippingCost,
         taxRate: settings.taxRate * 100,
         isTaxInclusive: settings.isTaxInclusive,
+        isCodEnabled: settings.isCodEnabled ?? false,
+        codFee: settings.codFee ?? 0,
       });
     }
   }, [settings, reset]);
@@ -64,21 +70,22 @@ export default function StoreSettingsPage() {
       };
       
       await updateSettings(formattedData);
-      toast.success("Store settings updated successfully.");
+      toast.success("Store configuration updated successfully.");
     } catch (error) {
-      toast.error("Failed to update store settings.");
+      toast.error("Failed to save store configurations.");
     }
   };
 
   const isAcceptingOrders = watch("isAcceptingOrders");
+  const isCodEnabled = watch("isCodEnabled");
 
   if (isLoading) return <div className="p-8 text-center text-muted-foreground animate-pulse">Loading settings...</div>;
 
   return (
-    <div className="max-w-4xl space-y-8">
+    <div className="max-w-4xl space-y-8 pb-12">
       <div>
         <h1 className="text-3xl font-primary font-bold tracking-tight">Store Configuration</h1>
-        <p className="text-muted-foreground mt-2">Manage live checkout rules, taxes, and global store behavior.</p>
+        <p className="text-muted-foreground mt-2">Manage live checkout rules, taxes, shipping, and payment methods.</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -115,6 +122,62 @@ export default function StoreSettingsPage() {
               <span>Customers will see a warning at checkout and cannot process payments.</span>
             </div>
           )}
+        </div>
+
+        {/* CASH ON DELIVERY CONFIGURATION */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border/50">
+            <Landmark className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold">Cash on Delivery (COD)</h2>
+          </div>
+          
+          <div className="space-y-6">
+            <div className="flex flex-row items-center justify-between rounded-lg border border-border/50 p-4 shadow-sm">
+              <div className="space-y-0.5">
+                <label className="text-base font-semibold">Enable Cash on Delivery</label>
+                <p className="text-sm text-muted-foreground">
+                  Toggle to allow customers to request COD payments during checkout.
+                </p>
+              </div>
+              <Controller
+                name="isCodEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+
+            {isCodEnabled && (
+              <div className="grid grid-cols-1 gap-6 animate-in fade-in duration-300">
+                <div className="space-y-2 max-w-md">
+                  <label className="text-sm font-medium leading-none">COD Handling / Shipping Fee (₹)</label>
+                  <Controller
+                    name="codFee"
+                    control={control}
+                    render={({ field: { value, onChange, onBlur, ref } }) => (
+                      <Input 
+                        ref={ref}
+                        type="number" 
+                        placeholder="100" 
+                        value={value as number}
+                        onBlur={onBlur}
+                        onChange={(e) => onChange(e.target.valueAsNumber || 0)}
+                        className={errors.codFee ? "border-red-500" : ""}
+                      />
+                    )}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    An additional handling fee applied strictly to COD orders to protect against high logistics rejection rates.
+                  </p>
+                  {errors.codFee && <p className="text-[0.8rem] font-medium text-destructive">{errors.codFee.message}</p>}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* FINANCIALS & TAX */}

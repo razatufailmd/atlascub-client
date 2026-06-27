@@ -20,6 +20,7 @@ const isPublicRoute = createRouteMatcher([
   "/privacy",
   "/terms",
   "/returns",
+  "/shipping-policy",
 ]);
 
 // Define authentication pages specifically
