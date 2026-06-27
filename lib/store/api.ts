@@ -58,6 +58,7 @@ export const API_TAGS = {
   COLLECTION: "Collection",
   SETTINGS: "Settings",
   ADDRESSES: "Addresses",
+  CHATHISTORY: "ChatHistory",
 } as const;
 
 export type APITagType = (typeof API_TAGS)[keyof typeof API_TAGS];

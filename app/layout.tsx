@@ -15,6 +15,7 @@ import { Toaster } from "sonner";
 import { AuthStatus } from "@/components/debug/token-debug";
 
 import { Providers } from "@/components/providers/global-provider";
+import { Chatbot } from "@/components/rag/chatbot";
 
 const fontSans = Poppins({
   subsets: ["latin"],
@@ -127,6 +128,7 @@ export default function RootLayout({
              <CartSidebar />
              <WishlistSidebar />
              <WhatsappWidget />
+             <Chatbot />
 
              {/* Development Utilities */}
              {process.env.NODE_ENV === "development" && <AuthStatus />}

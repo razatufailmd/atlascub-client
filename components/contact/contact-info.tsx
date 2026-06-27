@@ -2,14 +2,12 @@
 
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
-import { FaInstagram,FaTwitter } from "react-icons/fa";
+
 import { contactInfo } from "@/lib/constants/contact";
+import { companyInfo } from "@/lib/constants/legal";
 
 export function ContactInfo() {
-  const iconMap = {
-    FaInstagram,FaTwitter
-  };
-
+  
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -32,10 +30,10 @@ export function ContactInfo() {
               General Inquiries
             </p>
             <a
-              href={`mailto:${contactInfo.email.primary}`}
+              href={`mailto:${companyInfo.email}`}
               className="text-sm text-foreground transition-colors hover:text-primary"
             >
-              {contactInfo.email.primary}
+              {contactInfo.email.support}
             </a>
           </div>
           <div>
@@ -49,17 +47,7 @@ export function ContactInfo() {
               {contactInfo.email.support}
             </a>
           </div>
-          <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">
-              Press & Partnerships
-            </p>
-            <a
-              href={`mailto:${contactInfo.email.press}`}
-              className="text-sm text-foreground transition-colors hover:text-primary"
-            >
-              {contactInfo.email.press}
-            </a>
-          </div>
+        
         </div>
       </div>
 

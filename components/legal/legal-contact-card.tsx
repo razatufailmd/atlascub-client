@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Mail, Phone, Clock, MapPin } from "lucide-react";
-import { grievanceOfficer, companyInfo } from "@/lib/constants/legal";
+import {  companyInfo } from "@/lib/constants/legal";
 
 export function LegalContactCard() {
   return (
@@ -27,10 +27,10 @@ export function LegalContactCard() {
               Email
             </p>
             <a
-              href={`mailto:${grievanceOfficer.email}`}
+              href={`mailto:${companyInfo.email}`}
               className="text-sm text-foreground transition-colors hover:text-primary"
             >
-              {grievanceOfficer.email}
+              {companyInfo.email}
             </a>
           </div>
         </div>
@@ -42,10 +42,10 @@ export function LegalContactCard() {
               Phone
             </p>
             <a
-              href={`tel:${grievanceOfficer.phone}`}
+              href={`tel:${companyInfo.phone}`}
               className="text-sm text-foreground transition-colors hover:text-primary"
             >
-              {grievanceOfficer.phone}
+              {companyInfo.phone}
             </a>
           </div>
         </div>
@@ -56,7 +56,7 @@ export function LegalContactCard() {
             <p className="text-xs uppercase tracking-wider text-muted-foreground">
               Response Time
             </p>
-            <p className="text-sm text-foreground">{grievanceOfficer.responseTime}</p>
+            <p className="text-sm text-foreground">within 24 hrs</p>
           </div>
         </div>
 
@@ -66,7 +66,7 @@ export function LegalContactCard() {
             <p className="text-xs uppercase tracking-wider text-muted-foreground">
               Address
             </p>
-            <p className="text-sm text-foreground">{companyInfo.registeredAddress}</p>
+            <p className="text-sm text-foreground">{companyInfo.address}</p>
           </div>
         </div>
       </div>

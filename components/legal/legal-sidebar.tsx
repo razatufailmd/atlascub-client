@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface LegalSidebarProps {
-  items: Array<{ id: string; label: string }>;
+  items: Array<{ id: string; title: string }>;
 }
 
 export function LegalSidebar({ items }: LegalSidebarProps) {
@@ -56,7 +56,7 @@ export function LegalSidebar({ items }: LegalSidebarProps) {
                   : "text-muted-foreground"
               )}
             >
-              {item.label}
+              {item.title}
             </button>
           ))}
         </div>
