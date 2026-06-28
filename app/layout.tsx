@@ -48,57 +48,62 @@ export const viewport: Viewport = {
   userScalable: true,
   };
   
-  // --- GLOBAL SEO METADATA ---
   export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"), // Fixed to support local testing!
-  manifest: "/manifest.webmanifest", // Explicitly link the dynamic manifest
-  title: {
-    default: "Atlascub | Premium Modern Clothing & Drapes",
-    template: "%s | Atlascub",
-  },
-  description: "Discover curated apparel at Atlascub. Premium quality, timeless design, and modern Indian tailoring.",
-  keywords: ["premium clothing", "Indian fashion", "linen shirts", "oversized tees", "Atlascub", "festive wear"],
-  authors: [{ name: "Atlascub" }],
-  creator: "Atlascub",
-  publisher: "Atlascub",
-  applicationName: "Atlascub Store",
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://www.atlascub.in"),
+    manifest: "/manifest.webmanifest", // Direct Next.js dynamic routing endpoint
+    title: {
+      default: "Atlascub | Premium Modern Clothing & Drapes",
+      template: "%s | Atlascub",
+    },
+    description: "Discover curated apparel at Atlascub. Premium quality, timeless design, and modern Indian tailoring.",
+    keywords: [
+      "premium clothing", 
+      "Indian fashion", 
+      "linen shirts", 
+      "oversized tees", 
+      "Atlascub", 
+      "festive wear", 
+      "handloom silhouettes", 
+      "resort apparel"
+    ],
+    authors: [{ name: "Atlascub Studio" }],
+    creator: "Atlascub",
+    publisher: "Atlascub Studio Private Limited",
+    applicationName: "Atlascub",
   
-  // OpenGraph (Facebook, LinkedIn, Discord previews)
-  openGraph: {
-  type: "website",
-  locale: "en_IN",
-  url: "https://www.atlascub.in",
-  siteName: "Atlascub",
-  title: "Atlascub | Premium Modern Clothing",
-  description: "Discover curated apparel at Atlascub. Premium quality, timeless design, and modern tailoring.",
-  images: [
-  {
-  url: "/og-image.png", // The default image shown on social media shares
-  width: 1200,
-  height: 630,
-  alt: "Atlascub Premium Clothing",
-  },
-  ],
-  },
+    openGraph: {
+      type: "website",
+      locale: "en_IN",
+      url: "https://www.atlascub.in",
+      siteName: "Atlascub",
+      title: "Atlascub | Premium Modern Clothing",
+      description: "Discover curated apparel at Atlascub. Premium quality, timeless design, and modern tailoring.",
+      images: [
+        {
+          url: "/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: "Atlascub Premium Clothing",
+        },
+      ],
+    },
   
-  // Twitter Cards
-  twitter: {
-  card: "summary_large_image",
-  title: "Atlascub | Premium Modern Clothing",
-  description: "Discover curated apparel at Atlascub. Premium quality, timeless design.",
-  creator: "@atlascub", // Your brand's twitter handle
-  images: ["/og-image.png"],
-  },
+    twitter: {
+      card: "summary_large_image",
+      title: "Atlascub | Premium Modern Clothing",
+      description: "Discover curated apparel at Atlascub. Premium quality, timeless design.",
+      creator: "@atlascub",
+      images: ["/og-image.png"],
+    },
   
-  // PWA & Apple specific tags
-  appleWebApp: {
-  capable: true,
-  title: "Atlascub",
-  statusBarStyle: "default",
-  },
-  formatDetection: {
-  telephone: false, // Prevents iOS from auto-styling numbers
-  },
+    appleWebApp: {
+      capable: true,
+      title: "Atlascub",
+      statusBarStyle: "default",
+    },
+    formatDetection: {
+      telephone: false, // Prevents mobile browsers from force-styling raw phone lines
+    },
   };
 
 

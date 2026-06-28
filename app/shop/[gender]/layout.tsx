@@ -1,11 +1,34 @@
 import { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { Metadata } from "next";
 import { genderMetadata } from "@/lib/constants/categories";
 
 interface GenderLayoutProps {
   children: ReactNode;
   params: Promise<{ gender: string }>;
+}
+
+// 🚀 GENERATE DYNAMIC DEPARTMENT METADATA
+export async function generateMetadata({ params }: { params: Promise<{ gender: string }> }): Promise<Metadata> {
+  const { gender } = await params;
+  const data = genderMetadata[gender as keyof typeof genderMetadata];
+
+  if (!data) return { title: "Shop Apparel | Atlascub" };
+
+  const formatTitle = `${data.title} | Premium Modern Collection | Atlascub`;
+
+  return {
+    title: formatTitle,
+    description: data.description || `Explore our tailored selection of luxury garments in the Atlascub ${gender} department. Premium fabrics, timeless styles.`,
+    openGraph: {
+      title: formatTitle,
+      description: data.description,
+      url: `https://www.atlascub.in/shop/${gender}`,
+      type: "website",
+      images: data.heroImage ? [{ url: data.heroImage, alt: data.title }] : [],
+    },
+  };
 }
 
 export default async function GenderLayout({ children, params }: GenderLayoutProps) {
@@ -53,6 +76,7 @@ export default async function GenderLayout({ children, params }: GenderLayoutPro
         </div>
       </div>
       
+      {/* Page Content Canvas Injection */}
       {children}
     </div>
   );

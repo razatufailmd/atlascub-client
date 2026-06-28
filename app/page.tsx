@@ -12,7 +12,20 @@ import { FeatureSection } from "@/components/home/feature-section";
 import { FaqsSection } from "@/components/home/faq-section";
 import { InstagramFeedLive } from "@/components/home/ig-feed";
 import { CinematicShowcase } from "@/components/home/cinematic-showcase-images";
+import { Metadata } from "next";
 
+
+// 🚀 HOMEPAGE SPECIALIZED METADATA
+export const metadata: Metadata = {
+  title: "Atlascub | Premium Modern Clothing & Luxury Drapes",
+  description: "Discover curated luxury apparel at Atlascub. Elevate your everyday wardrobe with our signature premium linen shirts, oversized silhouettes, and minimalist modern Indian tailoring.",
+  openGraph: {
+    title: "Atlascub | Premium Modern Clothing & Luxury Drapes",
+    description: "Discover curated luxury apparel at Atlascub. Elevate your everyday wardrobe with premium linen shirts, oversized silhouettes, and minimalist modern Indian tailoring.",
+    url: "https://www.atlascub.in",
+    type: "website",
+  },
+};
 
 export default function HomePage() {
   return (
@@ -34,7 +47,7 @@ export default function HomePage() {
         {/* 4. Gender/Department Split Grid */}
         <FeatureSection/>
         {/* 7. Dynamic Newsletter Signup */}
-        {/* <NewsletterSignup /> */}
+        <NewsletterSignup />
         {/*  */}
         <TestimonialsSection/>
         {/* 8. Instagram Community Grid */}
