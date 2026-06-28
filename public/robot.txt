@@ -1,12 +1,28 @@
-# Allow all crawlers
+# 🛡️ ATLASCUB ROBOTS
+# Allow all crawlers to index storefront content
 User-agent: *
 Allow: /
 
-# Sitemap location
-Sitemap: https://www.atlascub.in/sitemap.xml
-
-# Disallow admin and private routes
+# Block admin & private system paths
 Disallow: /admin/
 Disallow: /api/
-Disallow: /account/orders/
+Disallow: /account/
 Disallow: /checkout/
+Disallow: /cart/
+
+# Block search-related paths (draft)
+Disallow: /search?*
+
+# Sitemap location (GSC will find this URL)
+Sitemap: https://www.atlascub.in/sitemap.xml
+
+# Crawl delay to be respectful to server resources
+Crawl-delay: 1
+
+# Rules for Googlebot specifically
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /account/
+Disallow: /checkout/
+Disallow: /cart/

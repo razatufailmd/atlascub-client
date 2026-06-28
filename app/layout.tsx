@@ -104,6 +104,12 @@ export const viewport: Viewport = {
     formatDetection: {
       telephone: false, // Prevents mobile browsers from force-styling raw phone lines
     },
+
+    other: {
+      "application-name": "Atlascub",
+      "msapplication-TileColor": "#9b2c2c",
+      "theme-color": "#9b2c2c",
+    },
   };
 
 

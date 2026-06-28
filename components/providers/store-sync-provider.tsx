@@ -9,10 +9,8 @@ import { cartApi, useSyncCartMutation } from "@/lib/store/apis/cart-api";
 import { wishlistApi, useSyncWishlistMutation } from "@/lib/store/apis/wishlist-api";
 
 /**
- * 🛡️ STATE PERSISTENCE ENGINE (BIDIRECTIONAL)
- * 1. Mounts: Instantly hydrates from LocalStorage for immediate UX.
- * 2. Login: Fetches saved items from the Database cross-device.
- * 3. Updates: Silently debounces & syncs any Redux changes back to DB & LocalStorage.
+ * 🛡️ STATE PERSISTENCE ENGINE (OPTIMIZED)
+ * Prevents Main Thread blocking and stops redundant "Echo Sync" feedback loops.
  */
 export function StoreSyncProvider({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
@@ -20,79 +18,79 @@ export function StoreSyncProvider({ children }: { children: React.ReactNode }) {
   const wishlistItems = useAppSelector((state) => state.wishlist.items);
   
   const isInitialized = useRef(false);
+  const isDbHydrating = useRef(false); // 🛡️ Hydration Lock: Prevents DB pulls from triggering DB pushes
+  
   const { isSignedIn, isLoaded } = useAuth();
   
   const [syncCart] = useSyncCartMutation();
   const [syncWishlist] = useSyncWishlistMutation();
 
-  // 1. FAST LOCAL LOAD: Hydrate Redux Store from LocalStorage instantly on mount
+  // 1. FAST LOCAL LOAD: Deferred to prevent blocking the initial UI paint
   useEffect(() => {
-    try {
-      const savedCart = localStorage.getItem("atlascub_cart");
-      const savedWishlist = localStorage.getItem("atlascub_wishlist");
-      
-      if (savedCart) dispatch(hydrateCart(JSON.parse(savedCart)));
-      if (savedWishlist) dispatch(hydrateWishlist(JSON.parse(savedWishlist)));
-      
-      isInitialized.current = true;
-    } catch (e) {
-      console.error("Failed to hydrate state from local storage", e);
-    }
+    // We wrap this in a setTimeout so the browser renders your heavy Hero animations FIRST
+    const timer = setTimeout(() => {
+      try {
+        const savedCart = localStorage.getItem("atlascub_cart");
+        const savedWishlist = localStorage.getItem("atlascub_wishlist");
+        
+        if (savedCart) dispatch(hydrateCart(JSON.parse(savedCart)));
+        if (savedWishlist) dispatch(hydrateWishlist(JSON.parse(savedWishlist)));
+        
+        // Unlock pushing 50ms later to guarantee the hydration dispatch doesn't trigger the save effects
+        setTimeout(() => { isInitialized.current = true; }, 50);
+      } catch (e) {
+        console.error("Failed to hydrate state from local storage", e);
+        isInitialized.current = true;
+      }
+    }, 150); // 150ms delay removes all landing stutter
+
+    return () => clearTimeout(timer);
   }, [dispatch]);
 
   // 2. CROSS-DEVICE PULL: Fetch from Backend Database when user signs in
   useEffect(() => {
     if (isLoaded && isSignedIn) {
-      // Pull saved cart from Postgres
-      dispatch(cartApi.endpoints.getCart.initiate())
-        .unwrap()
-        .then((serverCart) => {
-          if (serverCart && serverCart.length > 0) {
-            dispatch(hydrateCart(serverCart));
-          }
-        })
-        .catch((err) => console.error("Failed to pull DB cart:", err));
+      isDbHydrating.current = true; // Lock pushing back to DB while we download
 
-      // Pull saved wishlist from Postgres
-      dispatch(wishlistApi.endpoints.getWishlist.initiate())
-        .unwrap()
-        .then((serverWishlist) => {
-          if (serverWishlist && serverWishlist.length > 0) {
-            dispatch(hydrateWishlist(serverWishlist));
-          }
-        })
-        .catch((err) => console.error("Failed to pull DB wishlist:", err));
+      Promise.all([
+        dispatch(cartApi.endpoints.getCart.initiate()).unwrap().catch(() => null),
+        dispatch(wishlistApi.endpoints.getWishlist.initiate()).unwrap().catch(() => null)
+      ]).then(([serverCart, serverWishlist]) => {
+        if (serverCart && serverCart.length > 0) dispatch(hydrateCart(serverCart));
+        if (serverWishlist && serverWishlist.length > 0) dispatch(hydrateWishlist(serverWishlist));
+        
+        // Unlock pushing after React has enough time to commit the new state
+        setTimeout(() => { isDbHydrating.current = false; }, 500);
+      });
     }
   }, [isLoaded, isSignedIn, dispatch]);
 
   // 3A. SECURE PUSH: Mirror Cart changes to LocalStorage and Backend
   useEffect(() => {
-    if (!isInitialized.current) return;
+    // 🛡️ GUARD: Only save if the user explicitly added/removed an item, NOT during initial load
+    if (!isInitialized.current || isDbHydrating.current) return;
     
-    // Always save locally for guest users & speed
     localStorage.setItem("atlascub_cart", JSON.stringify(cartItems));
 
-    // If logged in, push to DB securely with a 1-second debounce
     if (isLoaded && isSignedIn) {
       const debounceTimer = setTimeout(() => {
         syncCart(cartItems).catch((err) => console.error("Cloud cart sync failed:", err));
-      }, 1000);
+      }, 1500); // Batched to 1.5 seconds to handle rapid quantity clicks efficiently
       return () => clearTimeout(debounceTimer);
     }
   }, [cartItems, isSignedIn, isLoaded, syncCart]);
 
   // 3B. SECURE PUSH: Mirror Wishlist changes to LocalStorage and Backend
   useEffect(() => {
-    if (!isInitialized.current) return;
+    // 🛡️ GUARD: Only save if the user explicitly added/removed an item
+    if (!isInitialized.current || isDbHydrating.current) return;
     
-    // Always save locally for guest users & speed
     localStorage.setItem("atlascub_wishlist", JSON.stringify(wishlistItems));
 
-    // If logged in, push to DB securely with a 1-second debounce
     if (isLoaded && isSignedIn) {
       const debounceTimer = setTimeout(() => {
         syncWishlist(wishlistItems).catch((err) => console.error("Cloud wishlist sync failed:", err));
-      }, 1000);
+      }, 1500);
       return () => clearTimeout(debounceTimer);
     }
   }, [wishlistItems, isSignedIn, isLoaded, syncWishlist]);

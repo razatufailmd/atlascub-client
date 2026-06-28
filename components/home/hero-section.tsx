@@ -8,7 +8,6 @@ import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { heroSlides } from "@/lib/constants/homepage";
 import { TextReveal } from "../shadcn-space/animated-text/animated-text-06";
 
-
 export function HeroSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
@@ -60,13 +59,23 @@ export function HeroSection() {
   const activeSlide = heroSlides[currentIndex];
 
   return (
-    // Outer container provides the background color and padding (The Fintech Frame)
-    <section className="relative h-screen min-h-[700px] w-full bg-background/30 px-4 pb-4md:px-6 md:pb-6  pt-8  md:pt-4 flex flex-col">
+    <section 
+      aria-roledescription="carousel"
+      className="relative h-screen min-h-[700px] w-full bg-background/30 px-4 pb-4 md:px-6 md:pb-6 pt-8 md:pt-4 flex flex-col"
+    >
       
+      {/* 🚀 SEO SHADOW DOM: Instantly readable by Googlebot before JS executes */}
+      <div className="sr-only">
+        <h1>{heroSlides[0].title}</h1>
+        <h2>{heroSlides[0].overline}</h2>
+        <p>{heroSlides[0].subtitle}</p>
+      </div>
+
       {/* Inner Rounded Card containing the actual carousel */}
       <div 
         ref={containerRef}
         className="relative flex-1 w-full rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl bg-black"
+        aria-live="polite"
       >
         {/* Parallax Background Wrapper */}
         <motion.div
@@ -91,9 +100,10 @@ export function HeroSection() {
               >
                 <Image
                   src={activeSlide.image}
-                  alt={activeSlide.title}
+                  alt={`Atlascub - ${activeSlide.title}`}
                   fill
-                  priority
+                  priority={currentIndex === 0} // Only prioritize LCP for the first image
+                  fetchPriority={currentIndex === 0 ? "high" : "auto"} // Speeds up First Contentful Paint
                   className="object-cover object-center"
                   sizes="100vw"
                 />
@@ -110,6 +120,7 @@ export function HeroSection() {
         <motion.div
           style={{ y: yText }}
           className="absolute inset-0 z-10 flex flex-col items-start justify-center p-8 md:p-16 lg:p-24"
+          aria-hidden="true" /* 🚀 Hides animated fragmented text from confusing Screen Readers/Bots */
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -139,7 +150,7 @@ export function HeroSection() {
               >
                 <TextReveal
                   text={activeSlide.title}
-                  as="h1"
+                  as="div" /* 🚀 Changed from 'h1' to 'div' since the real H1 is in the sr-only block */
                   className="text-5xl sm:text-6xl md:text-7xl font-primary font-bold tracking-tight text-white leading-[1.05]"
                 />
               </motion.div>
@@ -153,7 +164,7 @@ export function HeroSection() {
               >
                 <TextReveal
                   text={activeSlide.subtitle}
-                  as="p"
+                  as="div" /* 🚀 Changed from 'p' to 'div' */
                   className="text-base sm:text-lg md:text-xl font-body text-white/80 max-w-md leading-relaxed"
                 />
               </motion.div>
@@ -189,7 +200,7 @@ export function HeroSection() {
           </AnimatePresence>
         </motion.div>
 
-        {/* Navigation Arrows (Inside the card, vertically centered) */}
+        {/* Navigation Arrows */}
         <div className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 z-20 hidden md:flex flex-col gap-4">
           <button
             onClick={handlePrev}
@@ -207,7 +218,7 @@ export function HeroSection() {
           </button>
         </div>
 
-        {/* Progress Indicators (Inside the card, bottom left) */}
+        {/* Progress Indicators */}
         <div className="absolute bottom-8 left-8 md:left-16 z-20 flex gap-4">
           {heroSlides.map((slide, index) => {
             const isActive = index === currentIndex;
@@ -216,6 +227,7 @@ export function HeroSection() {
                 key={slide.id}
                 onClick={() => handleDotClick(index)}
                 className="group flex flex-col items-start focus:outline-none"
+                aria-label={`Go to slide ${index + 1}`}
               >
                 <div className="flex items-center gap-2 mb-2 text-[10px] font-mono uppercase tracking-wider text-white/50 group-hover:text-white transition-colors">
                   <span>0{index + 1}</span>
