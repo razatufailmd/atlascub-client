@@ -11,7 +11,6 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, useGSAP);
 }
 
-// 👑 Curated Archive Layout preserving true fashion aspect ratios
 const showcaseImages = [
   {
     id: 1,
@@ -91,59 +90,114 @@ const showcaseImages = [
 export function CinematicShowcase() {
   const containerRef = useRef<HTMLDivElement>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    // 1. Fluid 3D Camera Loop
-    gsap.to(galleryRef.current, {
-      z: 7600,
-      ease: "none",
-      force3D: true, // Forces GPU layer allocation to prevent rigid micro-stutters
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 0.5, // 🚀 Sweet spot: Eradicates mobile touch delays while keeping tracking silky smooth
-        invalidateOnRefresh: true,
-      },
-    });
+    // 🛡️ MOBILE SYNCHRONIZATION HARDWARE LAYER
+    // Forces the mobile touch thread to sync directly with GSAP calculations
+    if (ScrollTrigger.isTouch === 1) {
+      ScrollTrigger.normalizeScroll({ allowNestedScroll: true });
+    }
 
-    // 2. Premium Scale Title Escape
-    gsap.to(".showcase-text", {
-      opacity: 0,
-      scale: 1.15,
-      y: -40,
-      ease: "power1.out",
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: "top top",
-        end: "+=1000",
-        scrub: 0.3,
-      },
-    });
+    const mm = gsap.matchMedia();
 
-    // 3. Gentle Idle Floating Matrix
-    gsap.to(".showcase-card", {
-      y: "-=15",
-      x: "+=6",
-      rotationZ: "0.5",
-      duration: 4,
-      yoyo: true,
-      repeat: -1,
-      ease: "sine.inOut",
-      stagger: {
-        amount: 1.5,
-        from: "center",
+    // 📱 1. MOBILE OPTIMIZATION PROFILE (Touch Screens)
+    mm.add("(max-width: 768px)", () => {
+      // Exaggerate depth perception by lowering the lens focal length
+      if (viewportRef.current) {
+        viewportRef.current.style.perspective = "450px"; 
       }
+
+      // Snappy camera track loop mapped across an elongated track layout
+      gsap.to(galleryRef.current, {
+        z: 7650,
+        ease: "none",
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: true, // 1-to-1 immediate lock with thumb movement
+          invalidateOnRefresh: true,
+        },
+      });
+
+      // Quick fade out for titles before content clusters scale into view
+      gsap.to(".showcase-text", {
+        opacity: 0,
+        scale: 1.05,
+        y: -20,
+        ease: "none",
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "+=600", // Clears view early on mobile screens
+          scrub: true,
+        },
+      });
     });
+
+    // 💻 2. DESKTOP OPTIMIZATION PROFILE (Mice & Trackpads)
+    mm.add("(min-width: 769px)", () => {
+      if (viewportRef.current) {
+        viewportRef.current.style.perspective = "1100px";
+      }
+
+      gsap.to(galleryRef.current, {
+        z: 7650,
+        ease: "none",
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.5, // Fluid coasting momentum
+          invalidateOnRefresh: true,
+        },
+      });
+
+      gsap.to(".showcase-text", {
+        opacity: 0,
+        scale: 1.15,
+        y: -40,
+        ease: "power1.out",
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "+=1200",
+          scrub: 0.3,
+        },
+      });
+
+      // Ambient floating mechanics active on desktop only
+      gsap.to(".showcase-card", {
+        y: "-=15",
+        x: "+=6",
+        rotationZ: "0.5",
+        duration: 4,
+        yoyo: true,
+        repeat: -1,
+        ease: "sine.inOut",
+        stagger: {
+          amount: 1.5,
+          from: "center",
+        }
+      });
+    });
+
+    return () => {
+      mm.revert();
+      // Cleanly un-normalize scrolling behavior upon unmounting sequences
+      ScrollTrigger.normalizeScroll(false);
+    };
   }, { scope: containerRef });
 
   return (
+    /* 🚀 FIX: Height extended to 600vh on mobile to give touch tracking more real estate */
     <section 
       ref={containerRef} 
-      className="relative h-[400vh] bg-background/30 text-foreground"
+      className="relative h-[550vh] md:h-[400vh] bg-background/30 text-foreground"
       aria-roledescription="imagery-showcase"
     >
-      {/* 🚀 SEO DIRECTORY SUMMARY: Visible to bots instantly for crawl performance */}
+      {/* Structural SEO List Block */}
       <div className="sr-only">
         <h2>The Atlascub Archive — Bespoke Mastery Exhibit</h2>
         <p>Explore our premium heritage crafts, tailored silhouettes, and luxury Indian textile designs.</p>
@@ -154,35 +208,35 @@ export function CinematicShowcase() {
         </ul>
       </div>
 
-      {/* Viewport Frame */}
+      {/* Dynamic Viewport Container Frame */}
       <div 
+        ref={viewportRef}
         className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center  transition-colors duration-300"
-        style={{ perspective: "1000px" }} // Increased for a more natural human-eye field of view
       >
-        {/* Cinematic Branding Text */}
-        <div className="showcase-text absolute z-20 flex flex-col items-center pointer-events-none select-none">
-          <div className="flex items-center gap-2 mb-3 text-primary/80">
+        {/* Central Brand Title Header */}
+        <div className="showcase-text absolute z-20 flex flex-col items-center pointer-events-none select-none px-4">
+          <div className="flex items-center justify-center gap-2 mb-3 text-primary/80">
             <Sparkles className="h-4 w-4" />
-            <span className="text-xs font-secondary uppercase tracking-[0.35em] font-semibold">
+            <span className="text-xs font-secondary uppercase tracking-[0.35em] font-semibold text-center">
               The Atlascub Archive
             </span>
           </div>
-          <h3 className="font-primary text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-center leading-[1.05]">
+          <h3 className="font-primary text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-center leading-[1.1]">
             Bespoke <br /> Mastery.
           </h3>
         </div>
 
-        {/* 3D Space Deck */}
+        {/* Interactive 3D Deck */}
         <div 
           ref={galleryRef} 
-          className="absolute inset-0 w-full h-full will-change-transform"
+          className="absolute inset-0 w-full h-full transform-gpu"
           style={{ transformStyle: "preserve-3d" }}
-          aria-hidden="true" // Hidden from screen readers to read the clean sr-only list instead
+          aria-hidden="true"
         >
           {showcaseImages.map((img) => (
             <div
               key={img.id}
-              className={`showcase-card absolute shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6)] border border-neutral-200/30 dark:border-neutral-800/40 rounded-xl overflow-hidden bg-muted will-change-transform ${img.className}`}
+              className={`showcase-card absolute shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] border border-neutral-200/20 dark:border-neutral-800/30 rounded-xl overflow-hidden bg-muted will-change-transform ${img.className}`}
               style={{
                 transform: `translate(-50%, -50%) translateZ(${img.z}px)`,
                 backfaceVisibility: "hidden",
@@ -194,13 +248,13 @@ export function CinematicShowcase() {
                 fill
                 priority={img.priority}
                 sizes="(max-width: 768px) 85vw, 30vw"
-                className="object-cover object-center transform scale-[1.01]" // scale-101 removes subpixel anti-aliasing edge gaps
+                className="object-cover object-center transform scale-[1.02]"
               />
             </div>
           ))}
         </div>
 
-       
+        
       </div>
     </section>
   );
