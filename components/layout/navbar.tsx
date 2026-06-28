@@ -20,19 +20,12 @@ export function Navbar() {
   const scrolled = useScrollPosition(20);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  
+  // 🛡️ FIX 1: Lift the mobile menu state to the parent Navbar
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-
-  // 1. Pull the visibility state instantly and cleanly from Redux!
+  // Pull the visibility state instantly and cleanly from Redux
   const isBannerVisible = useAppSelector((state) => state.ui.isAnnouncementVisible);
-
-  // Track search state from SearchBar via event listener
-  useEffect(() => {
-    const handleSearchState = (e: CustomEvent) => {
-      setIsSearchOpen(e.detail.isOpen);
-    };
-    window.addEventListener("searchStateChange", handleSearchState as EventListener);
-    return () => window.removeEventListener("searchStateChange", handleSearchState as EventListener);
-  }, []);
 
   // Track search state from SearchBar via event listener
   useEffect(() => {
@@ -54,7 +47,8 @@ export function Navbar() {
     },
   };
 
-  const shouldHide = scrollDirection === "down" && scrolled && !(isMobile && isSearchOpen);
+  // 🛡️ FIX 2: Do NOT hide the navbar if the mobile menu is currently open
+  const shouldHide = scrollDirection === "down" && scrolled && !isMobileMenuOpen && !(isMobile && isSearchOpen);
 
   useEffect(() => {
     const navbar = document.querySelector("header");
@@ -76,7 +70,7 @@ export function Navbar() {
       } ${
         /* Apply dynamic margin ONLY if we haven't scrolled AND the banner is active */
         !scrolled && isBannerVisible 
-          ? " mt-[36px] md:mt-[30px]" // Added your requested 5px/8px margins + base top offset
+          ? " mt-[36px] md:mt-[30px]" 
           : "top-0 mt-0"
       }`}
     >
@@ -97,7 +91,10 @@ export function Navbar() {
                 <CartIcon />
               </>
             )}
-            {isMobile && !isSearchOpen && <MobileMenu />}
+            {/* 🛡️ FIX 3: Pass lifted state down to MobileMenu */}
+            {isMobile && !isSearchOpen && (
+              <MobileMenu open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen} />
+            )}
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Menu, X, ChevronDown, Sparkles, Building2 } from "lucide-react";
+import { Menu, ChevronDown, Sparkles, Building2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,8 +18,12 @@ import { genderLinks, categories, companyLinks } from "@/lib/constants/navigatio
 import { useUserRole } from "@/hooks/use-user-role";
 import { useGetCollectionsQuery } from "@/lib/store/apis/collection-api";
 
-export function MobileMenu() {
-  const [open, setOpen] = useState(false);
+interface MobileMenuProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
   const [expandedGender, setExpandedGender] = useState<string | null>(null);
   const [expandedCollections, setExpandedCollections] = useState(false);
   const [expandedCompany, setExpandedCompany] = useState(false);
@@ -48,7 +52,7 @@ export function MobileMenu() {
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="md:hidden">
           <Menu className="h-5 w-5" />
@@ -65,7 +69,6 @@ export function MobileMenu() {
             <span className="text-lg font-semibold">Menu</span>
             <SheetClose asChild>
               <Button variant="ghost" size="icon">
-                {/* <X className="h-5 w-5" /> */}
                 <span className="sr-only">Close menu</span>
               </Button>
             </SheetClose>
@@ -79,7 +82,7 @@ export function MobileMenu() {
                   <div className="flex items-center justify-between">
                     <Link
                       href={gender.href}
-                      onClick={() => setOpen(false)}
+                      onClick={() => onOpenChange(false)}
                       className="py-2 text-left text-lg font-medium hover:text-primary transition-colors"
                     >
                       {gender.name}
@@ -111,7 +114,7 @@ export function MobileMenu() {
                             <Link
                               key={cat.name}
                               href={cat.href}
-                              onClick={() => setOpen(false)}
+                              onClick={() => onOpenChange(false)}
                               className="block py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
                             >
                               <div className="font-medium">{cat.name}</div>
@@ -132,7 +135,7 @@ export function MobileMenu() {
                 <div className="flex items-center justify-between">
                   <Link
                     href="/collections/all"
-                    onClick={() => setOpen(false)}
+                    onClick={() => onOpenChange(false)}
                     className="flex items-center gap-2 py-2 text-left text-lg font-medium hover:text-primary transition-colors"
                   >
                     <Sparkles className="h-4 w-4" />
@@ -165,7 +168,7 @@ export function MobileMenu() {
                           <Link
                             key={collection.slug}
                             href={collection.href}
-                            onClick={() => setOpen(false)}
+                            onClick={() => onOpenChange(false)}
                             className="block py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
                           >
                             <div className="font-medium">{collection.name}</div>
@@ -185,7 +188,7 @@ export function MobileMenu() {
                 <div className="flex items-center justify-between">
                   <Link
                     href="/about"
-                    onClick={() => setOpen(false)}
+                    onClick={() => onOpenChange(false)}
                     className="flex items-center gap-2 py-2 text-left text-lg font-medium hover:text-primary transition-colors"
                   >
                     <Building2 className="h-4 w-4" />
@@ -218,7 +221,7 @@ export function MobileMenu() {
                           <Link
                             key={link.href}
                             href={link.href}
-                            onClick={() => setOpen(false)}
+                            onClick={() => onOpenChange(false)}
                             className="block py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
                           >
                             <div className="font-medium">{link.name}</div>
@@ -239,7 +242,7 @@ export function MobileMenu() {
               {isAdmin && (
                 <Link
                   href="/admin"
-                  onClick={() => setOpen(false)}
+                  onClick={() => onOpenChange(false)}
                   className="block py-2 text-sm font-medium transition-colors hover:text-primary"
                 >
                   Admin Dashboard
@@ -247,14 +250,14 @@ export function MobileMenu() {
               )}
               <Link
                 href="/account"
-                onClick={() => setOpen(false)}
+                onClick={() => onOpenChange(false)}
                 className="block py-2 text-sm font-medium transition-colors hover:text-primary"
               >
                 My Account
               </Link>
               <Link
                 href="/wishlist"
-                onClick={() => setOpen(false)}
+                onClick={() => onOpenChange(false)}
                 className="block py-2 text-sm font-medium transition-colors hover:text-primary"
               >
                 Wishlist
