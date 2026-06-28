@@ -7,10 +7,11 @@ type Props = {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.atlascub.in/api";
 
+let jsonLd:any = null;
+
 // 🚀 GENERATE DYNAMIC SEO METADATA MATCHING YOUR BACKEND ROUTE
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-
   try {
     // 🔍 Directly targeting your single product parameter endpoint: /products/:id_or_slug
     const response = await fetch(`${API_URL}/products/${slug}`, {
@@ -32,6 +33,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       : "Discover premium tailored apparel at Atlascub.";
     
     const productImage = product.images?.[0]?.url || "/og-image.png";
+
+
+    jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": product.name,
+      "image": product.images?.map((img: any) => img.url) || [],
+      "description": product.description?.replace(/<[^>]*>/g, ""),
+      "sku": product.id,
+      "mpn": product.slug,
+      "offers": {
+        "@type": "Offer",
+        "url": `https://www.atlascub.in/product/${product.slug}`,
+        "priceCurrency": "INR",
+        "price": product.price,
+        "itemCondition": "https://schema.org/NewCondition",
+        "availability": product.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        "seller": {
+          "@type": "Organization",
+          "name": "Atlascub"
+        }
+      }
+    };
 
     return {
       title: cleanTitle,
@@ -58,6 +82,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         images: [productImage],
       },
     };
+
+
+
   } catch (error) {
     console.error("⚠️ SEO Engine: Error building dynamic product metadata:", error);
     return {
@@ -67,6 +94,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+
+
+
 export default function ProductDetailPage() {
-  return <ProductDetailClient />;
+  return(
+    <>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+    <ProductDetailClient />
+    </>
+  )
 }
