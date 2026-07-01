@@ -26,7 +26,7 @@ export function AuthStatus() {
   if (!isLoaded) return null;
   if (!isSignedIn) return null;
 
-  console.log(token)
+  // console.log(token)
 
   const isAdmin = user?.publicMetadata?.role === "admin";
 

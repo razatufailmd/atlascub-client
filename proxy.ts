@@ -21,34 +21,34 @@ const isPublicRoute = createRouteMatcher([
   "/terms",
   "/returns",
   "/shipping-policy",
+  "/api/rag(.*)",
 ]);
 
-// Define authentication pages specifically
 const isAuthRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
-
-// Define admin routes (requires admin role)
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
-
-// Define protected routes (requires authentication)
 const isProtectedRoute = createRouteMatcher([
   "/account(.*)",
   "/checkout",
   "/orders(.*)",
 ]);
 
-const proxy = clerkMiddleware(async (auth, req) => {
+export default clerkMiddleware(async (auth, req) => {
+  const pathname = req.nextUrl.pathname;
+
+  // 🚀 1. BULLETPROOF SEO BYPASS: Instantly pass system files before any Clerk check runs
+  if (pathname === "/sitemap.xml" || pathname === "/robots.txt") {
+    return NextResponse.next();
+  }
+
   const { userId, sessionClaims, redirectToSignIn } = await auth();
-  const isApiRoute = req.nextUrl.pathname.startsWith("/api");
-  //   console.log(sessionClaims);
+  const isApiRoute = pathname.startsWith("/api");
+
   // Get user role from session claims
   const role = sessionClaims?.public_metadata?.role as string;
   const isAdmin = role === "admin";
-  //   console.log(isAdmin);
-  //   console.log(role);
 
   // Handle API routes differently
   if (isApiRoute) {
-    // For API routes, return 401 instead of redirect
     if (!isPublicRoute(req) && !userId) {
       return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -60,7 +60,6 @@ const proxy = clerkMiddleware(async (auth, req) => {
 
   // 🛡️ REDIRECT LOGGED-IN USERS AWAY FROM SIGN-IN / SIGN-UP
   if (userId && isAuthRoute(req)) {
-    // If they are admin, send them directly to the admin suite, otherwise home
     const destination = isAdmin ? "/admin" : "/";
     return NextResponse.redirect(new URL(destination, req.url));
   }
@@ -68,7 +67,7 @@ const proxy = clerkMiddleware(async (auth, req) => {
   // Redirect to sign-in if accessing protected route without authentication
   if (!isPublicRoute(req) && !userId) {
     const signInUrl = new URL("/sign-in", req.url);
-    signInUrl.searchParams.set("redirect_url", req.nextUrl.pathname);
+    signInUrl.searchParams.set("redirect_url", pathname);
     return redirectToSignIn();
   }
 
@@ -85,17 +84,12 @@ const proxy = clerkMiddleware(async (auth, req) => {
   return NextResponse.next();
 });
 
-export default proxy;
-
+// 🚀 2. CLEANED MATCHER: Standardized high-performance matching rules
 export const config = {
   matcher: [
-    // Skip Next.js internals and static files
+    // Skip Next.js internals and all static files asset extensions cleanly
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
-    "/(api|trpc)(.*)",
-
-    // skip sitemap and manifest
-    "/((?!_next|[^?]*\\.(?:html|css|js|gif|svg|png|webp|jpg|ico|xml|sitemap\\.xml|csv|docx|xlsx|zip|webmanifest)).*)",
+    // Always run middleware for API and TRPC routes
     "/(api|trpc)(.*)",
   ],
 };

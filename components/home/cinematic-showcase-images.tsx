@@ -1,47 +1,16 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
+import Image from "next/image";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Sparkles } from "lucide-react";
 
-// ----------------------------------------------------------------------
-// 🛠️ STANDALONE MOCKS FOR CANVAS COMPILATION
-// ----------------------------------------------------------------------
-const Image = ({ src, alt, className, fill, priority, sizes }: any) => (
-  <img 
-    src={src} 
-    alt={alt} 
-    className={className} 
-    style={fill ? { position: 'absolute', height: '100%', width: '100%', left: 0, top: 0, objectFit: 'cover' } : undefined} 
-  />
-);
-
-const gsap = {
-  to: (target: any, vars: any) => {},
-  registerPlugin: (...args: any[]) => {},
-  matchMedia: () => ({
-    add: (query: string, callback: () => void) => callback(),
-    revert: () => {},
-  }),
-};
-const ScrollTrigger = {
-  isTouch: 0,
-  normalizeScroll: (value: any) => {},
-};
-const useGSAP = (callback: () => void, options?: any) => {
-  useEffect(() => {
-    try {
-      callback();
-    } catch (e) {}
-  }, []);
-};
-// ----------------------------------------------------------------------
-
-// Register ScrollTrigger and useGSAP safely on the client side
+// ✅ Register GSAP plugins (only once)
 if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger, useGSAP);
+  gsap.registerPlugin(ScrollTrigger);
 }
 
-// 3D positioning mapping for our showcase images
 const showcaseImages = [
   {
     id: 1,
@@ -106,7 +75,7 @@ const showcaseImages = [
     id: 9,
     src: "https://i.pinimg.com/736x/f9/64/17/f96417d05914ffcacd7e8aeca71b8258.jpg",
     alt: "Bridal Reds and Golds - Atlascub Couture",
-    className: "top-[18%] left-[48%] w-[45vw] h-[18vw] aspect-[2/3]",
+    className: "top-[18%] left-[48%] w-[45vw] md:w-[18vw] aspect-[2/3]",
     z: -6400,
   },
   {
@@ -123,162 +92,175 @@ export function CinematicShowcase() {
   const galleryRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
 
-  useGSAP(() => {
-    // 🛡️ FIX 4: Removed ScrollTrigger.normalizeScroll({ allowNestedScroll: true });
-    // This is the major culprit causing touch-canceling and click-outside conflicts 
-    // on Radix dialogs, Sheets, and Clerk interactive items.
+  useEffect(() => {
+    if (!containerRef.current || !galleryRef.current || !viewportRef.current) return;
 
-    const mm = gsap.matchMedia();
+    // ✅ Ensure all elements are ready
+    const container = containerRef.current;
+    const gallery = galleryRef.current;
+    const viewport = viewportRef.current;
 
-    // 📱 1. MOBILE OPTIMIZATION PROFILE (Touch Screens)
-    mm.add("(max-width: 768px)", () => {
-      if (viewportRef.current) {
-        viewportRef.current.style.perspective = "450px"; 
-      }
+    // ✅ Set perspective based on screen width
+    const isMobile = window.innerWidth < 768;
+    viewport.style.perspective = isMobile ? "450px" : "1100px";
 
-      gsap.to(galleryRef.current, {
+    // ✅ Create a GSAP context for proper cleanup
+    const ctx = gsap.context(() => {
+      // ✅ Main gallery animation
+      gsap.to(gallery, {
         z: 7650,
         ease: "none",
         scrollTrigger: {
-          trigger: containerRef.current,
+          trigger: container,
           start: "top top",
           end: "bottom bottom",
-          scrub: true, 
+          scrub: isMobile ? true : 0.5,
           invalidateOnRefresh: true,
         },
       });
 
+      // ✅ Text fade animation
       gsap.to(".showcase-text", {
         opacity: 0,
-        scale: 1.05,
-        y: -20,
-        ease: "none",
+        scale: isMobile ? 1.05 : 1.15,
+        y: isMobile ? -20 : -40,
+        ease: isMobile ? "none" : "power1.out",
         scrollTrigger: {
-          trigger: containerRef.current,
+          trigger: container,
           start: "top top",
-          end: "+=600", 
+          end: isMobile ? "+=600" : "+=1200",
           scrub: true,
         },
       });
-    });
 
-    // 💻 2. DESKTOP OPTIMIZATION PROFILE (Mice & Trackpads)
-    mm.add("(min-width: 769px)", () => {
-      if (viewportRef.current) {
-        viewportRef.current.style.perspective = "1100px";
+      // ✅ Desktop only: ambient floating cards
+      if (!isMobile) {
+        gsap.to(".showcase-card", {
+          y: "-=15",
+          x: "+=6",
+          rotationZ: "0.5",
+          duration: 4,
+          yoyo: true,
+          repeat: -1,
+          ease: "sine.inOut",
+          stagger: {
+            amount: 1.5,
+            from: "center",
+          },
+        });
       }
 
-      gsap.to(galleryRef.current, {
-        z: 7650,
-        ease: "none",
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 0.5, 
-          invalidateOnRefresh: true,
-        },
-      });
+      // ✅ Force refresh to ensure ScrollTrigger calculates correctly
+      ScrollTrigger.refresh();
+    }, container);
 
-      gsap.to(".showcase-text", {
-        opacity: 0,
-        scale: 1.15,
-        y: -40,
-        ease: "power1.out",
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top top",
-          end: "+=1200",
-          scrub: 0.3,
-        },
-      });
+    // ✅ Handle resize to refresh ScrollTrigger
+    const handleResize = () => {
+      ScrollTrigger.refresh();
+    };
 
-      gsap.to(".showcase-card", {
-        y: "-=15",
-        x: "+=6",
-        rotationZ: "0.5",
-        duration: 4,
-        yoyo: true,
-        repeat: -1,
-        ease: "sine.inOut",
-        stagger: {
-          amount: 1.5,
-          from: "center",
-        }
-      });
-    });
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      mm.revert();
+      ctx.revert(); // ✅ Clean up GSAP animations
+      window.removeEventListener("resize", handleResize);
+      ScrollTrigger.getAll().forEach((st) => st.kill()); // ✅ Kill all ScrollTriggers
     };
-  }, { scope: containerRef });
+  }, []);
+
+  // Structured Data (JSON-LD)
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Atlascub Bespoke Collection",
+    "description": "Explore our premium heritage crafts, tailored silhouettes, and luxury Indian textile designs.",
+    "about": {
+      "@type": "Brand",
+      "name": "Atlascub",
+      "description": "Premium modern clothing and drapes"
+    },
+    "image": showcaseImages.map((img) => img.src),
+  };
 
   return (
-    <section 
-      ref={containerRef} 
-      className="relative h-[550vh] md:h-[400vh] bg-background text-foreground"
-      aria-roledescription="imagery-showcase"
-    >
-      {/* Structural SEO List Block */}
-      <div className="sr-only">
-        <h2>The Atlascub Archive — Bespoke Mastery Exhibit</h2>
-        <p>Explore our premium heritage crafts, tailored silhouettes, and luxury Indian textile designs.</p>
-        <ul>
-          {showcaseImages.map((img) => (
-            <li key={img.id}>{img.alt}</li>
-          ))}
-        </ul>
-      </div>
+    <>
+      {/* ✅ SEO: JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
 
-      {/* Dynamic Viewport Container Frame */}
-      <div 
-        ref={viewportRef}
-        className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300"
+      <section
+        ref={containerRef}
+        className="relative h-[550vh] md:h-[400vh] bg-background/30 text-foreground"
+        aria-label="Atlascub Bespoke Collection Showcase"
       >
-        {/* Central Brand Title Header */}
-        <div className="showcase-text absolute z-20 flex flex-col items-center pointer-events-none select-none px-4">
-          <div className="flex items-center justify-center gap-2 mb-3 text-primary/80">
-            <Sparkles className="h-4 w-4" />
-            <span className="text-xs font-secondary uppercase tracking-[0.35em] font-semibold text-center">
-              The Atlascub Archive
-            </span>
-          </div>
-          <h3 className="font-primary text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-center leading-[1.1]">
-            Bespoke <br /> Mastery.
-          </h3>
+        {/* ✅ SEO: Accessible hidden content for screen readers & crawlers */}
+        <div className="sr-only">
+          <h2>The Atlascub Archive — Bespoke Mastery Exhibit</h2>
+          <p>
+            Explore our premium heritage crafts, tailored silhouettes, and luxury Indian textile
+            designs. Featuring bespoke sherwanis, embroidered lehengas, silk drapes, fusion kurtas,
+            handwoven sarees, nehru jackets, and intricate hand embroidery.
+          </p>
+          <ul>
+            {showcaseImages.map((img) => (
+              <li key={img.id}>{img.alt}</li>
+            ))}
+          </ul>
         </div>
 
-        {/* Interactive 3D Deck */}
-        <div 
-          ref={galleryRef} 
-          className="absolute inset-0 w-full h-full transform-gpu"
-          style={{ transformStyle: "preserve-3d" }}
-          aria-hidden="true"
+        {/* Dynamic Viewport Container */}
+        <div
+          ref={viewportRef}
+          className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center transition-colors duration-300"
         >
-          {showcaseImages.map((img) => (
-            <div
-              key={img.id}
-              className={`showcase-card absolute shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] border border-neutral-200/20 dark:border-neutral-800/30 rounded-xl overflow-hidden bg-muted will-change-transform ${img.className}`}
-              style={{
-                transform: `translate(-50%, -50%) translateZ(${img.z}px)`,
-                backfaceVisibility: "hidden",
-              }}
-            >
-              <Image
-                src={img.src}
-                alt={img.alt}
-                fill
-                priority={img.priority}
-                sizes="(max-width: 768px) 85vw, 30vw"
-                className="object-cover object-center transform scale-[1.02]"
-              />
+          {/* Central Brand Title */}
+          <div className="showcase-text absolute z-20 flex flex-col items-center pointer-events-none select-none px-4">
+            <div className="flex items-center justify-center gap-2 mb-3 text-primary/80">
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
+              <span className="text-xs font-secondary uppercase tracking-[0.35em] font-semibold text-center text-muted-foreground">
+                The Atlascub Archive
+              </span>
             </div>
-          ))}
-        </div>
+            <h2 className="font-primary text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-center leading-[1.1] text-foreground">
+              Bespoke <br className="hidden sm:block" /> Mastery.
+            </h2>
+            <p className="sr-only">
+              Discover our collection of bespoke Indian fashion, featuring handcrafted garments for
+              every occasion.
+            </p>
+          </div>
 
-        {/* Clean Outer Frame Accent */}
-        <div className="absolute inset-0 border-[12px] md:border-[24px] border-background pointer-events-none z-30 transition-colors duration-300" />
-      </div>
-    </section>
+          {/* 3D Gallery Deck */}
+          <div
+            ref={galleryRef}
+            className="absolute inset-0 w-full h-full transform-gpu"
+            style={{ transformStyle: "preserve-3d" }}
+            aria-hidden="true"
+          >
+            {showcaseImages.map((img) => (
+              <div
+                key={img.id}
+                className={`showcase-card absolute shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] border border-neutral-200/20 dark:border-neutral-800/30 rounded-xl overflow-hidden bg-muted will-change-transform ${img.className}`}
+                style={{
+                  transform: `translate(-50%, -50%) translateZ(${img.z}px)`,
+                  backfaceVisibility: "hidden",
+                }}
+              >
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  fill
+                  priority={img.priority}
+                  sizes="(max-width: 768px) 85vw, 30vw"
+                  className="object-cover object-center transform scale-[1.02]"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

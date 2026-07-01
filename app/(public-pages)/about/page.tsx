@@ -27,7 +27,7 @@ export default function AboutPage() {
       <StorySection />
       <ValuesSection />
       <JourneyTimeline />
-      <TeamSection />
+      {/* <TeamSection /> */}
       <CTASection />
     </div>
   );
