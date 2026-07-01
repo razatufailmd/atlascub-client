@@ -20,18 +20,21 @@ import { Chatbot } from "@/components/rag/chatbot";
 const fontSans = Poppins({
   subsets: ["latin"],
   variable: "--font-sans",
-  weight: ["400", "500", "700"]
+  weight: ["400", "500", "700"],
+  display:"swap"
 });
 
 const fontSerif = Libre_Baskerville({
   subsets: ["latin"],
   variable: "--font-serif",
+  display: "swap",
 });
 
 const fontMono = IBM_Plex_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
-  weight: ["400", "500", "700"]
+  weight: ["400", "500", "700"],
+  display: "swap",
 });
 
 

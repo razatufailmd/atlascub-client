@@ -69,6 +69,7 @@ export function WishlistButton({ product, size = "md", className = "" }: Wishlis
         size="icon"
         className={`${getSizeClasses()} rounded-full bg-grey/80 backdrop-blur-sm hover:bg-white ${className}`}
         onClick={handleClick}
+        aria-label="wishlist-button"
       >
         <Heart
           className={`h-4 w-4 transition-all hover:text-accent-foreground ${
