@@ -53,6 +53,9 @@ export const viewport: Viewport = {
   
   export const metadata: Metadata = {
     metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://www.atlascub.in"),
+    alternates: {
+      canonical: "/",
+    },
     manifest: "/manifest.webmanifest", // Direct Next.js dynamic routing endpoint
     title: {
       default: "Atlascub | Premium Modern Clothing & Drapes",
